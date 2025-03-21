@@ -5,7 +5,7 @@ export const fetchAllData = async () => {
     const response = await fetch(`${BACKEND_URI}/api/products`);
 
     if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      throw new Error(`${response.status}`);
     }
 
     const data = await response.json();
@@ -17,11 +17,11 @@ export const fetchAllData = async () => {
       console.log("Fetched products:", data.products);
       return { products: data.products };
     } else {
-      console.error("❌ Invalid API Response:", data);
+      console.error("❌❌❌❌❌❌❌❌ Invalid Response:", data);
       return { products: [] };
     }
   } catch (error) {
-    console.error("❌ Error fetching products:", error);
+    console.error("❌❌❌❌❌ Error fetching products:", error);
     return { products: [] };
   }
 };

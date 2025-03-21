@@ -12,7 +12,7 @@ const initializeDB = async () => {
   return openDB("ProductDB", 1, {
     upgrade(db) {
       if (!db.objectStoreNames.contains("products")) {
-        db.createObjectStore("products", { keyPath: "_id" });
+        db.createObjectStore("products", { keyPath: "id" });
       }
     },
   });
@@ -32,13 +32,8 @@ const saveDataToDB = async (db, data) => {
 
   await Promise.all(
     data.map((product) => {
-      if (
-        !product._id ||
-        typeof product._id !== "string" ||
-        product._id.trim() === ""
-      ) {
-        console.warn("Invalid `_id` in product:", product);
-        product._id = uuidv4();
+      if (!product.id) {
+        product.id = uuidv4();
       }
       return store.put(product);
     })
@@ -53,38 +48,28 @@ export const ProductProvider = ({ children }) => {
 
   const fetchProducts = async () => {
     try {
-      console.log("Fetching products...");
+      console.log("Fetching wait bhai...");
 
       const db = await initializeDB();
+      console.log("db", db);
 
       const cachedProducts = await getDataFromDB(db);
 
       if (cachedProducts.length > 0) {
-        console.log("Using cached products from IndexedDB...");
         setProducts(cachedProducts);
         setIsLoading(false);
         return;
       }
 
       const { products } = await fetchAllData();
-      console.log("Fetched products:", products);
-
-      const invalidProducts = products.filter(
-        (product) =>
-          !product._id ||
-          typeof product._id !== "string" ||
-          product._id.trim() === ""
-      );
-      if (invalidProducts.length > 0) {
-        console.warn("Products with invalid `_id`:", invalidProducts);
-      }
+      console.log("Fetch ho gya:", products);
       console.log(products);
 
       setProducts(products);
 
       await saveDataToDB(db, products);
     } catch (error) {
-      console.error("❌ Error fetching products:", error);
+      console.error("❌❌❌❌❌❌❌❌ Error fetching products:", error);
       setProducts([]);
     } finally {
       setIsLoading(false);

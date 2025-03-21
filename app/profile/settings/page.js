@@ -59,13 +59,13 @@ const Settings = () => {
 
   React.useEffect(() => {
     const fetchUserData = async () => {
-      const res = await fetch(`${BACKEND_URI}/api/users/email/${user.email}`);
+      const res = await fetch(`${BACKEND_URI}/api/users/email/${user?.email}`);
       if (!res.ok) throw new Error("No user exists", res.message);
       const data = await res.json();
       setAddress(data.address);
     };
-    if (isAddressUpdated) fetchUserData();
-  }, [isAddressUpdated, user.email]);
+    if (isAddressUpdated && user) fetchUserData();
+  }, [isAddressUpdated, user?.email]);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -106,11 +106,11 @@ const Settings = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        street: address.street,
-        city: address.city,
-        postalCode: address.postalCode,
-        state: address.state,
-        country: address.country,
+        street: address.street || "",
+        city: address.city || "",
+        postalCode: address.postalCode || "",
+        state: address.state || "",
+        country: address.country || "",
       }),
     });
     setIsAddressUpdated(false);
@@ -209,7 +209,7 @@ const Settings = () => {
                     <input
                       type="checkbox"
                       name="email"
-                      checked={notifications.email}
+                      checked={notifications?.email}
                       onChange={handleNotificationChange}
                     />
                     <span className="slider"></span>
@@ -239,8 +239,12 @@ const Settings = () => {
                   className="p-4 border border-gray-100 rounded-lg bg-gray-50"
                 >
                   <p className="text-sm text-gray-500">
-                    {address?.street}, {address?.city}, {address?.state}{" "}
-                    {address?.postalCode}, {address?.country}
+                    {address?.street}
+                    <br></br> {address?.city}
+                    <br></br> {address?.state}
+                    <br></br>
+                    {address?.postalCode} <br></br> {address?.country}
+                    <br></br>
                   </p>
                   <button
                     onClick={openModal}
@@ -263,7 +267,7 @@ const Settings = () => {
                           </label>
                           <input
                             type="text"
-                            value={address.street}
+                            value={address?.street}
                             onChange={(e) =>
                               setAddress({ ...address, street: e.target.value })
                             }
@@ -276,7 +280,7 @@ const Settings = () => {
                           </label>
                           <input
                             type="text"
-                            value={address.city}
+                            value={address?.city}
                             onChange={(e) =>
                               setAddress({ ...address, city: e.target.value })
                             }
@@ -289,7 +293,7 @@ const Settings = () => {
                           </label>
                           <input
                             type="text"
-                            value={address.state}
+                            value={address?.state}
                             onChange={(e) =>
                               setAddress({ ...address, state: e.target.value })
                             }
@@ -302,7 +306,7 @@ const Settings = () => {
                           </label>
                           <input
                             type="text"
-                            value={address.postalCode}
+                            value={address?.postalCode}
                             onChange={(e) =>
                               setAddress({
                                 ...address,
@@ -318,7 +322,7 @@ const Settings = () => {
                           </label>
                           <input
                             type="text"
-                            value={address.country}
+                            value={address?.country}
                             onChange={(e) =>
                               setAddress({
                                 ...address,

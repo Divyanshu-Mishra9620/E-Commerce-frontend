@@ -90,6 +90,8 @@ export default function ProductPage() {
         localStorage.getItem("lastVisitedProduct")
       );
       if (storedProduct && storedProduct.uniq_id === slug) {
+        console.log(storedProduct);
+
         setProduct(storedProduct);
         return;
       }
@@ -274,19 +276,72 @@ export default function ProductPage() {
       behavior: "smooth",
     });
   };
+  const currentProductKeywords = [
+    ...(product?.product_name || "").toLowerCase().split(" "),
+    ...(product?.description || "").toLowerCase().split(" "),
+    ...(product?.product_category_tree || "").toLowerCase().split(" >> "),
+  ].filter(Boolean);
+
   const similarProducts =
     products
       ?.filter((prod) => {
-        const currentProductKeywords = (prod?.product_name || "")
-          .toLowerCase()
-          .split(" ");
-        const prodKeywords = (prod.product_name || "").toLowerCase().split(" ");
+        if (prod.uniq_id === product?.uniq_id) return false;
 
-        return currentProductKeywords.some((keyword) =>
-          prodKeywords.includes(keyword)
-        );
+        const prodKeywords = [
+          ...(prod.product_name || "").toLowerCase().split(" "),
+          ...(prod.description || "").toLowerCase().split(" "),
+          ...(prod.product_category_tree || "").toLowerCase().split(" >> "),
+        ].filter(Boolean);
+
+        const matchCount = currentProductKeywords.reduce((count, keyword) => {
+          if (
+            prodKeywords.some((prodKeyword) => prodKeyword.includes(keyword))
+          ) {
+            return count + 1;
+          }
+          return count;
+        }, 0);
+
+        return matchCount > 0;
       })
-      ?.slice(0, 20) || [];
+      .sort((a, b) => {
+        const countA = currentProductKeywords.reduce((count, keyword) => {
+          if (
+            (a.product_name || "").toLowerCase().includes(keyword) ||
+            (a.description || "").toLowerCase().includes(keyword) ||
+            (a.product_category_tree || "").toLowerCase().includes(keyword)
+          ) {
+            return count + 1;
+          }
+          return count;
+        }, 0);
+
+        const countB = currentProductKeywords.reduce((count, keyword) => {
+          if (
+            (b.product_name || "").toLowerCase().includes(keyword) ||
+            (b.description || "").toLowerCase().includes(keyword) ||
+            (b.product_category_tree || "").toLowerCase().includes(keyword)
+          ) {
+            return count + 1;
+          }
+          return count;
+        }, 0);
+
+        return countB - countA;
+      })
+      .slice(0, 20)
+      .map((prod) => {
+        const imageUrl = (prod.image = prod.image
+          .replace(/\s+/g, "")
+          .replace(/[\[\]]/g, ""));
+
+        return {
+          ...prod,
+          image: imageUrl,
+        };
+      }) || [];
+
+  console.log(similarProducts);
 
   if (isLoading) {
     return (
@@ -510,34 +565,39 @@ export default function ProductPage() {
               ref={containerRef}
               style={{ overflowX: "auto", whiteSpace: "nowrap" }}
             >
-              {similarProducts?.map((product) => (
-                <div
-                  key={product.uniq_id}
-                  className="flex-shrink-0 w-48 border rounded-lg p-4 hover:shadow-lg transition-shadow"
-                >
-                  <Image
-                    src={
-                      product.image
-                        .replace(/\s+/g, "")
-                        .replace(/[\[\]]/g, "") || "/lamp.jpg"
-                    }
-                    alt={product.product_name}
-                    width={500}
-                    height={200}
-                    className="w-full h-32 object-cover rounded-lg"
-                  />
-                  <h3 className="text-lg font-semibold mt-2 line-clamp-1">
-                    {product.product_name}
-                  </h3>
-                  <p className="text-gray-600">₹{product.discounted_price}</p>
-                  <button
-                    onClick={() => router.push(`/product/${product.uniq_id}`)}
-                    className="mt-2 w-full px-4 py-2 bg-none text-gray-600 rounded-md hover:text-gray-900 hover:bg-blue-200 transition-colors"
+              {similarProducts?.map((product) => {
+                // Sanitize and validate the image URL
+                const imageUrl =
+                  product.image && /^https?:\/\//.test(product.image)
+                    ? product.image.replace(/\s+/g, "").replace(/[\[\]]/g, "")
+                    : "/lamp.jpg";
+                console.log(imageUrl);
+
+                return (
+                  <div
+                    key={product.uniq_id}
+                    className="flex-shrink-0 w-48 border rounded-lg p-4 hover:shadow-lg transition-shadow"
                   >
-                    Take a look
-                  </button>
-                </div>
-              ))}
+                    <Image
+                      src={imageUrl}
+                      alt={product.product_name}
+                      width={500}
+                      height={200}
+                      className="w-full h-32 object-cover rounded-lg"
+                    />
+                    <h3 className="text-lg font-semibold mt-2 line-clamp-1">
+                      {product.product_name}
+                    </h3>
+                    <p className="text-gray-600">₹{product.discounted_price}</p>
+                    <button
+                      onClick={() => router.push(`/product/${product.uniq_id}`)}
+                      className="mt-2 w-full px-4 py-2 bg-none text-gray-600 rounded-md hover:text-gray-900 hover:bg-blue-200 transition-colors"
+                    >
+                      Take a look
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

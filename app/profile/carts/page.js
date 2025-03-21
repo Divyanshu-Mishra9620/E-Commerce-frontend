@@ -37,11 +37,13 @@ const Cart = () => {
 
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (typeof window !== "undefined") {
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
         setUser(JSON.parse(storedUser));
+      } else {
+        router.push("/api/auth/signin");
       }
     }
   }, []);

@@ -20,17 +20,25 @@ const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [user, setUser] = useState(null);
 
   const router = useRouter();
-
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      } else {
+        router.push("/api/auth/signin");
+      }
+    }
+  }, []);
   useEffect(() => {
     const fetchOrders = async () => {
+      if (!user || !user?._id) {
+        throw new Error("User not found");
+      }
       try {
-        const user = JSON.parse(localStorage.getItem("user"));
-        if (!user || !user._id) {
-          throw new Error("User not found");
-        }
-
         const response = await fetch(`${BACKEND_URI}/api/orders/${user._id}`);
 
         if (!response.ok) {
@@ -63,7 +71,6 @@ const Orders = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Handle filter changes
   const handleFilterChange = (status) => {
     setFilters((prevFilters) => {
       const updatedStatuses = prevFilters.orderStatus.includes(status)

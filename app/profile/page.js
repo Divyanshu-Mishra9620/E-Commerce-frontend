@@ -8,6 +8,7 @@ import ProfileSidebar from "@/components/ProfileSidebar";
 import BottomNavigation from "@/components/BottomNavigation";
 import "@/app/_styles/global.css";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
@@ -25,12 +26,14 @@ export default function Profile() {
   });
 
   const [user, setUser] = React.useState(null);
-
+  const router = useRouter();
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
         setUser(JSON.parse(storedUser));
+      } else {
+        router.push("/api/auth/signin");
       }
     }
   }, []);

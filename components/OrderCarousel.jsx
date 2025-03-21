@@ -18,6 +18,7 @@ export default function OrderCarousel() {
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [errorOrders, setErrorOrders] = useState(null);
   const [errorReviews, setErrorReviews] = useState(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {

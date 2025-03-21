@@ -55,33 +55,31 @@ const SearchPageContent = () => {
         const decodedQuery = decodeURIComponent(query).toLowerCase().trim();
         const searchTerms = decodedQuery.split(/\s+/);
 
-        const filteredProducts = products?.filter((product) => {
-          product.image = product.image?.replace(/[\[\]"]/g, "");
-          product.image =
-            product.image.length < 20
-              ? product.description.replace(/[\[\]"]/g, "")
-              : product.image;
-          const categoryTree =
-            product.product_category_tree
-              ?.replace(/[\[\]"]/g, "")
-              .toLowerCase() || "";
-          const brand =
-            product.brand?.replace(/[\[\]"]/g, "").toLowerCase() || "";
-          const productName = product.product_name?.toLowerCase() || "";
-          const description =
-            product.description?.replace(/[\[\]"]/g, "").toLowerCase() || "";
-          const productUrl = product.product_url?.toLowerCase() || "";
+        const filteredProducts = products
+          ?.filter((product) => {
+            product.image = product.image?.replace(/[\[\]"]/g, "");
+            const categoryTree =
+              product.product_category_tree
+                ?.replace(/[\[\]"]/g, "")
+                .toLowerCase() || "";
+            const brand =
+              product.brand?.replace(/[\[\]"]/g, "").toLowerCase() || "";
+            const productName = product.product_name?.toLowerCase() || "";
+            const description =
+              product.description?.replace(/[\[\]"]/g, "").toLowerCase() || "";
+            const productUrl = product.product_url?.toLowerCase() || "";
 
-          return searchTerms.every((term) => {
-            return (
-              productName.includes(term) ||
-              description.includes(term) ||
-              categoryTree.includes(term) ||
-              brand.includes(term) ||
-              productUrl.includes(term)
-            );
-          });
-        });
+            return searchTerms.every((term) => {
+              return (
+                productName.includes(term) ||
+                description.includes(term) ||
+                categoryTree.includes(term) ||
+                brand.includes(term) ||
+                productUrl.includes(term)
+              );
+            });
+          })
+          .slice(100, 400);
 
         console.log(filteredProducts);
         setProds(filteredProducts);
@@ -271,30 +269,37 @@ const SearchPageContent = () => {
           <p>No products found. Try another search.</p>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {prods.slice(0, 100).map((product) => (
-              <div
-                key={product.uniq_id}
-                className="border p-4 rounded-md cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => router.push(`/product/${product.uniq_id}`)}
-              >
-                <Image
-                  src={
-                    product.image.replace(/\s+/g, "").replace(/[\[\]]/g, "") ||
-                    "/lamp.jpg"
-                  }
-                  alt={product.product_name}
-                  width={160}
-                  height={160}
-                  className="w-full h-40 object-cover rounded-md"
-                />
-                <h2 className="text-lg font-medium mt-2">
-                  {product.product_name}
-                </h2>
-                <p className="text-sm text-gray-500">
-                  ₹{product.discounted_price}
-                </p>
-              </div>
-            ))}
+            {prods.slice(0, 100).map((product) => {
+              const imageUrl =
+                product.image &&
+                /^https?:\/\//.test(
+                  product.image.replace(/\s+/g, "").replace(/[\[\]]/g, "")
+                )
+                  ? product.image.replace(/\s+/g, "").replace(/[\[\]]/g, "")
+                  : "/lamp.jpg";
+              return (
+                <div
+                  key={product.uniq_id}
+                  className="border p-4 rounded-md cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => router.push(`/product/${product.uniq_id}`)}
+                >
+                  <Image
+                    src={imageUrl}
+                    alt={product.product_name}
+                    width={160}
+                    height={160}
+                    className="w-full h-40 object-cover rounded-md"
+                    unoptimized={true} // Disable Next.js image optimization for external URLs
+                  />
+                  <h2 className="text-lg font-medium mt-2">
+                    {product.product_name}
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    ₹{product.discounted_price}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         )}
         <BottomNavigation visible={isBottomNavVisible} />

@@ -78,6 +78,7 @@ export const ProductProvider = ({ children }) => {
       if (invalidProducts.length > 0) {
         console.warn("Products with invalid `_id`:", invalidProducts);
       }
+      console.log(products);
 
       setProducts(products);
 

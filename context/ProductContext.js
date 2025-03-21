@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect } from "react";
 import { fetchAllData } from "@/utils/fetchData";
 import { openDB } from "idb";
+import { v4 as uuidv4 } from "uuid";
 
 const ProductContext = createContext({
   products: [],
@@ -37,7 +38,7 @@ const saveDataToDB = async (db, data) => {
         product._id.trim() === ""
       ) {
         console.warn("Invalid `_id` in product:", product);
-        product._id = crypto.randomUUID();
+        product._id = uuidv4();
       }
       return store.put(product);
     })

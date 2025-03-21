@@ -31,8 +31,12 @@ const saveDataToDB = async (db, data) => {
 
   await Promise.all(
     data.map((product) => {
-      if (!product._id) {
-        console.warn("Product missing `_id`:", product);
+      if (
+        !product._id ||
+        typeof product._id !== "string" ||
+        product._id.trim() === ""
+      ) {
+        console.warn("Invalid `_id` in product:", product);
         product._id = crypto.randomUUID();
       }
       return store.put(product);
@@ -63,6 +67,16 @@ export const ProductProvider = ({ children }) => {
 
       const { products } = await fetchAllData();
       console.log("Fetched products:", products);
+
+      const invalidProducts = products.filter(
+        (product) =>
+          !product._id ||
+          typeof product._id !== "string" ||
+          product._id.trim() === ""
+      );
+      if (invalidProducts.length > 0) {
+        console.warn("Products with invalid `_id`:", invalidProducts);
+      }
 
       setProducts(products);
 

@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 
+const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
+
 const ProfileForm = () => {
   const { data: session, status } = useSession();
 
@@ -25,7 +27,7 @@ const ProfileForm = () => {
     const fetchUser = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5001/api/users/email/${session.user.email}`
+          `${BACKEND_URI}/api/users/email/${session.user.email}`
         );
         if (!res.ok) {
           throw new Error("Failed to fetch user data");

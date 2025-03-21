@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
 
+const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
+
 const WishlistSection = () => {
   const [wishlistItems, setWishlistItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,9 +17,7 @@ const WishlistSection = () => {
           throw new Error("User not found in localStorage");
         }
 
-        const response = await fetch(
-          `http://localhost:5001/api/wishlist/${user._id}`
-        );
+        const response = await fetch(`${BACKEND_URI}/api/wishlist/${user._id}`);
         if (!response.ok) {
           throw new Error("Failed to fetch wishlist");
         }

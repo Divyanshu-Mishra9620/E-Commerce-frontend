@@ -1,16 +1,16 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-
+const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 const ReviewSection = ({ productId }) => {
   const [reviews, setReviews] = useState([]);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
-  const [editingReviewId, setEditingReviewId] = useState(null);  
-  const [editRating, setEditRating] = useState(5);  
-  const [editComment, setEditComment] = useState("");  
-  const [hasSubmittedReview, setHasSubmittedReview] = useState(false);  
+  const [editingReviewId, setEditingReviewId] = useState(null);
+  const [editRating, setEditRating] = useState(5);
+  const [editComment, setEditComment] = useState("");
+  const [hasSubmittedReview, setHasSubmittedReview] = useState(false);
 
   const router = useRouter();
   const user = JSON.parse(localStorage.getItem("user"));
@@ -19,15 +19,15 @@ const ReviewSection = ({ productId }) => {
     fetchReviews();
   }, []);
 
-   const fetchReviews = async () => {
+  const fetchReviews = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5001/api/products/${productId}/reviews`
+        `${BACKEND_URI}/api/products/${productId}/reviews`
       );
       const data = await response.json();
       setReviews(data.reviews);
 
-       if (user) {
+      if (user) {
         const userReview = data.reviews.find((rev) => rev.user === user._id);
         if (userReview) {
           setHasSubmittedReview(true);
@@ -38,13 +38,13 @@ const ReviewSection = ({ productId }) => {
     }
   };
 
-   const submitReview = async () => {
+  const submitReview = async () => {
     setLoading(true);
     if (!user) router.push("/api/auth/signin");
 
     try {
       const response = await fetch(
-        `http://localhost:5001/api/products/${productId}/reviews`,
+        `${BACKEND_URI}/api/products/${productId}/reviews`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -61,20 +61,20 @@ const ReviewSection = ({ productId }) => {
 
       setComment("");
       setRating(5);
-      setHasSubmittedReview(true);  
-      fetchReviews();  
+      setHasSubmittedReview(true);
+      fetchReviews();
     } catch (error) {
       console.error("Error submitting review:", error);
     }
     setLoading(false);
   };
 
-   const deleteReview = async (reviewId) => {
+  const deleteReview = async (reviewId) => {
     if (!user) router.push("/api/auth/signin");
 
     try {
       const response = await fetch(
-        `http://localhost:5001/api/products/${productId}/reviews/${reviewId}`,
+        `${BACKEND_URI}/api/products/${productId}/reviews/${reviewId}`,
         {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
@@ -82,31 +82,31 @@ const ReviewSection = ({ productId }) => {
       );
 
       if (!response.ok) throw new Error("Failed to delete review");
-      setHasSubmittedReview(false);  
-      fetchReviews(); 
+      setHasSubmittedReview(false);
+      fetchReviews();
     } catch (error) {
       console.error("Error deleting review:", error);
     }
   };
 
-   const startEditing = (review) => {
+  const startEditing = (review) => {
     setEditingReviewId(review.user);
     setEditRating(review.rating);
     setEditComment(review.comment);
   };
 
-   const cancelEditing = () => {
+  const cancelEditing = () => {
     setEditingReviewId(null);
     setEditRating(5);
     setEditComment("");
   };
 
-   const submitEdit = async () => {
+  const submitEdit = async () => {
     if (!user) router.push("/api/auth/signin");
 
     try {
       const response = await fetch(
-        `http://localhost:5001/api/products/${productId}/reviews/${editingReviewId}`,
+        `${BACKEND_URI}/api/products/${productId}/reviews/${editingReviewId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -118,8 +118,8 @@ const ReviewSection = ({ productId }) => {
       );
 
       if (!response.ok) throw new Error("Failed to update review");
-      fetchReviews();  
-      cancelEditing();  
+      fetchReviews();
+      cancelEditing();
     } catch (error) {
       console.error("Error updating review:", error);
     }
@@ -129,7 +129,7 @@ const ReviewSection = ({ productId }) => {
     <div className="w-full mt-6">
       <h2 className="text-lg font-semibold mb-3">Customer Reviews</h2>
 
-       {!hasSubmittedReview ? (
+      {!hasSubmittedReview ? (
         <div className="border p-4 rounded-md shadow-sm">
           <h3 className="text-md font-semibold mb-2">Write a Review</h3>
           <select
@@ -163,14 +163,14 @@ const ReviewSection = ({ productId }) => {
         </p>
       )}
 
-       <div className="mt-4">
+      <div className="mt-4">
         {reviews?.length > 0 ? (
           reviews?.map((review) => (
             <div
               key={review.createdAt}
               className="border p-3 rounded-md my-2 shadow-sm"
             >
-               {editingReviewId === review.user ? (
+              {editingReviewId === review.user ? (
                 <div className="mb-4">
                   <select
                     value={editRating}
@@ -205,7 +205,7 @@ const ReviewSection = ({ productId }) => {
                   </div>
                 </div>
               ) : (
-                 <div>
+                <div>
                   <p className="font-semibold">{user?.name || "Anonymous"}</p>
                   <p className="text-yellow-500">
                     {"⭐".repeat(review.rating)}
@@ -214,7 +214,7 @@ const ReviewSection = ({ productId }) => {
                   <p className="text-sm text-gray-500">
                     {new Date(review.createdAt).toLocaleString()}
                   </p>
-                   {user && review.user === user._id && (
+                  {user && review.user === user._id && (
                     <div className="flex gap-2 mt-2">
                       <button
                         onClick={() => startEditing(review)}

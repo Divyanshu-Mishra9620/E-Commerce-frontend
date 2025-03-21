@@ -100,7 +100,7 @@ const Settings = () => {
 
   const handleSaveAddress = async (e) => {
     e.preventDefault();
-    const res = await fetch(`http://localhost:5001/api/users/${user._id}`, {
+    const res = await fetch(`${BACKEND_URI}/api/users/${user._id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

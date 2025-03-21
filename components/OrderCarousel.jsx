@@ -11,6 +11,8 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { Info, Loader2 } from "lucide-react";
 
+const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
+
 export default function OrderCarousel() {
   const [orders, setOrders] = useState([]);
   const [reviews, setReviews] = useState([]);
@@ -34,9 +36,7 @@ export default function OrderCarousel() {
       setLoadingOrders(true);
       setErrorOrders(null);
       try {
-        const response = await fetch(
-          `http://localhost:5001/api/orders/${user._id}`
-        );
+        const response = await fetch(`${BACKEND_URI}/api/orders/${user._id}`);
         const data = await response.json();
         setOrders(data.orders);
       } catch (error) {
@@ -57,7 +57,7 @@ export default function OrderCarousel() {
       setLoadingReviews(true);
       setErrorReviews(null);
       try {
-        const res = await fetch("http://localhost:5001/api/products");
+        const res = await fetch(`${BACKEND_URI}/api/products`);
         const products = await res.json();
 
         const userReviews = [];

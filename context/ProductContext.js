@@ -11,7 +11,7 @@ const initializeDB = async () => {
   return openDB("ProductDB", 1, {
     upgrade(db) {
       if (!db.objectStoreNames.contains("products")) {
-        db.createObjectStore("products", { keyPath: "id" });
+        db.createObjectStore("products", { keyPath: "_id" });
       }
     },
   });
@@ -32,7 +32,7 @@ const saveDataToDB = async (db, data) => {
   await Promise.all(
     data.map((product) => {
       if (!product._id) {
-        console.warn("Product missing `id`:", product);
+        console.warn("Product missing `_id`:", product);
         product._id = crypto.randomUUID();
       }
       return store.put(product);

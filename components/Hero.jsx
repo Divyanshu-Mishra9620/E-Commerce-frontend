@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 const ProductCard = ({ image, product_name, discounted_price, uniq_id }) => {
   const router = useRouter();
@@ -16,11 +17,14 @@ const ProductCard = ({ image, product_name, discounted_price, uniq_id }) => {
         "backdrop-blur-lg backdrop-filter bg-opacity-20 border border-gray-700 hover:border-gray-500"
       )}
     >
-      <img
+      <Image
         src={image?.replace(/\s+/g, "").replace(/[\[\]]/g, "") || "/lamp.jpg"}
         alt={product_name || "Product Image"}
+        width={240}
+        height={240}
         className="w-60 h-60 object-cover rounded-lg transition-transform duration-500 group-hover:scale-110 cursor-pointer"
         onClick={() => router.push(`/product/${uniq_id}`)}
+        priority={true}
       />
       <div className="text-center mt-6">
         <h3 className="text-2xl font-serif font-semibold group-hover:text-gold-500">

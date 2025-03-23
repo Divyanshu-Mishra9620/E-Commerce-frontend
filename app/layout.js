@@ -1,4 +1,5 @@
 "use client";
+import BottomNavigation from "@/components/BottomNavigation";
 import Navbar from "@/components/Navbar";
 import { CartProvider } from "@/context/CartContext";
 import { ProductProvider } from "@/context/ProductContext";
@@ -31,6 +32,7 @@ export default function RootLayout({ children, session }) {
               <WishlistProvider>
                 <Navbar user={user} />
                 {children}
+                <BottomNavigation />
               </WishlistProvider>
             </CartProvider>
           </ProductProvider>

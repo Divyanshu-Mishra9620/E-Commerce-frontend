@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import BottomNavigation from "@/components/BottomNavigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trash2, Plus, Minus, X, Package, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -19,7 +18,6 @@ const Cart = () => {
   const { cartItems, loading, error, removeItem, updateQuantity, fetchCart } =
     useCart();
   const [searchInput, setSearchInput] = useState("");
-  const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -36,7 +34,7 @@ const Cart = () => {
         router.push("/api/auth/signin");
       }
     }
-  }, []);
+  }, [router]);
 
   const openModal = (itemId) => {
     setSelectedItem(itemId);
@@ -85,22 +83,6 @@ const Cart = () => {
       setShowModal(false);
     }
   };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const fullHeight = document.documentElement.scrollHeight;
-      if (scrollY + windowHeight < fullHeight - 20) {
-        setIsBottomNavVisible(true);
-      } else {
-        setIsBottomNavVisible(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const filteredItems = useMemo(() => {
     return cartItems?.filter((item) =>
@@ -349,7 +331,6 @@ const Cart = () => {
           )}
         </div>
       </div>
-      <BottomNavigation visible={isBottomNavVisible} />
     </>
   );
 };

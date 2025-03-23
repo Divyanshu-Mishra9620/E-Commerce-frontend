@@ -1,12 +1,8 @@
-/* eslint-disable react/no-unescaped-entities, @next/next/no-img-element */
-
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useContext, useEffect, useState } from "react";
+import React, { Suspense, useContext, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import "@/app/_styles/global.css";
-import BottomNavigation from "@/components/BottomNavigation";
-
 import ProductContext from "@/context/ProductContext";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
@@ -14,7 +10,6 @@ import Navbar from "@/components/Navbar";
 const SearchPageContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
   const [prods, setProds] = useState([]);
   const [loader, setLoader] = useState(false);
   const query = searchParams.get("q") || "";
@@ -74,18 +69,6 @@ const SearchPageContent = () => {
 
     fetchAndFilterProducts();
   }, [query, products]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsBottomNavVisible(
-        window.innerHeight + window.scrollY <
-          document.documentElement.scrollHeight
-      );
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   return (
     <>
@@ -185,11 +168,17 @@ const SearchPageContent = () => {
               ))}
             </div>
           )}
-
-          <BottomNavigation visible={isBottomNavVisible} />
         </div>
       </div>
     </>
   );
 };
-export default SearchPageContent;
+const SearchPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SearchPageContent />
+    </Suspense>
+  );
+};
+
+export default SearchPage;

@@ -2,7 +2,6 @@
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState, useRef, useContext } from "react";
 import "@/app/_styles/global.css";
-import BottomNavigation from "@/components/BottomNavigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, ChevronDown } from "lucide-react";
 import ReviewSection from "@/components/ReviewSection";
@@ -17,7 +16,6 @@ export default function ProductPage() {
   const slug = params.slug;
   const router = useRouter();
   const containerRef = useRef(null);
-  const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
   const [qty, setQty] = useState(0);
   const [user, setUser] = useState(null);
   const [isInWishlist, setIsInWishlist] = useState(false);
@@ -28,22 +26,6 @@ export default function ProductPage() {
   const toggleSection = (section) => {
     setExpandedSection(expandedSection === section ? null : section);
   };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const fullHeight = document.documentElement.scrollHeight;
-      if (scrollY + windowHeight < fullHeight - 50) {
-        setIsBottomNavVisible(true);
-      } else {
-        setIsBottomNavVisible(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -478,7 +460,6 @@ export default function ProductPage() {
           </div>
         </div>
       </div>
-      <BottomNavigation visible={isBottomNavVisible} />
     </>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import BottomNavigation from "@/components/BottomNavigation";
 import { Lock, Bell, MapPin, Globe, LogOut } from "lucide-react";
 import "@/app/_styles/global.css";
 import withAuth from "@/components/withAuth";
@@ -12,8 +11,6 @@ import { motion } from "framer-motion";
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
 function Settings() {
-  const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
-
   const [security] = useState({ twoFactorAuth: true });
   const [notifications, setNotifications] = useState({
     email: true,
@@ -65,30 +62,11 @@ function Settings() {
     }
   }, [isAddressUpdated, user?.email]);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const fullHeight = document.documentElement.scrollHeight;
-
-      if (scrollY + windowHeight < fullHeight - 50) {
-        setIsBottomNavVisible(true);
-      } else {
-        setIsBottomNavVisible(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   const openModal = () => {
     setIsModalOpen(true);
-    setIsBottomNavVisible(false);
   };
   const closeModal = () => {
     setIsModalOpen(false);
-    setIsBottomNavVisible(true);
   };
 
   const handleAddressChange = (e) => {
@@ -394,8 +372,6 @@ function Settings() {
           </div>
         </motion.div>
       </div>
-
-      <BottomNavigation visible={isBottomNavVisible} />
     </>
   );
 }

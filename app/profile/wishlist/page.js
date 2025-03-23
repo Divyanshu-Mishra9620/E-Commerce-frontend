@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import BottomNavigation from "@/components/BottomNavigation";
 import { Heart, ShoppingBag, Info, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import "@/app/_styles/global.css";
@@ -13,27 +12,9 @@ import Navbar from "@/components/Navbar";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Wishlist = () => {
-  const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
-
   const router = useRouter();
   const { wishlistItems, loading, error, removeItem, fetchWishlist } =
     useWishlist();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const fullHeight = document.documentElement.scrollHeight;
-      if (scrollY + windowHeight < fullHeight) {
-        setIsBottomNavVisible(true);
-      } else {
-        setIsBottomNavVisible(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const handleRemoveItem = (productId) => {
     removeItem(productId);
@@ -189,7 +170,6 @@ const Wishlist = () => {
           )}
         </div>
       </div>
-      <BottomNavigation visible={isBottomNavVisible} />
     </>
   );
 };

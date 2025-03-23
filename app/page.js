@@ -8,15 +8,12 @@ import Deals from "@/components/Deals";
 import WishlistSection from "@/components/Wishlist";
 import MostVisitedSection from "@/components/MostVisitedSection";
 import Footer from "@/components/Footer";
-import BottomNavigation from "@/components/BottomNavigation";
 import { useContext } from "react";
 import ProductContext from "@/context/ProductContext";
-import useScrollDirection from "@/hooks/useScrollDirection";
 import SkeletonLoader from "@/components/SkeletonLoader";
 
 export default function Page() {
   const { products, isLoading, error } = useContext(ProductContext);
-  const isBottomNavVisible = useScrollDirection();
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -86,14 +83,6 @@ export default function Page() {
             <SectionWrapper delay={0.6}>
               <MostVisitedSection products={products} />
             </SectionWrapper>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.7 }}
-            >
-              <BottomNavigation visible={isBottomNavVisible} />
-            </motion.div>
           </>
         )}
       </main>

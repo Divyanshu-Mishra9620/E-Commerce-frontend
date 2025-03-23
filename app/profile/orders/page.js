@@ -1,7 +1,6 @@
 "use client";
 import { ListFilter, X } from "lucide-react";
 import React, { useState, useEffect } from "react";
-import BottomNavigation from "@/components/BottomNavigation";
 import "@/app/_styles/global.css";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -12,7 +11,6 @@ import { motion, AnimatePresence } from "framer-motion";
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
 const Orders = () => {
-  const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState({ orderStatus: [] });
   const [orders, setOrders] = useState([]);
@@ -30,7 +28,7 @@ const Orders = () => {
         router.push("/api/auth/signin");
       }
     }
-  }, []);
+  }, [router]);
   useEffect(() => {
     const fetchOrders = async () => {
       if (!user) return;
@@ -53,18 +51,6 @@ const Orders = () => {
 
     fetchOrders();
   }, [user]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const fullHeight = document.documentElement.scrollHeight;
-      setIsBottomNavVisible(scrollY + windowHeight < fullHeight - 50);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const handleFilterChange = (status) => {
     setFilters((prevFilters) => {
@@ -331,8 +317,6 @@ const Orders = () => {
           )}
         </div>
       </div>
-
-      <BottomNavigation visible={isBottomNavVisible} />
     </>
   );
 };

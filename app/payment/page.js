@@ -1,5 +1,4 @@
 "use client";
-import BottomNavigation from "@/components/BottomNavigation";
 import { Menu, MoveLeft, User } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -11,7 +10,6 @@ dotenv.config();
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
 export default function PaymentPage() {
-  const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
   const [products, setProducts] = useState([]);
@@ -102,25 +100,6 @@ export default function PaymentPage() {
   useEffect(() => {
     const cartItems = JSON.parse(localStorage.getItem("cart")) || [];
     setProducts(cartItems);
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const fullHeight = document.documentElement.scrollHeight;
-
-      setIsScrolled(scrollY > 1);
-
-      if (scrollY + windowHeight < fullHeight) {
-        setIsBottomNavVisible(true);
-      } else {
-        setIsBottomNavVisible(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const calculateTotal = () => {
@@ -545,8 +524,6 @@ export default function PaymentPage() {
           </div>
         </div>
       </div>
-
-      <BottomNavigation visible={isBottomNavVisible} />
     </>
   );
 }

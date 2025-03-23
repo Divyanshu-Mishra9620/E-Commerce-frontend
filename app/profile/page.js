@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import OrderCarousel from "@/components/OrderCarousel";
 import { Loader2, MapPin, User } from "lucide-react";
-import BottomNavigation from "@/components/BottomNavigation";
 import "@/app/_styles/global.css";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -35,7 +34,7 @@ export default function Profile() {
         router.push("/api/auth/signin");
       }
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     const fetchUserAddress = async () => {
@@ -177,7 +176,6 @@ export default function Profile() {
         </div>
       </div>
 
-      <BottomNavigation visible={isBottomNavVisible} />
       <Toaster position="bottom-right" reverseOrder={false} />
     </>
   );

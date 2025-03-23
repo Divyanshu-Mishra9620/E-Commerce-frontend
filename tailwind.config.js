@@ -67,6 +67,12 @@ module.exports = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        gold: {
+          300: "#D4AF37",
+          400: "#C5A030",
+          500: "#B8860B",
+          600: "#A67C00",
+        },
       },
       keyframes: {
         marquee: {

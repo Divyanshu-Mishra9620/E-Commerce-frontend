@@ -1,23 +1,21 @@
 "use client";
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import OrderCarousel from "@/components/OrderCarousel";
-import { Loader2 } from "lucide-react";
-import Link from "next/link";
-import ProfileSidebar from "@/components/ProfileSidebar";
+import { Loader2, MapPin, User } from "lucide-react";
 import BottomNavigation from "@/components/BottomNavigation";
 import "@/app/_styles/global.css";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import Navbar from "@/components/Navbar";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
 export default function Profile() {
-  const [isScrolled, setIsScrolled] = React.useState(false);
-  const [isBottomNavVisible, setIsBottomNavVisible] = React.useState(true);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [hasFetchedAddress, setHasFetchedAddress] = React.useState(false);
-  const [address, setAddress] = React.useState({
+  const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasFetchedAddress, setHasFetchedAddress] = useState(false);
+  const [address, setAddress] = useState({
     street: "",
     city: "",
     state: "",
@@ -25,9 +23,10 @@ export default function Profile() {
     postalCode: "",
   });
 
-  const [user, setUser] = React.useState(null);
+  const [user, setUser] = useState(null);
   const router = useRouter();
-  React.useEffect(() => {
+
+  useEffect(() => {
     if (typeof window !== "undefined") {
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
@@ -38,7 +37,7 @@ export default function Profile() {
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchUserAddress = async () => {
       try {
         const response = await fetch(
@@ -62,16 +61,11 @@ export default function Profile() {
     }
   }, [user, hasFetchedAddress]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       const windowHeight = window.innerHeight;
       const fullHeight = document.documentElement.scrollHeight;
-      if (window.scrollY > 1) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
       if (scrollY + windowHeight < fullHeight - 50) {
         setIsBottomNavVisible(true);
       } else {
@@ -85,157 +79,106 @@ export default function Profile() {
 
   return (
     <>
-      <nav
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          isScrolled
-            ? "bg-white bg-opacity-90 backdrop-blur-lg shadow-md"
-            : "bg-transparent"
-        }`}
-      >
-        <div className="container mx-auto flex justify-between items-center p-4">
-          <Link href="/" className="text-2xl font-bold text-gray-800">
-            ShopEase
-          </Link>
-        </div>
-      </nav>
+      <Navbar />
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-7xl mt-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-200 to-gray-400 bg-clip-text text-transparent">
+              Profile
+            </h1>
+          </motion.div>
 
-      <ProfileSidebar />
-
-      <div className="mt-16 md:ml-64">
-        <div className="bg-gray-50 min-h-screen p-6">
-          <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-sm">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Profile</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-gray-800 rounded-xl p-6 border border-gray-700"
+            >
+              <h2 className="text-xl font-semibold text-gray-200 mb-6 flex items-center gap-2">
+                <User className="w-6 h-6 text-gray-400" />
+                Personal Information
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    value={user?.name || ""}
+                    disabled
+                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={user?.email || ""}
+                    disabled
+                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
+                  />
+                </div>
+              </div>
+            </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="space-y-4 mb-8"
+              transition={{ delay: 0.4 }}
+              className="bg-gray-800 rounded-xl p-6 border border-gray-700"
             >
-              <h2 className="text-lg font-semibold text-gray-800">
-                Personal Information
+              <h2 className="text-xl font-semibold text-gray-200 mb-6 flex items-center gap-2">
+                <MapPin className="w-6 h-6 text-gray-400" />
+                Address
               </h2>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  value={user?.name || ""}
-                  disabled
-                  placeholder="Your name"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={user?.email || ""}
-                  disabled
-                  placeholder="Your email"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+              {isLoading ? (
+                <div className="flex justify-center items-center py-8">
+                  <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {Object.entries(address).map(([key, value]) => (
+                    <div key={key}>
+                      <label className="block text-sm font-medium text-gray-400 mb-2 capitalize">
+                        {key}
+                      </label>
+                      <input
+                        type="text"
+                        value={value}
+                        disabled
+                        className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 focus:outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </motion.div>
-
-            {isLoading ? (
-              <div className="flex justify-center items-center py-8">
-                <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-              </div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="space-y-4"
-              >
-                <h2 className="text-lg font-semibold text-gray-800">Address</h2>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Street
-                  </label>
-                  <input
-                    type="text"
-                    name="street"
-                    value={address.street}
-                    disabled
-                    placeholder="Enter street address"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    City
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={address.city}
-                    disabled
-                    placeholder="Enter city"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    State
-                  </label>
-                  <input
-                    type="text"
-                    name="state"
-                    value={address.state}
-                    disabled
-                    placeholder="Enter state"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Country
-                  </label>
-                  <input
-                    type="text"
-                    name="country"
-                    value={address.country}
-                    disabled
-                    placeholder="Enter country"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Postal Code
-                  </label>
-                  <input
-                    type="text"
-                    name="postalCode"
-                    disabled
-                    value={address.postalCode}
-                    placeholder="Enter postal code"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </motion.div>
-            )}
           </div>
 
-          <div className="flex flex-col items-center justify-center w-full px-4 md:px-8 lg:px-12 mt-6">
-            <div className="w-full">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                Your Orders
-              </h2>
-              <OrderCarousel />
-            </div>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="mt-12"
+          >
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-200 to-gray-400 bg-clip-text text-transparent mb-8">
+              Your Orders
+            </h2>
+            <OrderCarousel />
+          </motion.div>
         </div>
       </div>
 
       <BottomNavigation visible={isBottomNavVisible} />
-
-      <Toaster position="top-right" reverseOrder={false} />
+      <Toaster position="bottom-right" reverseOrder={false} />
     </>
   );
 }

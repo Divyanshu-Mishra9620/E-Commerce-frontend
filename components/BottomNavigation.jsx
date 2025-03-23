@@ -9,72 +9,59 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 
 const BottomNavigation = ({ visible }) => {
   const pathname = usePathname();
 
-  const isActive = (href) => {
-    return pathname === href;
-  };
+  const isActive = (href) => pathname === href;
 
   return (
-    <div
-      className={`fixed bottom-0 left-0 w-full bg-blue-100 shadow-lg z-50 md:hidden transition-transform duration-300 ${
-        visible ? "translate-y-0" : "translate-y-full"
-      }`}
+    <motion.div
+      className={`fixed bottom-0 left-0 w-full bg-gray-900/80 backdrop-blur-lg border-t border-gray-700 shadow-xl z-50 md:hidden`}
+      initial={{ y: 100 }}
+      animate={{ y: visible ? 0 : 100 }}
+      transition={{ type: "spring", damping: 20, stiffness: 200 }}
     >
-      <div className="flex justify-around items-center p-2">
-        <Link
-          href="/"
-          className={`flex flex-col items-center text-gray-700 hover:text-blue-600 transition-colors ${
-            isActive("/") ? "text-blue-600" : ""
-          }`}
-        >
-          <House className="w-6 h-6" />
-          <span className="text-xs">Home</span>
-        </Link>
+      <div className="flex justify-around items-center p-3">
+        {[
+          { href: "/", icon: House, label: "Home" },
+          { href: "/profile/orders", icon: ShoppingBasket, label: "Orders" },
+          { href: "/profile/carts", icon: ShoppingCart, label: "Cart" },
+          { href: "/profile/wishlist", icon: Heart, label: "Wishlist" },
+          { href: "/profile/settings", icon: Settings, label: "Settings" },
+        ].map((item, index) => (
+          <Link
+            key={index}
+            href={item.href}
+            className="relative flex flex-col items-center group"
+          >
+            <motion.div
+              className={`flex flex-col items-center ${
+                isActive(item.href) ? "text-white" : "text-gray-400"
+              } hover:text-white transition-colors duration-200`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <item.icon
+                className="w-6 h-6 mb-1 stroke-[1.5]"
+                stroke={isActive(item.href) ? "currentColor" : "currentColor"}
+              />
+              <span className="text-xs font-medium">{item.label}</span>
+            </motion.div>
 
-        <Link
-          href="/profile/orders"
-          className={`flex flex-col items-center text-gray-700 hover:text-blue-600 transition-colors ${
-            isActive("/profile/orders") ? "text-blue-600" : ""
-          }`}
-        >
-          <ShoppingBasket className="w-6 h-6" />
-          <span className="text-xs">Orders</span>
-        </Link>
-
-        <Link
-          href="/profile/carts"
-          className={`flex flex-col items-center text-gray-700 hover:text-blue-600 transition-colors ${
-            isActive("/profile/carts") ? "text-blue-600" : ""
-          }`}
-        >
-          <ShoppingCart className="w-6 h-6" />
-          <span className="text-xs">Cart</span>
-        </Link>
-
-        <Link
-          href="/profile/wishlist"
-          className={`flex flex-col items-center text-gray-700 hover:text-blue-600 transition-colors ${
-            isActive("/profile/wishlist") ? "text-blue-600" : ""
-          }`}
-        >
-          <Heart className="w-6 h-6" />
-          <span className="text-xs">Wishlist</span>
-        </Link>
-
-        <Link
-          href="/profile/settings"
-          className={`flex flex-col items-center text-gray-700 hover:text-blue-600 transition-colors ${
-            isActive("/profile/settings") ? "text-blue-600" : ""
-          }`}
-        >
-          <Settings className="w-6 h-6" />
-          <span className="text-xs">Settings</span>
-        </Link>
+            {isActive(item.href) && (
+              <motion.div
+                className="absolute -top-2 w-1 h-1 bg-white rounded-full"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200 }}
+              />
+            )}
+          </Link>
+        ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

@@ -47,15 +47,15 @@ export default function ResetPassword({ params }) {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold text-center text-gray-800">
+    <div className="min-h-screen flex items-center justify-center bg-black">
+      <div className="w-full max-w-md p-8 bg-gray-900 border border-gray-800 rounded-lg shadow-xl">
+        <h1 className="text-2xl font-bold text-center text-gray-100">
           Reset Password
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-400">
               New Password
             </label>
             <input
@@ -63,17 +63,27 @@ export default function ResetPassword({ params }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="mt-1 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your new password"
+              className="
+                mt-1 w-full px-3 py-2 bg-gray-800 text-gray-100 placeholder-gray-500 
+                rounded-md border border-gray-700 
+                focus:outline-none focus:ring-2 focus:ring-gray-600
+              "
             />
           </div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          {message && <p className="text-green-500 text-sm">{message}</p>}
+          {error && <p className="text-red-400 text-sm">{error}</p>}
+          {message && <p className="text-green-400 text-sm">{message}</p>}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+            className="
+              w-full flex items-center justify-center gap-2 py-2 px-4
+              bg-gray-700 text-gray-100 rounded-md 
+              hover:bg-gray-600 transition-colors 
+              disabled:opacity-50 disabled:cursor-not-allowed
+            "
           >
             {loading ? "Resetting..." : "Reset Password"}
           </button>

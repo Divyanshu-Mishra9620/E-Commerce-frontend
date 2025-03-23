@@ -48,38 +48,60 @@ export const WishlistProvider = ({ children }) => {
         throw new Error("User not found in local storage");
       }
 
+      const tempId = `temp-${Date.now()}`;
+      setWishlistItems((prev) => [
+        ...prev,
+        {
+          _id: tempId,
+          product: { ...product, _id: product._id || tempId },
+        },
+      ]);
+
       const response = await fetch(
         `${BACKEND_URI}/api/wishlist/${savedUser._id}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ product: product._id }),
+          body: JSON.stringify({ productId: product._id }),
         }
       );
 
       if (!response.ok) {
+        setWishlistItems((prev) =>
+          prev.filter((item) => item.product._id !== product._id)
+        );
         throw new Error("Failed to add item to wishlist");
       }
 
       const updatedWishlist = await response.json();
-      setWishlistItems(updatedWishlist.items);
+
+      setWishlistItems((prev) => {
+        const cleanPrev = prev.filter((item) => item._id !== tempId);
+        return [...cleanPrev, ...updatedWishlist.wishlist.items];
+      });
+
+      localStorage.setItem(
+        "wishlist",
+        JSON.stringify(updatedWishlist.wishlist.items)
+      );
     } catch (error) {
       console.error("Error adding item to wishlist:", error);
+      setWishlistItems((prev) => prev.filter((item) => item._id !== tempId));
       setError(error.message);
     }
   };
 
   const removeItem = async (productId) => {
     try {
-      console.log(productId);
+      const originalItem = wishlistItems.find(
+        (item) => item.product._id === productId
+      );
+
+      setWishlistItems((prev) =>
+        prev.filter((item) => item.product._id !== productId)
+      );
 
       const savedUser = JSON.parse(localStorage.getItem("user"));
-      if (!savedUser?._id) {
-        throw new Error("User not found in local storage");
-      }
-
-      console.log(savedUser);
-
       const response = await fetch(
         `${BACKEND_URI}/api/wishlist/${savedUser._id}`,
         {
@@ -90,15 +112,12 @@ export const WishlistProvider = ({ children }) => {
       );
 
       if (!response.ok) {
+        setWishlistItems((prev) => [...prev, originalItem]);
         throw new Error("Failed to remove item from wishlist");
       }
 
       const updatedWishlist = await response.json();
-      console.log(updatedWishlist.wishlist);
-
-      setWishlistItems((prevItems) =>
-        prevItems.filter((item) => item.product._id !== productId)
-      );
+      setWishlistItems(updatedWishlist.wishlist.items);
     } catch (error) {
       console.error("Error removing item from wishlist:", error);
       setError(error.message);

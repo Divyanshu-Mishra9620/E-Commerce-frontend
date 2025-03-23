@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { AiOutlineMail } from "react-icons/ai";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
@@ -17,8 +19,6 @@ export default function ForgotPassword() {
     setMessage("");
 
     try {
-      console.log(email);
-
       const res = await fetch(`${BACKEND_URI}/api/auth/forgot-password`, {
         method: "POST",
         headers: {
@@ -43,47 +43,74 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold text-center text-gray-800">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md p-8 bg-gray-900 rounded-xl shadow-2xl border border-gray-800"
+      >
+        <h1 className="text-3xl font-bold text-center bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent mb-8">
           Forgot Password
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Email
+            <label className="block text-sm font-medium text-gray-400 mb-2">
+              Email Address
             </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="mt-1 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div className="relative">
+              <AiOutlineMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                placeholder="Enter your email"
+              />
+            </div>
           </div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          {message && <p className="text-green-500 text-sm">{message}</p>}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="p-2 bg-red-900/20 text-red-400 text-sm rounded-lg"
+            >
+              {error}
+            </motion.div>
+          )}
 
-          <button
+          {message && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="p-2 bg-green-900/20 text-green-400 text-sm rounded-lg"
+            >
+              {message}
+            </motion.div>
+          )}
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all"
           >
             {loading ? "Sending..." : "Send Reset Link"}
-          </button>
+          </motion.button>
         </form>
 
-        <div className="text-center text-gray-600 mt-4">
+        <div className="text-center text-gray-400 mt-6">
           <Link
             href="/api/auth/signin"
-            className="text-blue-600 hover:underline"
+            className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
           >
             Back to Sign In
           </Link>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

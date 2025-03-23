@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
-import { AiOutlineMail } from "react-icons/ai";
+import { AiOutlineMail, AiOutlineLock } from "react-icons/ai";
+import { motion } from "framer-motion";
+
 import Link from "next/link";
 import "@/app/_styles/global.css";
 
@@ -129,84 +131,109 @@ export default function SignIn() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold text-center text-gray-800">
-          Sign In
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md p-8 bg-gray-900 rounded-xl shadow-2xl border border-gray-800"
+      >
+        <h1 className="text-3xl font-bold text-center bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent mb-8">
+          Welcome Back
         </h1>
 
-        <button
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={handleGoogleSignIn}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 py-2 px-4 mt-4 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition"
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-gray-700 rounded-lg bg-gray-800 text-gray-200 hover:bg-gray-700 transition-all"
         >
-          <FcGoogle className="text-xl" /> Sign in with Google
-        </button>
+          <FcGoogle className="text-xl" />
+          <span>Sign in with Google</span>
+        </motion.button>
 
-        <div className="flex items-center my-4">
-          <hr className="flex-grow border-gray-300" />
-          <span className="px-2 text-gray-500">OR</span>
-          <hr className="flex-grow border-gray-300" />
+        <div className="flex items-center my-6">
+          <hr className="flex-grow border-gray-700" />
+          <span className="px-3 text-gray-400 text-sm">OR CONTINUE WITH</span>
+          <hr className="flex-grow border-gray-700" />
         </div>
 
-        <form onSubmit={handleCredentialsSignIn} className="space-y-4">
+        <form onSubmit={handleCredentialsSignIn} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Email
+            <label className="block text-sm font-medium text-gray-400 mb-2">
+              Email Address
             </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="mt-1 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div className="relative">
+              <AiOutlineMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                placeholder="Enter your email"
+              />
+            </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-400 mb-2">
               Password
             </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="mt-1 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div className="relative">
+              <AiOutlineLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                placeholder="Enter your password"
+              />
+            </div>
           </div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="p-2 bg-red-900/20 text-red-400 text-sm rounded-lg"
+            >
+              {error}
+            </motion.div>
+          )}
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all"
           >
             <AiOutlineMail className="text-lg" />
             {loading ? "Signing in..." : "Sign in with Email"}
-          </button>
+          </motion.button>
         </form>
 
-        <div className="text-center text-gray-600 mt-4">
+        <div className="flex flex-col items-center gap-3 mt-6 text-gray-400">
           <Link
             href="/api/forgot-password"
-            className="text-blue-600 hover:underline"
+            className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
           >
             Forgot password?
           </Link>
-        </div>
 
-        <p className="text-center text-gray-600 mt-4">
-          Don&apos;t have an account?{" "}
-          <Link
-            href="/api/auth/register"
-            className="text-blue-600 hover:underline"
-          >
-            Register here
-          </Link>
-        </p>
-      </div>
+          <div className="flex items-center gap-2">
+            <span>Don't have an account?</span>
+            <Link
+              href="/api/auth/register"
+              className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
+            >
+              Register here
+            </Link>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }

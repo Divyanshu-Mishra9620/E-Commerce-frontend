@@ -37,6 +37,10 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    --color-gold-300: 212 175 55;
+    --color-gold-400: 197 160 48;
+    --color-gold-500: 184 134 11;
+    --color-gold-600: 166 124 0;
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -73,7 +77,22 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
+/* Add this to your global CSS file */
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
 
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
 @layer base {
   * {
     @apply border-border;
@@ -84,19 +103,25 @@
 }
 
 @keyframes wiggle {
-  0%,
-  100% {
+  0% {
     transform: rotate(0deg);
   }
   25% {
-    transform: rotate(-10deg);
-  }
-  50% {
     transform: rotate(10deg);
   }
-  75% {
-    transform: rotate(-5deg);
+  50% {
+    transform: rotate(-10deg);
   }
+  75% {
+    transform: rotate(10deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-wiggle {
+  animation: wiggle 0.5s infinite;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
@@ -105,4 +130,77 @@
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+@layer utilities {
+  .shadow-gold {
+    box-shadow: 0 25px 50px -12px rgba(184, 134, 11, 0.25);
+  }
+  .text-gold-gradient {
+    background-image: linear-gradient(to right, #b8860b, #daa520);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+/* global.css */
+body {
+  scroll-behavior: smooth;
+}
+
+/* Smooth scroll behavior */
+@media (prefers-reduced-motion: reduce) {
+  body {
+    scroll-behavior: auto;
+  }
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e5e7eb;
+  transition: 0.3s;
+  border-radius: 12px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #2563eb;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
 }

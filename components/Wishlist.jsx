@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
+import { motion } from "framer-motion";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
@@ -13,20 +14,14 @@ const WishlistSection = () => {
     const fetchWishlist = async () => {
       try {
         const user = JSON.parse(localStorage.getItem("user"));
-        if (!user || !user._id) {
+        if (!user?.email) {
           throw new Error("User not found in localStorage");
         }
 
         const response = await fetch(`${BACKEND_URI}/api/wishlist/${user._id}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch wishlist");
-        }
+        if (!response.ok) throw new Error("Failed to fetch wishlist");
 
         const data = await response.json();
-        console.log("Wishlist Data:", data);
-
-        console.log(data.items);
-
         setWishlistItems(data.items || []);
       } catch (error) {
         console.error("Error fetching wishlist:", error);
@@ -41,38 +36,66 @@ const WishlistSection = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen text-xl font-bold">
-        Loading Wishlist...
+      <div className="flex justify-center items-center min-h-[50vh]">
+        <div className="animate-pulse text-xl text-gray-500">
+          Loading your curated selections...
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center min-h-screen text-xl font-bold text-red-500">
-        Error: {error}
-      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex justify-center items-center min-h-[50vh] text-red-400"
+      >
+        Error loading wishlist: {error}
+      </motion.div>
     );
   }
 
   return (
-    <div className="flex-col mt-8 p-4 bg-pink-50 dark:bg-pink-900 rounded-lg shadow-sm">
-      <h3 className="px-4 text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
-        Your Wishlist ❤️
-      </h3>
+    <motion.section
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="mt-12 px-4 sm:px-6 lg:px-8"
+    >
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+        <h3 className="text-3xl font-semibold text-gray-900 dark:text-gray-100 mb-8">
+          Saved Selections
+          <span className="ml-3 text-gray-400 dark:text-gray-500">❤</span>
+        </h3>
 
-      {wishlistItems.length === 0 ? (
-        <p className="text-center text-gray-600 dark:text-gray-400">
-          Your wishlist is empty.
-        </p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {wishlistItems.map((item, index) => (
-            <ProductCard key={index} product={item.product} />
-          ))}
-        </div>
-      )}
-    </div>
+        {wishlistItems.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-12 text-gray-500 dark:text-gray-400"
+          >
+            No items saved yet
+          </motion.div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {wishlistItems.map((item, index) => (
+              <motion.div
+                key={item.product._id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <ProductCard
+                  product={item.product}
+                  className="hover:shadow-xl transition-shadow"
+                />
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </div>
+    </motion.section>
   );
 };
 

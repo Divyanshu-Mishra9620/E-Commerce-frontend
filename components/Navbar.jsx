@@ -3,32 +3,54 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Menu, Search, User, ChevronDown, ChevronUp } from "lucide-react";
-import { useSession, signOut } from "next-auth/react";
+import {
+  Menu,
+  Search,
+  User,
+  ShoppingCart,
+  Package,
+  Heart,
+  Tag,
+  Settings,
+  LogOut,
+  HelpCircle,
+  IndianRupee,
+  LayoutGrid,
+} from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
+import { motion, AnimatePresence } from "framer-motion";
 import "@/app/_styles/global.css";
-
-const categories = [
-  // ... (your categories array remains the same)
-];
-
-export default function Navbar() {
+import { useCart } from "@/context/CartContext";
+const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
+export default function Navbar({ user }) {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const [searchOpen, setSearchOpen] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
-  const [isCategoriesOpen, setIsCategoriesOpen] = React.useState(false);
-  const [isMobileCategoriesOpen, setIsMobileCategoriesOpen] =
-    React.useState(false);
+  const [isVisible, setIsVisible] = React.useState(true);
+  const [lastScrollY, setLastScrollY] = React.useState(0);
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const [isSearchFocused, setIsSearchFocused] = React.useState(false);
 
   const { data: session } = useSession();
 
   const [query, setQuery] = React.useState("");
   const router = useRouter();
 
+  const { cartItems } = useCart();
+
+  const cartItemLength = cartItems.reduce(
+    (acc, item) => acc + item.quantity,
+    0
+  );
+
   const handleUserIconClick = () => {
     if (!session) {
       router.push("/api/auth/signin");
     } else {
-      router.push("/profile");
+      if (window.innerWidth > 767) {
+        setIsDropdownOpen(!isDropdownOpen);
+      } else {
+        router.push("/profile");
+      }
     }
   };
 
@@ -40,9 +62,24 @@ export default function Navbar() {
     setQuery("");
   };
 
+  const handleCartClick = (e) => {
+    e.preventDefault();
+    if (user) router.push("/profile/carts");
+    else router.push("/api/auth/signin");
+  };
+
   React.useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 1) {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY) {
+        setIsVisible(true);
+      }
+
+      setLastScrollY(currentScrollY);
+      if (currentScrollY > 1) {
         setIsScrolled(true);
       } else {
         setIsScrolled(false);
@@ -51,198 +88,401 @@ export default function Navbar() {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [lastScrollY]);
+
+  React.useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (isDropdownOpen && !e.target.closest(".user-dropdown")) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isDropdownOpen]);
+
+  async function handleLogout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    await signOut({ callbackUrl: "/api/auth/signin" });
+  }
 
   return (
-    <nav
+    <motion.nav
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
         isScrolled
-          ? "bg-blue-100 bg-opacity-90 backdrop-blur-lg shadow-md"
-          : "bg-blue-100"
+          ? "bg-black bg-opacity-90 backdrop-blur-lg shadow-lg"
+          : "bg-black"
       }`}
+      style={{
+        transform: isVisible ? "translateY(0)" : "translateY(-100%)",
+        transition: "transform 0.3s ease-in-out",
+      }}
+      whileHover={{ backdropFilter: "blur(10px)" }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center py-4">
-        <div className="flex flex-row gap-5 items-center">
-          <Link href="/" className="text-2xl font-bold text-gray-800">
-            ShopEase
-          </Link>
-
-          <div className="hidden md:flex items-center gap-6">
-            <div className="relative">
-              <button
-                className="flex items-center text-gray-800 hover:text-gray-900"
-                onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
+        <AnimatePresence>
+          {!isSearchFocused && (
+            <motion.div
+              initial={{ opacity: 1 }}
+              animate={{ opacity: isSearchFocused ? 0 : 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="flex flex-row gap-5 items-center"
+            >
+              <Link
+                href="/"
+                className="text-2xl font-bold text-gray-200 hover:text-white transition-colors duration-200"
               >
-                Categories
-                {isCategoriesOpen ? (
-                  <ChevronUp className="w-4 h-4 ml-2" />
-                ) : (
-                  <ChevronDown className="w-4 h-4 ml-2" />
-                )}
-              </button>
-              {isCategoriesOpen && (
-                <div className="fixed left-0 top-[60px] w-full bg-white shadow-lg z-40">
-                  <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="grid grid-cols-4 gap-6">
-                      {categories.map((category) => (
-                        <div key={category.title} className="space-y-2">
-                          <h3 className="text-lg font-semibold text-gray-800">
-                            {category.title}
-                          </h3>
-                          <ul className="space-y-1">
-                            {category.subCategories.map((subCategory) => (
-                              <li key={subCategory.title}>
-                                <Link
-                                  href={subCategory.href}
-                                  className="text-gray-600 hover:text-gray-900"
-                                  onClick={() => setIsCategoriesOpen(false)}
-                                >
-                                  {subCategory.title}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <Link href="/deals" className="text-gray-800 hover:text-gray-900">
-              Deals
-            </Link>
-            <Link href="/contact" className="text-gray-800 hover:text-gray-900">
-              Contact Us
-            </Link>
-          </div>
-        </div>
+                Elysoria
+              </Link>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div
-          className={`${
-            searchOpen ? "flex" : "hidden"
-          } md:flex relative w-full max-w-[400px] mx-4`}
+          className={`relative transition-all duration-300 ${
+            isSearchFocused ? "w-full" : "w-full max-w-[400px]"
+          }`}
+          style={{
+            width: isSearchFocused ? "100%" : "100%",
+            maxWidth: isSearchFocused ? "100%" : "400px",
+          }}
         >
           <form onSubmit={handleSearch} className="w-full flex">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
               placeholder="Search products..."
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-black text-gray-200 placeholder-gray-400 transition-all duration-200"
+              style={{
+                background: "transparent",
+                border: isSearchFocused
+                  ? "linear-gradient(45deg, #ff0080, #7928ca, #ff0080)"
+                  : "2px solid transparent",
+                backgroundImage: "none",
+                backgroundClip: "padding-box",
+                boxShadow: isSearchFocused
+                  ? "0 0 10px rgba(255, 0, 128, 0.5), 0 0 20px rgba(121, 40, 202, 0.5)"
+                  : "none",
+              }}
             />
-            <button type="submit" className="absolute right-3 top-2.5">
-              <Search className="text-gray-400" size={18} />
+            <button
+              type="submit"
+              className="absolute right-3 top-2.5 text-gray-400 hover:text-white transition-colors duration-200"
+              style={{
+                background: isSearchFocused
+                  ? "linear-gradient(45deg, #ff0080, #7928ca)"
+                  : "none",
+                WebkitBackgroundClip: isSearchFocused ? "text" : "none",
+                WebkitTextFillColor: isSearchFocused
+                  ? "transparent"
+                  : "inherit",
+              }}
+            >
+              <Search size={18} />
             </button>
           </form>
         </div>
 
-        <div className="flex items-center space-x-4">
-          <button
-            className="md:hidden text-gray-700 hover:text-gray-900"
-            onClick={() => {
-              setSearchOpen(!searchOpen);
-              setMobileMenuOpen(false);
-            }}
-          >
-            <Search className="w-6 h-6" />
-          </button>
-
-          <div className="relative">
-            <button
-              onClick={handleUserIconClick}
-              className="text-gray-700 hover:text-gray-900 focus:outline-none"
+        <AnimatePresence>
+          {!isSearchFocused && (
+            <motion.div
+              initial={{ opacity: 1 }}
+              animate={{ opacity: isSearchFocused ? 0 : 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="flex items-center space-x-4"
             >
-              <User className="w-6 h-6" />
-            </button>
-          </div>
+              <div className="relative user-dropdown hidden md:block">
+                <button
+                  onClick={handleUserIconClick}
+                  className="text-gray-200 hover:text-white focus:outline-none transition-colors duration-200"
+                >
+                  <User className="w-6 h-6" />
+                </button>
 
-          <button
-            className="md:hidden text-gray-700 hover:text-gray-900"
-            onClick={() => {
-              setMobileMenuOpen(!mobileMenuOpen);
-              setSearchOpen(false);
-            }}
-          >
-            <Menu className="w-6 h-6" />
-          </button>
-        </div>
-      </div>
-
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-white shadow-md mt-2 absolute w-full left-0">
-          <ul className="flex flex-col p-4 space-y-2">
-            <li>
-              <button
-                className="flex items-center justify-between w-full p-2 hover:bg-gray-100"
-                onClick={() =>
-                  setIsMobileCategoriesOpen(!isMobileCategoriesOpen)
-                }
-              >
-                <span>Categories</span>
-                {isMobileCategoriesOpen ? (
-                  <ChevronUp className="w-4 h-4" />
-                ) : (
-                  <ChevronDown className="w-4 h-4" />
-                )}
-              </button>
-              {isMobileCategoriesOpen && (
-                <ul className="pl-4 mt-2 space-y-2 z-20 max-h-[300px] overflow-y-auto">
-                  {categories.map((category) => (
-                    <li key={category.title}>
-                      <Link
-                        href={category.href}
-                        className="block p-2 hover:bg-gray-100"
-                        onClick={() => {
-                          setIsMobileCategoriesOpen(false);
-                          setMobileMenuOpen(false);
+                {isDropdownOpen && (
+                  <motion.div
+                    className="absolute right-0 mt-2 w-48 bg-black bg-opacity-90 backdrop-blur-lg rounded-lg shadow-lg border border-gray-700"
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <motion.ul
+                      className="py-2"
+                      variants={{
+                        hidden: { opacity: 0 },
+                        visible: {
+                          opacity: 1,
+                          transition: {
+                            delayChildren: 0.2,
+                            staggerChildren: 0.05,
+                          },
+                        },
+                        exit: {
+                          opacity: 0,
+                          transition: {
+                            staggerChildren: 0.05,
+                            staggerDirection: -1,
+                          },
+                        },
+                      }}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                    >
+                      <motion.li
+                        variants={{
+                          hidden: { opacity: 0, y: -10 },
+                          visible: { opacity: 1, y: 0 },
+                          exit: { opacity: 0, y: -10 },
                         }}
                       >
-                        {category.title}
-                      </Link>
-                      <ul className="pl-4 mt-1 space-y-1">
-                        {category.subCategories.map((subCategory) => (
-                          <li key={subCategory.title}>
-                            <Link
-                              href={subCategory.href}
-                              className="block p-2 hover:bg-gray-100"
-                              onClick={() => {
-                                setIsMobileCategoriesOpen(false);
-                                setMobileMenuOpen(false);
-                              }}
-                            >
-                              {subCategory.title}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </li>
-            <li>
-              <Link
-                href="/deals"
-                className="block p-2 hover:bg-gray-100"
-                onClick={() => setMobileMenuOpen(false)}
+                        <Link
+                          href="/profile/carts"
+                          className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                        >
+                          <ShoppingCart className="w-4 h-4 mr-2" />
+                          Cart
+                        </Link>
+                      </motion.li>
+                      <motion.li
+                        variants={{
+                          hidden: { opacity: 0, y: -10 },
+                          visible: { opacity: 1, y: 0 },
+                          exit: { opacity: 0, y: -10 },
+                        }}
+                      >
+                        <Link
+                          href="/profile/orders"
+                          className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                        >
+                          <Package className="w-4 h-4 mr-2" />
+                          Orders
+                        </Link>
+                      </motion.li>
+                      <motion.li
+                        variants={{
+                          hidden: { opacity: 0, y: -10 },
+                          visible: { opacity: 1, y: 0 },
+                          exit: { opacity: 0, y: -10 },
+                        }}
+                      >
+                        <Link
+                          href="/profile/wishlist"
+                          className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                        >
+                          <Heart className="w-4 h-4 mr-2" />
+                          Wishlist
+                        </Link>
+                      </motion.li>
+                      <motion.li
+                        variants={{
+                          hidden: { opacity: 0, y: -10 },
+                          visible: { opacity: 1, y: 0 },
+                          exit: { opacity: 0, y: -10 },
+                        }}
+                      >
+                        <Link
+                          href="/profile"
+                          className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                        >
+                          <User className="w-4 h-4 mr-2" />
+                          Profile
+                        </Link>
+                      </motion.li>
+                      <motion.li
+                        variants={{
+                          hidden: { opacity: 0, y: -10 },
+                          visible: { opacity: 1, y: 0 },
+                          exit: { opacity: 0, y: -10 },
+                        }}
+                      >
+                        <Link
+                          href="/profile/coupons"
+                          className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                        >
+                          <Tag className="w-4 h-4 mr-2" />
+                          Coupons
+                        </Link>
+                      </motion.li>
+                      <motion.li
+                        variants={{
+                          hidden: { opacity: 0, y: -10 },
+                          visible: { opacity: 1, y: 0 },
+                          exit: { opacity: 0, y: -10 },
+                        }}
+                      >
+                        <Link
+                          href="/profile/settings"
+                          className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                        >
+                          <Settings className="w-4 h-4 mr-2" />
+                          Settings
+                        </Link>
+                      </motion.li>
+                    </motion.ul>
+                  </motion.div>
+                )}
+              </div>
+
+              <div className="relative hidden md:block">
+                <button
+                  onClick={handleCartClick}
+                  className="text-gray-200 hover:text-white focus:outline-none transition-colors duration-200 relative"
+                >
+                  <ShoppingCart className="w-6 h-6" />
+                  {cartItemLength > 0 && (
+                    <span
+                      className="
+          absolute
+          -top-2
+          -right-2
+          bg-white
+          text-black
+          text-xs
+          rounded-full
+          px-1.5
+          py-0.5
+          font-semibold
+        "
+                    >
+                      {cartItemLength}
+                    </span>
+                  )}
+                </button>
+              </div>
+
+              <div>
+                <button
+                  className="text-gray-200 hover:text-white transition-colors duration-200"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                >
+                  <Menu className="w-6 h-6" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            className="bg-black bg-opacity-90 backdrop-blur-lg shadow-lg"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <motion.ul
+              className="py-2"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    delayChildren: 0.2,
+                    staggerChildren: 0.05,
+                  },
+                },
+                exit: {
+                  opacity: 0,
+                  transition: {
+                    staggerChildren: 0,
+                    staggerDirection: 0,
+                  },
+                },
+              }}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              <motion.li
+                variants={{
+                  hidden: { opacity: 0, y: -10 },
+                  visible: { opacity: 1, y: 0 },
+                  exit: { opacity: 0, y: 0 },
+                }}
               >
-                Deals
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/contact"
-                className="block p-2 hover:bg-gray-100"
-                onClick={() => setMobileMenuOpen(false)}
+                <Link
+                  href="/"
+                  className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                >
+                  <LayoutGrid className="w-4 h-4 mr-2" />
+                  Categories
+                </Link>
+              </motion.li>
+              <motion.li
+                variants={{
+                  hidden: { opacity: 0, y: -10 },
+                  visible: { opacity: 1, y: 0 },
+                  exit: { opacity: 0, y: 0 },
+                }}
               >
-                Contact Us
-              </Link>
-            </li>
-          </ul>
-        </div>
-      )}
-    </nav>
+                <Link
+                  href="/"
+                  className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                >
+                  <Tag className="w-4 h-4 mr-2" />
+                  Coupons
+                </Link>
+              </motion.li>
+              <motion.li
+                variants={{
+                  hidden: { opacity: 0, y: -10 },
+                  visible: { opacity: 1, y: 0 },
+                  exit: { opacity: 0, y: 0 },
+                }}
+              >
+                <Link
+                  href="/"
+                  className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                >
+                  <IndianRupee className="w-4 h-4 mr-2" />
+                  Sell
+                </Link>
+              </motion.li>
+              <motion.li
+                variants={{
+                  hidden: { opacity: 0, y: -10 },
+                  visible: { opacity: 1, y: 0 },
+                  exit: { opacity: 0, y: 0 },
+                }}
+              >
+                <Link
+                  href="/"
+                  className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                >
+                  <HelpCircle className="w-4 h-4 mr-2" />
+                  Help Center
+                </Link>
+              </motion.li>
+              <motion.li
+                variants={{
+                  hidden: { opacity: 0, y: -10 },
+                  visible: { opacity: 1, y: 0 },
+                  exit: { opacity: 0, y: 0 },
+                }}
+              >
+                <div
+                  className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200 cursor-pointer"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </div>
+              </motion.li>
+            </motion.ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.nav>
   );
 }

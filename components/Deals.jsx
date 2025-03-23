@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import BestDealsGrid from "./BestDealsGrid";
+import { motion } from "framer-motion";
 
 export default function Deals({ products }) {
   const [deals, setDeals] = useState({
@@ -114,35 +115,39 @@ export default function Deals({ products }) {
   }, [products]);
 
   return (
-    <div className="p-4">
-      <h1 className="text-3xl font-bold text-center mb-8 dark:text-gray-200">
-        Welcome to Our <br /> <span className="text-red-500">Deals</span> of the{" "}
-        <span className="text-blue-500">Day</span> Section
-      </h1>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="hero-section"
+    >
+      <div className="p-4 bg-gray-50 dark:bg-gray-950 min-h-screen">
+        <h1 className="text-4xl font-bold text-center mb-8 text-gray-800 dark:text-gray-200">
+          Our Collections
+        </h1>
 
-      <div className="relative w-full h-48 mb-8 overflow-hidden rounded-lg">
-        <Image
-          src="/summer-banner.jpg"
-          alt="Summer Special"
-          width={1200}
-          height={300}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70">
-          <h2 className="text-4xl font-bold text-white text-center">
-            Summer Special: Up to 50% Off!
-          </h2>
+        <div className="relative w-full h-64 mb-12 overflow-hidden rounded-xl">
+          <Image
+            src="/summer-banner.jpg"
+            alt="summer Banner"
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+            <h2 className="text-3xl font-bold text-white text-center">
+              Explore Our Latest Arrivals
+            </h2>
+          </div>
         </div>
-      </div>
 
-      <BestDealsGrid deals={deals.summerDeals} category="Summer Special" />
-      <BestDealsGrid deals={deals.sportsDeals} category="Sports" />
-      <BestDealsGrid
-        deals={deals.kitchenDeals}
-        category="Kitchen Accessories"
-      />
-      <BestDealsGrid deals={deals.smartphoneDeals} category="Smartphones" />
-      <BestDealsGrid deals={deals.clothesDeals} category="Clothes" />
-    </div>
+        <BestDealsGrid deals={deals.summerDeals} category="Summer Collection" />
+        <BestDealsGrid deals={deals.sportsDeals} category="Sports Gear" />
+        <BestDealsGrid
+          deals={deals.kitchenDeals}
+          category="Kitchen Essentials"
+        />
+        <BestDealsGrid deals={deals.smartphoneDeals} category="Smartphones" />
+        <BestDealsGrid deals={deals.clothesDeals} category="Fashion" />
+      </div>
+    </motion.div>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Star, Edit, Trash, Check, X } from "lucide-react";
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 const ReviewSection = ({ productId }) => {
   const [reviews, setReviews] = useState([]);
@@ -125,121 +127,175 @@ const ReviewSection = ({ productId }) => {
     }
   };
 
-  return (
-    <div className="w-full mt-6">
-      <h2 className="text-lg font-semibold mb-3">Customer Reviews</h2>
-
-      {!hasSubmittedReview ? (
-        <div className="border p-4 rounded-md shadow-sm">
-          <h3 className="text-md font-semibold mb-2">Write a Review</h3>
-          <select
-            value={rating}
-            onChange={(e) => setRating(Number(e.target.value))}
-            className="border p-2 rounded w-full mb-2"
-          >
-            {[5, 4, 3, 2, 1].map((star) => (
-              <option key={star} value={star}>
-                {star} Stars
-              </option>
-            ))}
-          </select>
-          <textarea
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="Write your review..."
-            className="border p-2 rounded w-full mb-2"
-          ></textarea>
+  const renderStars = (rating, isEditable = false) => {
+    return (
+      <div className="flex gap-1">
+        {[...Array(5)].map((_, index) => (
           <button
-            onClick={submitReview}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-500"
-            disabled={loading}
+            key={index}
+            onClick={() => isEditable && setEditRating(index + 1)}
+            className={`p-1 transition-colors ${
+              isEditable ? "hover:text-yellow-400" : ""
+            }`}
+            disabled={!isEditable}
           >
-            {loading ? "Submitting..." : "Submit Review"}
+            <Star
+              size={20}
+              className={
+                index < (isEditable ? editRating : rating)
+                  ? "fill-yellow-400 stroke-yellow-400"
+                  : "fill-gray-300 stroke-gray-300"
+              }
+            />
           </button>
-        </div>
-      ) : (
-        <p className="text-gray-500 mb-4">
-          You have already submitted a review.
-        </p>
-      )}
+        ))}
+      </div>
+    );
+  };
 
-      <div className="mt-4">
+  return (
+    <div className="w-full mt-12 border-t border-gray-200 dark:border-gray-700 pt-8">
+      <h2 className="text-2xl font-bold mb-6 text-gray-300 dark:text-gray-100">
+        Customer Reviews
+      </h2>
+
+      <AnimatePresence>
+        {!hasSubmittedReview ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm mb-8"
+          >
+            <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
+              Share Your Experience
+            </h3>
+            <div className="mb-4">{renderStars(rating, true)}</div>
+
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Write your detailed review..."
+              className="w-full p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 
+                         focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-500 
+                         resize-none text-gray-900 dark:text-gray-100 
+                         placeholder-gray-500 dark:placeholder-gray-400"
+              rows="4"
+            />
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={submitReview}
+              disabled={loading}
+              className="mt-4 px-6 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 
+                         rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-200 
+                         transition-colors"
+            >
+              {loading ? "Publishing..." : "Publish Review"}
+            </motion.button>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mb-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl text-center text-gray-800 dark:text-gray-100"
+          >
+            <p className="text-gray-600 dark:text-gray-300">
+              You've already shared your review. Thank you!
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="space-y-6">
         {reviews?.length > 0 ? (
-          reviews?.map((review) => (
-            <div
+          reviews.map((review) => (
+            <motion.div
               key={review.createdAt}
-              className="border p-3 rounded-md my-2 shadow-sm"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm"
             >
               {editingReviewId === review.user ? (
-                <div className="mb-4">
-                  <select
-                    value={editRating}
-                    onChange={(e) => setEditRating(Number(e.target.value))}
-                    className="border p-2 rounded w-full mb-2"
-                  >
-                    {[5, 4, 3, 2, 1].map((star) => (
-                      <option key={star} value={star}>
-                        {star} Stars
-                      </option>
-                    ))}
-                  </select>
+                <div className="space-y-4">
+                  <div>{renderStars(editRating, true)}</div>
+
                   <textarea
                     value={editComment}
                     onChange={(e) => setEditComment(e.target.value)}
-                    placeholder="Edit your review..."
-                    className="border p-2 rounded w-full mb-2"
-                  ></textarea>
-                  <div className="flex gap-2">
-                    <button
+                    className="w-full p-4 bg-gray-50 dark:bg-gray-700 rounded-lg 
+                               border border-gray-200 dark:border-gray-600 
+                               text-gray-900 dark:text-gray-100 
+                               placeholder-gray-500 dark:placeholder-gray-400"
+                    rows="3"
+                  />
+
+                  <div className="flex gap-3">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
                       onClick={submitEdit}
-                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg"
                     >
-                      Save
-                    </button>
-                    <button
+                      <Check size={16} /> Save
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
                       onClick={cancelEditing}
-                      className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+                      className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg"
                     >
-                      Cancel
-                    </button>
+                      <X size={16} /> Cancel
+                    </motion.button>
                   </div>
                 </div>
               ) : (
-                <div>
-                  <p className="font-semibold">{user?.name || "Anonymous"}</p>
-                  <p className="text-yellow-500">
-                    {"⭐".repeat(review.rating)}
-                  </p>
-                  <p className="text-gray-700">{review.comment}</p>
-                  <p className="text-sm text-gray-500">
-                    {new Date(review.createdAt).toLocaleString()}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium text-gray-800 dark:text-gray-200">
+                        {user?.name || "Anonymous"}
+                      </h4>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    {renderStars(review.rating)}
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-100">
+                    {review.comment}
                   </p>
                   {user && review.user === user._id && (
-                    <div className="flex gap-2 mt-2">
-                      <button
+                    <div className="flex gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
                         onClick={() => startEditing(review)}
-                        className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                        className="p-2 text-gray-600 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                       >
-                        Edit
-                      </button>
-                      <button
+                        <Edit size={18} />
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
                         onClick={() => deleteReview(review.user)}
-                        className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                        className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
                       >
-                        Delete
-                      </button>
+                        <Trash size={18} />
+                      </motion.button>
                     </div>
                   )}
                 </div>
               )}
-            </div>
+            </motion.div>
           ))
         ) : (
-          <p className="text-gray-500">No reviews yet.</p>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center p-8 text-gray-500 dark:text-gray-400"
+          >
+            No reviews yet. Be the first to share your experience!
+          </motion.div>
         )}
       </div>
     </div>
   );
 };
-
 export default ReviewSection;

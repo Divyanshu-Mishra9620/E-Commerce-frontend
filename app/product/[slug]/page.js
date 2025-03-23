@@ -1,67 +1,39 @@
 "use client";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState, useRef, useMemo, useContext } from "react";
+import { useParams, useRouter } from "next/navigation";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import "@/app/_styles/global.css";
 import BottomNavigation from "@/components/BottomNavigation";
-import Link from "next/link";
-import { Heart, Menu, MoveLeft, Search, User } from "lucide-react";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from "@/components/ui/navigation-menu";
+import { motion, AnimatePresence } from "framer-motion";
+import { Heart, ChevronDown } from "lucide-react";
 import ReviewSection from "@/components/ReviewSection";
 import ProductContext from "@/context/ProductContext";
 import Image from "next/image";
-
-const categories = [
-  { title: "Electronics", href: "/categories/electronics" },
-  { title: "Fashion", href: "/categories/fashion" },
-  { title: "Home & Living", href: "/categories/home-living" },
-  { title: "Beauty & Health", href: "/categories/beauty-health" },
-  { title: "Sports & Outdoors", href: "/categories/sports-outdoors" },
-];
+import Navbar from "@/components/Navbar";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
 export default function ProductPage() {
   const params = useParams();
   const slug = params.slug;
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const [ballPosition, setBallPosition] = useState(0);
   const containerRef = useRef(null);
-  const ballRef = useRef(null);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isBottomNavVisible, setIsBottomNavVisible] = useState(true);
-  const [isClient, setIsClient] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchInput, setSearchInput] = useState("");
   const [qty, setQty] = useState(0);
   const [user, setUser] = useState(null);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [product, setProduct] = useState(null);
   const { products, isLoading } = useContext(ProductContext);
+  const [expandedSection, setExpandedSection] = useState(null);
 
-  const query = searchParams.get("q");
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const toggleSection = (section) => {
+    setExpandedSection(expandedSection === section ? null : section);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       const windowHeight = window.innerHeight;
       const fullHeight = document.documentElement.scrollHeight;
-      if (window.scrollY > 1) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
       if (scrollY + windowHeight < fullHeight - 50) {
         setIsBottomNavVisible(true);
       } else {
@@ -208,7 +180,7 @@ export default function ProductPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          product: product._id,
+          productId: product._id,
           quantity: newQuantity,
         }),
       });
@@ -238,44 +210,6 @@ export default function ProductPage() {
     }
   };
 
-  const formattedDate = useMemo(() => {
-    const deliveryDate = new Date();
-    deliveryDate.setDate(
-      deliveryDate.getDate() + Math.floor(Math.random() * 3) + 3
-    );
-    return deliveryDate.toDateString();
-  }, []);
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchInput.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchInput)}`);
-      setSearchInput("");
-    }
-  };
-  const handleMouseMove = (e) => {
-    if (!containerRef.current || !ballRef.current) return;
-
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const mouseX = e.clientX - containerRect.left;
-    const ballWidth = ballRef.current.offsetWidth;
-    const maxBallPosition = containerRect.width - ballWidth;
-
-    let newBallPosition = Math.max(
-      0,
-      Math.min(mouseX - ballWidth / 2, maxBallPosition)
-    );
-    setBallPosition(newBallPosition);
-
-    const scrollWidth = containerRef.current.scrollWidth - containerRect.width;
-    const scrollPercent = newBallPosition / maxBallPosition;
-    const newScrollPos = scrollPercent * scrollWidth;
-
-    containerRef.current.scrollTo({
-      left: newScrollPos,
-      behavior: "smooth",
-    });
-  };
   const currentProductKeywords = [
     ...(product?.product_name || "").toLowerCase().split(" "),
     ...(product?.description || "").toLowerCase().split(" "),
@@ -367,260 +301,184 @@ export default function ProductPage() {
 
   return (
     <>
-      <nav
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          isScrolled
-            ? "bg-white bg-opacity-50 backdrop-blur-lg shadow-md"
-            : "bg-transparent bg-white"
-        }`}
-      >
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex flex-row gap-5 items-center">
-            <button onClick={() => router.back()}>
-              <MoveLeft />
-            </button>
-
-            {isClient && (
-              <NavigationMenu className="hidden md:flex">
-                <NavigationMenuList className="flex space-x-6">
-                  <NavigationMenuItem>
-                    <span>Categories</span>
-                    <NavigationMenuContent>
-                      <ul className="grid w-[250px] gap-3 p-4 bg-white shadow-lg rounded-md">
-                        {categories.map((category) => (
-                          <ListItem
-                            key={category.title}
-                            title={category.title}
-                            href={category.href}
-                          />
-                        ))}
-                      </ul>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                  <NavigationMenuItem>
-                    <Link href="/deals" passHref>
-                      <span>Deals</span>
-                    </Link>
-                  </NavigationMenuItem>
-                  <NavigationMenuItem>
-                    <Link href="/" passHref>
-                      <span>Contact Us</span>
-                    </Link>
-                  </NavigationMenuItem>
-                </NavigationMenuList>
-              </NavigationMenu>
-            )}
-          </div>
-
-          {isClient && (
-            <div className="flex items-center justify-center">
-              <form
-                onSubmit={handleSearch}
-                className="flex relative w-full max-w-[400px]"
-              >
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  className="w-full px-4 py-2 border focus:outline-none focus:ring-2 focus:ring-primary rounded-l-lg"
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                />
-                <button type="submit" className="absolute right-3 top-2.5">
-                  <Search className="text-gray-400" size={18} />
-                </button>
-              </form>
-            </div>
-          )}
-
-          <div className="flex items-center space-x-4">
-            {isLoggedIn ? (
-              <Link
-                href="/profile"
-                className="text-gray-700 hover:text-gray-900"
-              >
-                <User className="w-6 h-6" />
-              </Link>
-            ) : (
-              <Link href="/login" className="text-gray-700 hover:text-gray-900">
-                <User className="w-6 h-6" />
-              </Link>
-            )}
-
-            <button
-              className="md:hidden text-gray-700 hover:text-gray-900"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+      <Navbar />
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100">
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid md:grid-cols-2 gap-8">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="relative group bg-gradient-to-br from-gray-800 to-gray-700 rounded-2xl p-6 shadow-2xl"
             >
-              <Menu className="w-6 h-6" />
-            </button>
-          </div>
-        </div>
+              <Image
+                src={
+                  product.image.replace(/\s+/g, "").replace(/[\[\]]/g, "") ||
+                  "/lamp.jpg"
+                }
+                alt={product.product_name}
+                width={600}
+                height={600}
+                className="w-full h-96 object-contain rounded-xl"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-xl" />
+            </motion.div>
 
-        {isClient && mobileMenuOpen && (
-          <div className="md:hidden bg-white shadow-md mt-2 absolute w-full left-0">
-            <ul className="flex flex-col p-4 space-y-2">
-              <li>
-                <Link
-                  href="/categories"
-                  className="block p-2 hover:bg-gray-100"
-                >
-                  Categories
-                </Link>
-              </li>
-              <li>
-                <Link href="/deals" className="block p-2 hover:bg-gray-100">
-                  Deals
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="block p-2 hover:bg-gray-100">
-                  Contact Us
-                </Link>
-              </li>
-            </ul>
-          </div>
-        )}
-      </nav>
-      <div className="container mx-auto p-6 mt-6">
-        <div className="grid md:grid-cols-2 gap-10">
-          <div className="border rounded-lg p-4">
-            <Image
-              src={
-                product.image.replace(/\s+/g, "").replace(/[\[\]]/g, "") ||
-                "/lamp.jpg"
-              }
-              alt={product.product_name}
-              width={400}
-              height={400}
-              className="w-full h-[400px] object-cover rounded-lg"
-            />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold">{product.product_name}</h1>
-            <p className="text-lg text-gray-700 mt-2">{product.description}</p>
-            <p className="text-2xl font-semibold text-green-600 mt-4">
-              ₹{product.discounted_price}
-            </p>
-            <p className="mt-4 text-blue-600 font-medium">
-              🚚 Estimated Delivery:{" "}
-              <span className="font-semibold">{formattedDate}</span>
-            </p>
-            <div className="mt-6 flex gap-4">
-              {qty === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="space-y-8"
+            >
+              <div>
+                <h1 className="text-4xl font-bold mb-4">
+                  {product.product_name}
+                </h1>
+                <p className="text-gray-400 text-lg">{product.description}</p>
+                <div className="mt-6 flex items-center gap-4">
+                  <span className="text-3xl font-bold bg-gradient-to-r from-gray-100 to-gray-300 bg-clip-text text-transparent">
+                    ₹{product.discounted_price}
+                  </span>
+                  <span className="text-gray-400 line-through">
+                    ₹{product.retail_price}
+                  </span>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-700 pt-6">
                 <button
-                  className="px-6 py-3 bg-gray-800 text-white font-semibold rounded-md hover:bg-gray-900 transition-colors"
-                  onClick={() => handleCartClick(1)}
+                  onClick={() => toggleSection("about")}
+                  className="flex items-center justify-between w-full group"
                 >
-                  Add to Cart
+                  <h3 className="text-xl font-semibold">Product Details</h3>
+                  <ChevronDown
+                    className={`w-6 h-6 transition-transform ${
+                      expandedSection === "about" ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
-              ) : (
-                <div className="flex items-center gap-2 bg-gray-800 text-white font-semibold rounded-md">
+                <AnimatePresence>
+                  {expandedSection === "about" && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-4 text-gray-300 space-y-4"
+                    >
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <span className="text-gray-400">Category:</span>
+                          <p>{product.category}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">Brand:</span>
+                          <p>{product.brand || "Unknown"}</p>
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Specifications:</span>
+                        <ul className="list-disc pl-6 mt-2">
+                          {product.specifications?.map((spec, i) => (
+                            <li key={i}>{spec}</li>
+                          )) || "No specifications available"}
+                        </ul>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div className="flex gap-4 mt-8">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex-1 bg-gradient-to-r from-gray-700 to-gray-600 px-8 py-4 rounded-xl font-semibold hover:from-gray-600 hover:to-gray-500 transition-all"
+                  onClick={() => handleCartClick(qty === 0 ? 1 : 0)}
+                >
+                  {qty === 0 ? "Add to Cart" : "Update Cart"}
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-4 bg-gray-700 rounded-xl hover:bg-gray-600 transition-colors"
+                  onClick={() => toggleWishlist(product._id)}
+                >
+                  <Heart
+                    className={`w-6 h-6 ${
+                      isInWishlist
+                        ? "text-red-400 fill-red-400"
+                        : "text-gray-300"
+                    }`}
+                  />
+                </motion.button>
+              </div>
+
+              {qty > 0 && (
+                <div className="flex items-center gap-4 mt-4">
                   <button
-                    className="px-4 py-3 hover:bg-gray-700 rounded-l-md"
                     onClick={() => handleCartClick(-1)}
+                    className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600"
                   >
                     -
                   </button>
-                  <span className="px-4 py-3 text-yellow-500">{qty}</span>
+                  <span className="text-xl font-medium">{qty}</span>
                   <button
-                    className="px-4 py-3 hover:bg-gray-700 rounded-r-md"
                     onClick={() => handleCartClick(1)}
+                    className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600"
                   >
                     +
                   </button>
                 </div>
               )}
-              <button
-                onClick={() => toggleWishlist(product._id)}
-                className="p-3 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+            </motion.div>
+          </div>
+
+          <div className="mt-16">
+            <h2 className="text-3xl font-bold mb-8">Similar Products</h2>
+            <div className="relative group">
+              <div
+                ref={containerRef}
+                className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide"
               >
-                <Heart
-                  className={`w-6 h-6 ${
-                    isInWishlist
-                      ? "text-pink-500 fill-pink-500"
-                      : "text-gray-700"
-                  }`}
-                />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-12">
-          <h2 className="text-2xl font-bold mb-6">Similar Products</h2>
-
-          <div
-            className="relative w-full p-4 bg-gray-200 rounded-full flex items-center shadow-lg cursor-pointer"
-            onMouseMove={handleMouseMove}
-          >
-            <div
-              ref={ballRef}
-              className="absolute top-1/2 -translate-y-1/2 w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-700 rounded-full shadow-lg transform transition-all"
-              style={{ left: `${ballPosition}px` }}
-            ></div>
-          </div>
-
-          <div className="overflow-hidden mt-4">
-            <div
-              className="flex gap-4 transition-transform duration-300"
-              ref={containerRef}
-              style={{ overflowX: "auto", whiteSpace: "nowrap" }}
-            >
-              {similarProducts?.map((product) => {
-                // Sanitize and validate the image URL
-                const imageUrl =
-                  product.image && /^https?:\/\//.test(product.image)
-                    ? product.image.replace(/\s+/g, "").replace(/[\[\]]/g, "")
-                    : "/lamp.jpg";
-                console.log(imageUrl);
-
-                return (
-                  <div
+                {similarProducts.map((product) => (
+                  <motion.div
                     key={product.uniq_id}
-                    className="flex-shrink-0 w-48 border rounded-lg p-4 hover:shadow-lg transition-shadow"
+                    whileHover={{ scale: 1.02 }}
+                    className="flex-shrink-0 w-72 bg-gray-800 rounded-xl p-4 hover:shadow-xl transition-all"
                   >
                     <Image
-                      src={imageUrl}
+                      src={product.image}
                       alt={product.product_name}
-                      width={500}
-                      height={200}
-                      className="w-full h-32 object-cover rounded-lg"
+                      width={400}
+                      height={400}
+                      className="w-full h-48 object-cover rounded-lg"
                     />
-                    <h3 className="text-lg font-semibold mt-2 line-clamp-1">
-                      {product.product_name}
-                    </h3>
-                    <p className="text-gray-600">₹{product.discounted_price}</p>
-                    <button
-                      onClick={() => router.push(`/product/${product.uniq_id}`)}
-                      className="mt-2 w-full px-4 py-2 bg-none text-gray-600 rounded-md hover:text-gray-900 hover:bg-blue-200 transition-colors"
-                    >
-                      Take a look
-                    </button>
-                  </div>
-                );
-              })}
+                    <div className="mt-4">
+                      <h3 className="text-lg font-semibold truncate">
+                        {product.product_name}
+                      </h3>
+                      <p className="text-gray-400 mt-2">
+                        ₹{product.discounted_price}
+                      </p>
+                      <button
+                        onClick={() =>
+                          router.push(`/product/${product.uniq_id}`)
+                        }
+                        className="mt-4 w-full py-2 bg-gray-700 rounded-lg hover:bg-gray-600"
+                      >
+                        View Product
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </div>
+
+          <div className="mt-16">
+            <ReviewSection productId={product._id} />
+          </div>
         </div>
-        <div>
-          <ReviewSection productId={product._id} />
-        </div>
-        <BottomNavigation visible={isBottomNavVisible} />
       </div>
+      <BottomNavigation visible={isBottomNavVisible} />
     </>
   );
 }
-
-const ListItem = ({ title, href }) => {
-  return (
-    <li>
-      <NavigationMenuLink asChild>
-        <Link
-          href={href}
-          className="block p-3 text-gray-700 hover:bg-gray-100 rounded-md transition"
-        >
-          {title}
-        </Link>
-      </NavigationMenuLink>
-    </li>
-  );
-};

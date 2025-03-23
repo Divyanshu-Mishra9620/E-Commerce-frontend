@@ -27,7 +27,6 @@ export const CartProvider = ({ children }) => {
       }
 
       const data = await response.json();
-      console.log(data.items);
       localStorage.setItem("cart", JSON.stringify(data.items));
       setCartItems(data.items || []);
     } catch (error) {
@@ -105,7 +104,7 @@ export const CartProvider = ({ children }) => {
       const response = await fetch(`${BACKEND_URI}/api/cart/${savedUser._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product: productId, quantity }),
+        body: JSON.stringify({ productId: productId, quantity }),
       });
 
       if (!response.ok) {
@@ -113,8 +112,6 @@ export const CartProvider = ({ children }) => {
       }
 
       const updatedCart = await response.json();
-      console.log(updatedCart);
-      console.log(quantity);
 
       setCartItems((prevItems) =>
         prevItems.map((item) =>
@@ -156,6 +153,7 @@ export const CartProvider = ({ children }) => {
     <CartContext.Provider
       value={{
         cartItems,
+        setCartItems,
         loading,
         error,
         addToCart,

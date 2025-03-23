@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
-import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import { motion } from "framer-motion";
 
 const categories = [
   {
@@ -30,104 +31,81 @@ const categories = [
   },
 ];
 
-const CategoryCarousel = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [progress, setProgress] = useState(0);
-
+const ExploreGrid = () => {
   const router = useRouter();
-
-  const nextSlide = () => {
-    setProgress(0);
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % categories.length);
-  };
-
-  const prevSlide = () => {
-    setProgress(0);
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? categories.length - 1 : prevIndex - 1
-    );
-  };
-
-  useEffect(() => {
-    let interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          nextSlide();
-          return 0;
-        }
-        return prev + 2;
-      });
-    }, 50);
-
-    return () => clearInterval(interval);
-  }, [currentIndex]);
 
   const handleCategory = (category, e) => {
     e.preventDefault();
-    console.log(category);
     router.push(`/search?q=${encodeURIComponent(category)}`);
   };
 
   return (
-    <div className="flex-col mt-8 p-4 bg-green-100 rounded-lg shadow-sm">
-      <h3 className="px-4 text-2xl font-semibold text-gray-800 mb-4">
-        Recommended to you
+    <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="hero-section"
+  >
+
+    <div
+      className="mt-8 p-4 border border-[#b8860b]/30 
+           bg-gradient-to-br from-black via-[#2a2108] to-black
+           shadow-[0_25px_50px_-12px_rgba(184,134,11,0.25)]"
+    >
+      <h3
+        className="text-3xl font-bold mb-6 px-2 tracking-tighter
+             bg-gradient-to-r from-[#b8860b] to-[#daa520] bg-clip-text text-transparent"
+      >
+        Explore Categories
       </h3>
 
-      <div className="relative w-full max-w-4xl mx-auto overflow-hidden">
-        <button
-          onClick={prevSlide}
-          className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 text-gray-800 p-3 rounded-full z-10 hover:bg-opacity-100 shadow-md transition-all"
-        >
-          &#10094;
-        </button>
-
-        <div
-          className="flex transition-transform duration-500 ease-in-out"
-          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-        >
-          {categories.map((category, index) => (
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        {categories.map((category, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className="group relative aspect-square cursor-pointer"
+            onClick={(e) => handleCategory(category.title, e)}
+          >
             <div
-              key={index}
-              className="w-full flex-shrink-0 flex flex-col items-center justify-center p-4"
-              onClick={(e) => handleCategory(category.title, e)}
+              className="absolute inset-0 rounded-xl overflow-hidden border-2 border-[#b8860b]/30 
+                   transition-all group-hover:border-[#b8860b]/60"
             >
-              <div className="relative w-full h-64 overflow-hidden rounded-lg shadow-md">
-                <img
-                  src={category.image}
-                  alt={category.title}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-20 hover:bg-opacity-30 transition-all"></div>
-              </div>
+              <Image
+                src={category.image}
+                alt={category.title}
+                width={400}
+                height={400}
+                className="w-full h-full object-cover transform transition-all duration-500 
+                       group-hover:scale-105 saturate-90 group-hover:saturate-125"
+              />
+              <div
+                className="absolute inset-0 bg-gradient-to-t from-black via-transparent 
+                     to-transparent opacity-90"
+              />
+            </div>
 
-              <a
-                href={category.href}
-                className="mt-4 text-xl font-bold text-gray-800 hover:text-blue-600 transition-colors"
-                onClick={(e) => e.preventDefault()}
+            <div className="absolute bottom-0 left-0 right-0 p-4 text-center">
+              <span
+                className="text-xl font-bold bg-gradient-to-r from-[#b8860b] to-[#daa520] 
+                     bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
               >
                 {category.title}
-              </a>
+              </span>
             </div>
-          ))}
-        </div>
 
-        <button
-          onClick={nextSlide}
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 text-gray-800 p-3 rounded-full z-10 hover:bg-opacity-100 shadow-md transition-all"
-        >
-          &#10095;
-        </button>
-      </div>
-
-      <div className="relative w-20 h-1 mx-auto mt-3 bg-gray-300 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-black transition-all duration-50 ease-linear"
-          style={{ width: `${progress}%` }}
-        ></div>
+            {/* Gold hover overlay */}
+            <div
+              className="absolute inset-0 bg-[#b8860b]/10 group-hover:bg-[#b8860b]/20 
+                   transition-all rounded-xl"
+            />
+          </motion.div>
+        ))}
       </div>
     </div>
+      </motion.div>
   );
 };
 
-export default CategoryCarousel;
+export default ExploreGrid;

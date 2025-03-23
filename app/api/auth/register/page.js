@@ -74,31 +74,35 @@ const Register = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-center text-gray-800">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+      <div className="w-full max-w-md bg-gray-900 p-8 rounded-xl shadow-2xl border border-gray-800">
+        <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent mb-6">
           Create an Account
         </h2>
 
-        {error && <p className="text-red-500 text-center">{error}</p>}
+        {error && (
+          <p className="text-red-400 text-center bg-red-900/20 p-2 rounded-lg mb-4">
+            {error}
+          </p>
+        )}
 
         <button
           onClick={handleGoogleSignIn}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 py-2 px-4 mt-4 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition"
+          className="w-full flex items-center justify-center gap-2 py-2 px-4 mt-4 border border-gray-700 rounded-lg bg-gray-800 text-gray-200 hover:bg-gray-700 transition-all"
         >
           <FcGoogle className="text-xl" /> Sign up with Google
         </button>
 
-        <div className="flex items-center my-4">
-          <hr className="flex-grow border-gray-300" />
-          <span className="px-2 text-gray-500">OR</span>
-          <hr className="flex-grow border-gray-300" />
+        <div className="flex items-center my-6">
+          <hr className="flex-grow border-gray-700" />
+          <span className="px-2 text-gray-400">OR</span>
+          <hr className="flex-grow border-gray-700" />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-400 mb-2">
               Name
             </label>
             <input
@@ -107,12 +111,12 @@ const Register = () => {
               required
               value={formData.name}
               onChange={handleChange}
-              className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+              className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-400 mb-2">
               Gmail
             </label>
             <input
@@ -121,13 +125,13 @@ const Register = () => {
               required
               value={formData.email}
               onChange={handleChange}
-              className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+              className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               placeholder="example@gmail.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-400 mb-2">
               Password
             </label>
             <input
@@ -137,19 +141,19 @@ const Register = () => {
               minLength={6}
               value={formData.password}
               onChange={handleChange}
-              className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+              className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-400 mb-2">
               Register As
             </label>
             <select
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+              className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             >
               <option value="user">User</option>
               <option value="seller">Seller</option>
@@ -159,16 +163,16 @@ const Register = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all"
           >
             {loading ? "Registering..." : "Sign Up"}
           </button>
         </form>
 
-        <div className="text-center text-gray-600 mt-4">
+        <div className="text-center text-gray-400 mt-6">
           Already have an account?{" "}
           <div
-            className="text-blue-600 hover:underline hover:cursor-pointer"
+            className="text-blue-400 hover:text-blue-300 hover:underline cursor-pointer"
             onClick={() => router.push("/api/auth/signin")}
           >
             Login here

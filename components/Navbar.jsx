@@ -49,7 +49,12 @@ export default function Navbar({ user }) {
       router.push("/api/auth/signin");
     } else {
       if (window.innerWidth > 767) {
-        setIsDropdownOpen(!isDropdownOpen);
+        if (isDropdownOpen) {
+          setIsDropdownOpen(false);
+        } else {
+          setIsDropdownOpen(true);
+          setMobileMenuOpen(false);
+        }
       } else {
         router.push("/profile");
       }
@@ -130,6 +135,12 @@ export default function Navbar({ user }) {
       </div>
     );
   }
+
+  const handleProClick = (path) => {
+    setIsDropdownOpen(false);
+    setMobileMenuOpen(false);
+    router.push(path);
+  };
 
   return (
     <motion.nav
@@ -268,13 +279,16 @@ export default function Navbar({ user }) {
                           exit: { opacity: 0, y: -10 },
                         }}
                       >
-                        <Link
-                          href="/profile"
+                        <div
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleProClick("/profile");
+                          }}
                           className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                         >
                           <User className="w-4 h-4 mr-2" />
                           Profile
-                        </Link>
+                        </div>
                       </motion.li>
                       <motion.li
                         variants={{
@@ -283,13 +297,16 @@ export default function Navbar({ user }) {
                           exit: { opacity: 0, y: -10 },
                         }}
                       >
-                        <Link
-                          href="/profile/carts"
+                        <div
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleProClick("/profile/carts");
+                          }}
                           className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                         >
                           <ShoppingCart className="w-4 h-4 mr-2" />
                           Cart
-                        </Link>
+                        </div>
                       </motion.li>
                       <motion.li
                         variants={{
@@ -298,13 +315,16 @@ export default function Navbar({ user }) {
                           exit: { opacity: 0, y: -10 },
                         }}
                       >
-                        <Link
-                          href="/profile/orders"
+                        <div
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleProClick("/profile/orders");
+                          }}
                           className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                         >
                           <Package className="w-4 h-4 mr-2" />
                           Orders
-                        </Link>
+                        </div>
                       </motion.li>
                       <motion.li
                         variants={{
@@ -313,13 +333,16 @@ export default function Navbar({ user }) {
                           exit: { opacity: 0, y: -10 },
                         }}
                       >
-                        <Link
-                          href="/profile/wishlist"
+                        <div
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleProClick("/profile/wishlist");
+                          }}
                           className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                         >
                           <Heart className="w-4 h-4 mr-2" />
                           Wishlist
-                        </Link>
+                        </div>
                       </motion.li>
                       <motion.li
                         variants={{
@@ -327,15 +350,7 @@ export default function Navbar({ user }) {
                           visible: { opacity: 1, y: 0 },
                           exit: { opacity: 0, y: -10 },
                         }}
-                      >
-                        <Link
-                          href="/profile/coupons"
-                          className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
-                        >
-                          <Tag className="w-4 h-4 mr-2" />
-                          Coupons
-                        </Link>
-                      </motion.li>
+                      ></motion.li>
                       <motion.li
                         variants={{
                           hidden: { opacity: 0, y: -10 },
@@ -343,13 +358,13 @@ export default function Navbar({ user }) {
                           exit: { opacity: 0, y: -10 },
                         }}
                       >
-                        <Link
+                        <div
                           href="/profile/settings"
                           className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                         >
                           <Settings className="w-4 h-4 mr-2" />
                           Settings
-                        </Link>
+                        </div>
                       </motion.li>
                     </motion.ul>
                   </motion.div>
@@ -435,13 +450,16 @@ export default function Navbar({ user }) {
                   exit: { opacity: 0, y: 0 },
                 }}
               >
-                <Link
-                  href="/"
+                <div
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleProClick("/categories");
+                  }}
                   className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                 >
                   <LayoutGrid className="w-4 h-4 mr-2" />
                   Categories
-                </Link>
+                </div>
               </motion.li>
               <motion.li
                 variants={{
@@ -450,13 +468,16 @@ export default function Navbar({ user }) {
                   exit: { opacity: 0, y: 0 },
                 }}
               >
-                <Link
-                  href="/"
+                <div
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleProClick("/coupons");
+                  }}
                   className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                 >
                   <Tag className="w-4 h-4 mr-2" />
                   Coupons
-                </Link>
+                </div>
               </motion.li>
               <motion.li
                 variants={{
@@ -465,13 +486,16 @@ export default function Navbar({ user }) {
                   exit: { opacity: 0, y: 0 },
                 }}
               >
-                <Link
-                  href="/"
+                <div
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleProClick("/sell");
+                  }}
                   className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                 >
                   <IndianRupee className="w-4 h-4 mr-2" />
                   Sell
-                </Link>
+                </div>
               </motion.li>
               <motion.li
                 variants={{
@@ -480,13 +504,16 @@ export default function Navbar({ user }) {
                   exit: { opacity: 0, y: 0 },
                 }}
               >
-                <Link
-                  href="/"
+                <div
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleProClick("/help");
+                  }}
                   className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                 >
                   <HelpCircle className="w-4 h-4 mr-2" />
                   Help Center
-                </Link>
+                </div>
               </motion.li>
               <motion.li
                 variants={{

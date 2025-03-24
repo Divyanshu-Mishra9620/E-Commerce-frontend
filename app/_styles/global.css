@@ -218,3 +218,8 @@ input[type="range"]::-webkit-slider-thumb {
 .backdrop-blur-xl {
   backdrop-filter: blur(20px);
 }
+@layer utilities {
+  .tracking-super {
+    letter-spacing: 0.2em;
+  }
+}

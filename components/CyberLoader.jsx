@@ -40,7 +40,6 @@ const CyberLoader = () => {
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-gray-900 backdrop-blur-xl">
       <div className="relative flex items-center justify-center">
-        {/* Main loader dashes */}
         {[0, 1, 2, 3].map((i) => (
           <motion.div
             key={i}
@@ -58,7 +57,6 @@ const CyberLoader = () => {
           />
         ))}
 
-        {/* Particle effects */}
         <div className="absolute inset-0">
           {particles.current.map((_, i) => (
             <motion.div
@@ -75,7 +73,6 @@ const CyberLoader = () => {
           ))}
         </div>
 
-        {/* Central core */}
         <motion.div
           className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-fuchsia-600 rounded-full shadow-2xl shadow-cyan-300/50"
           animate={{

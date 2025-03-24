@@ -70,6 +70,7 @@ const BottomNavigation = () => {
         <div className="flex justify-around items-center p-2">
           {navItems.map((item, index) => (
             <div
+              key={index}
               className="relative flex flex-col items-center group px-1 py-2"
               onClick={() => handleClick(item.href)}
             >
@@ -101,7 +102,6 @@ const BottomNavigation = () => {
         </div>
       </motion.div>
 
-      {/* Loading overlay */}
       <AnimatePresence>
         {isLoading && (
           <motion.div

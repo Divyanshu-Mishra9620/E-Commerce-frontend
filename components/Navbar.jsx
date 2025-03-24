@@ -21,6 +21,7 @@ import { signOut, useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import "@/app/_styles/global.css";
 import { useCart } from "@/context/CartContext";
+import Image from "next/image";
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 export default function Navbar({ user }) {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
@@ -33,6 +34,7 @@ export default function Navbar({ user }) {
   const { data: session } = useSession();
 
   const [query, setQuery] = React.useState("");
+  const [isSearching, setIsSearching] = React.useState(false);
   const router = useRouter();
 
   const { cartItems } = useCart();
@@ -54,12 +56,17 @@ export default function Navbar({ user }) {
     }
   };
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
-    if (query.trim()) {
+    if (!query.trim()) return;
+
+    setIsSearching(true);
+    try {
       router.push(`/search?q=${encodeURIComponent(query)}`);
+    } finally {
+      setIsSearching(false);
+      setQuery("");
     }
-    setQuery("");
   };
 
   const handleCartClick = (e) => {
@@ -105,6 +112,23 @@ export default function Navbar({ user }) {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     await signOut({ callbackUrl: "/api/auth/signin" });
+  }
+
+  if (isSearching) {
+    return (
+      <div className="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center">
+        <Image
+          src="/search.gif"
+          alt="Loading..."
+          width={200}
+          height={200}
+          priority
+          unoptimized
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-gray-800 opacity-30 mix-blend-multiply" />
+      </div>
+    );
   }
 
   return (
@@ -245,6 +269,21 @@ export default function Navbar({ user }) {
                         }}
                       >
                         <Link
+                          href="/profile"
+                          className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                        >
+                          <User className="w-4 h-4 mr-2" />
+                          Profile
+                        </Link>
+                      </motion.li>
+                      <motion.li
+                        variants={{
+                          hidden: { opacity: 0, y: -10 },
+                          visible: { opacity: 1, y: 0 },
+                          exit: { opacity: 0, y: -10 },
+                        }}
+                      >
+                        <Link
                           href="/profile/carts"
                           className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                         >
@@ -280,21 +319,6 @@ export default function Navbar({ user }) {
                         >
                           <Heart className="w-4 h-4 mr-2" />
                           Wishlist
-                        </Link>
-                      </motion.li>
-                      <motion.li
-                        variants={{
-                          hidden: { opacity: 0, y: -10 },
-                          visible: { opacity: 1, y: 0 },
-                          exit: { opacity: 0, y: -10 },
-                        }}
-                      >
-                        <Link
-                          href="/profile"
-                          className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
-                        >
-                          <User className="w-4 h-4 mr-2" />
-                          Profile
                         </Link>
                       </motion.li>
                       <motion.li

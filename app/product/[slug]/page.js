@@ -22,6 +22,7 @@ export default function ProductPage() {
   const [product, setProduct] = useState(null);
   const { products, isLoading } = useContext(ProductContext);
   const [expandedSection, setExpandedSection] = useState(null);
+  const [loader, setLoader] = useState(true);
 
   const toggleSection = (section) => {
     setExpandedSection(expandedSection === section ? null : section);
@@ -40,17 +41,17 @@ export default function ProductPage() {
 
   useEffect(() => {
     const fetchProductData = async () => {
-      const storedProduct = JSON.parse(
-        localStorage.getItem("lastVisitedProduct")
-      );
-      if (storedProduct && storedProduct.uniq_id === slug) {
-        console.log(storedProduct);
-
-        setProduct(storedProduct);
-        return;
-      }
-
       try {
+        const storedProduct = JSON.parse(
+          localStorage.getItem("lastVisitedProduct")
+        );
+        if (storedProduct && storedProduct.uniq_id === slug) {
+          console.log(storedProduct);
+
+          setProduct(storedProduct);
+          return;
+        }
+
         const foundProduct = products.find((p) => p.uniq_id === slug);
         if (foundProduct) {
           foundProduct.image = foundProduct.image
@@ -70,6 +71,8 @@ export default function ProductPage() {
         }
       } catch (error) {
         console.error("Error fetching product:", error);
+      } finally {
+        setLoader(false);
       }
     };
 
@@ -257,17 +260,24 @@ export default function ProductPage() {
         };
       }) || [];
 
-  console.log(similarProducts);
-
-  if (isLoading) {
+  if (isLoading || loader) {
     return (
-      <div className="container mx-auto p-6 text-center">
-        <h1 className="text-2xl font-bold">Loading...</h1>
+      <div className="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center">
+        <Image
+          src="/underConstruction.gif"
+          alt="Loading..."
+          width={200}
+          height={200}
+          priority
+          unoptimized
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-gray-800 opacity-30 mix-blend-multiply" />
       </div>
     );
   }
 
-  if (!product) {
+  if (!product && !loader && !isLoading) {
     return (
       <div className="container mx-auto p-6 text-center">
         <h1 className="text-2xl font-bold">Product Not Found</h1>

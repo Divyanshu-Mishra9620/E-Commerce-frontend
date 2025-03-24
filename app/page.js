@@ -8,19 +8,28 @@ import Deals from "@/components/Deals";
 import WishlistSection from "@/components/Wishlist";
 import MostVisitedSection from "@/components/MostVisitedSection";
 import Footer from "@/components/Footer";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import ProductContext from "@/context/ProductContext";
-import SkeletonLoader from "@/components/SkeletonLoader";
+// import CyberLoader from "@/components/CyberLoader";
+import Image from "next/image";
 
 export default function Page() {
   const { products, isLoading, error } = useContext(ProductContext);
-
+  const [showLoader, setShowLoader] = useState(true);
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
     restDelta: 0.001,
   });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLoader(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
   if (error) {
     return (
@@ -34,6 +43,27 @@ export default function Page() {
     );
   }
 
+  // Show loader if either loading or within first 5 seconds
+  if (showLoader || isLoading) {
+    return (
+      // <div className="min-h-screen">
+      //   <CyberLoader />
+      // </div> (
+      <div className="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center">
+        <Image
+          src="/underConstruction.gif"
+          alt="Loading..."
+          width={200}
+          height={200}
+          priority
+          unoptimized
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-gray-800 opacity-30 mix-blend-multiply" />
+      </div>
+    );
+  }
+
   return (
     <div>
       <motion.div
@@ -42,49 +72,37 @@ export default function Page() {
       />
 
       <main>
-        {isLoading ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="container mx-auto px-4 sm:px-6 lg:px-8 py-8"
-          >
-            <SkeletonLoader />
-          </motion.div>
-        ) : (
-          <>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <FlashSale />
-            </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <FlashSale />
+        </motion.div>
 
-            <SectionWrapper>
-              <Hero products={products} />
-            </SectionWrapper>
+        <SectionWrapper>
+          <Hero products={products} />
+        </SectionWrapper>
 
-            <SectionWrapper delay={0.2}>
-              <Explore />
-            </SectionWrapper>
+        <SectionWrapper delay={0.2}>
+          <Explore />
+        </SectionWrapper>
 
-            <SectionWrapper delay={0.3}>
-              <BestDeals products={products} />
-            </SectionWrapper>
+        <SectionWrapper delay={0.3}>
+          <BestDeals products={products} />
+        </SectionWrapper>
 
-            <SectionWrapper delay={0.4}>
-              <Deals products={products} />
-            </SectionWrapper>
+        <SectionWrapper delay={0.4}>
+          <Deals products={products} />
+        </SectionWrapper>
 
-            <SectionWrapper delay={0.5}>
-              <WishlistSection />
-            </SectionWrapper>
+        <SectionWrapper delay={0.5}>
+          <WishlistSection />
+        </SectionWrapper>
 
-            <SectionWrapper delay={0.6}>
-              <MostVisitedSection products={products} />
-            </SectionWrapper>
-          </>
-        )}
+        <SectionWrapper delay={0.6}>
+          <MostVisitedSection products={products} />
+        </SectionWrapper>
       </main>
 
       <motion.div

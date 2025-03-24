@@ -215,13 +215,6 @@ export default function SignIn() {
         </form>
 
         <div className="flex flex-col items-center gap-3 mt-6 text-gray-400">
-          <Link
-            href="/api/forgot-password"
-            className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
-          >
-            Forgot password?
-          </Link>
-
           <div className="flex items-center gap-2">
             <span>Don't have an account?</span>
             <Link

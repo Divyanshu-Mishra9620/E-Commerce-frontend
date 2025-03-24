@@ -197,10 +197,24 @@ body {
   border-radius: 50%;
 }
 
-input:checked + .slider {
-  background-color: #2563eb;
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: black;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.dark input[type="range"]::-webkit-slider-thumb {
+  background: white;
 }
 
-input:checked + .slider:before {
-  transform: translateX(20px);
+.shadow-glow {
+  box-shadow: 0 0 20px rgba(255, 44, 189, 0.5), 0 0 40px rgba(255, 44, 189, 0.3),
+    0 0 60px rgba(255, 44, 189, 0.2);
+}
+
+.backdrop-blur-xl {
+  backdrop-filter: blur(20px);
 }

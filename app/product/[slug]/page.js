@@ -1,4 +1,5 @@
 "use client";
+
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState, useRef, useContext } from "react";
 import "@/app/_styles/global.css";
@@ -16,6 +17,7 @@ export default function ProductPage() {
   const slug = params.slug;
   const router = useRouter();
   const containerRef = useRef(null);
+
   const [qty, setQty] = useState(0);
   const [user, setUser] = useState(null);
   const [isInWishlist, setIsInWishlist] = useState(false);
@@ -46,8 +48,6 @@ export default function ProductPage() {
           localStorage.getItem("lastVisitedProduct")
         );
         if (storedProduct && storedProduct.uniq_id === slug) {
-          console.log(storedProduct);
-
           setProduct(storedProduct);
           return;
         }
@@ -55,13 +55,15 @@ export default function ProductPage() {
         const foundProduct = products.find((p) => p.uniq_id === slug);
         if (foundProduct) {
           foundProduct.image = foundProduct.image
-            .replace(/\s+/g, "")
+            ?.replace(/\s+/g, "")
             .replace(/[\[\]]/g, "");
           foundProduct.description = foundProduct.description
-            .replace(/\s+/g, "")
+            ?.replace(/\s+/g, "")
             .replace(/[\[\]]/g, "");
-          if (foundProduct.image.length < 20)
+
+          if (foundProduct.image.length < 20) {
             foundProduct.image = foundProduct.description;
+          }
 
           setProduct(foundProduct);
           localStorage.setItem(
@@ -177,7 +179,6 @@ export default function ProductPage() {
         const updatedCartItem = data.cart.items.find(
           (item) => item.product === product._id
         );
-        console.log(updatedCartItem, "updated cart");
 
         if (updatedCartItem) {
           setQty(updatedCartItem.quantity);
@@ -250,10 +251,7 @@ export default function ProductPage() {
       })
       .slice(0, 20)
       .map((prod) => {
-        const imageUrl = (prod.image = prod.image
-          .replace(/\s+/g, "")
-          .replace(/[\[\]]/g, ""));
-
+        const imageUrl = prod.image?.replace(/\s+/g, "").replace(/[\[\]]/g, "");
         return {
           ...prod,
           image: imageUrl,
@@ -294,8 +292,8 @@ export default function ProductPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 mt-10">
-        <div className="container mx-auto px-4 py-12">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 mt-10 px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto py-12">
           <div className="grid md:grid-cols-2 gap-8">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -321,12 +319,14 @@ export default function ProductPage() {
               className="space-y-8"
             >
               <div>
-                <h1 className="text-4xl font-bold mb-4">
+                <h1 className="text-3xl sm:text-4xl font-bold mb-4">
                   {product.product_name}
                 </h1>
-                <p className="text-gray-400 text-lg">{product.description}</p>
+                <p className="text-gray-400 text-base sm:text-lg">
+                  {product.description}
+                </p>
                 <div className="mt-6 flex items-center gap-4">
-                  <span className="text-3xl font-bold bg-gradient-to-r from-gray-100 to-gray-300 bg-clip-text text-transparent">
+                  <span className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-100 to-gray-300 bg-clip-text text-transparent">
                     ₹{product.discounted_price}
                   </span>
                   <span className="text-gray-400 line-through">
@@ -340,7 +340,9 @@ export default function ProductPage() {
                   onClick={() => toggleSection("about")}
                   className="flex items-center justify-between w-full group"
                 >
-                  <h3 className="text-xl font-semibold">Product Details</h3>
+                  <h3 className="text-lg sm:text-xl font-semibold">
+                    Product Details
+                  </h3>
                   <ChevronDown
                     className={`w-6 h-6 transition-transform ${
                       expandedSection === "about" ? "rotate-180" : ""
@@ -358,7 +360,7 @@ export default function ProductPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <span className="text-gray-400">Category:</span>
-                          <p>{product.category}</p>
+                          <p>{product.category || "N/A"}</p>
                         </div>
                         <div>
                           <span className="text-gray-400">Brand:</span>
@@ -368,9 +370,13 @@ export default function ProductPage() {
                       <div>
                         <span className="text-gray-400">Specifications:</span>
                         <ul className="list-disc pl-6 mt-2">
-                          {product.specifications?.map((spec, i) => (
-                            <li key={i}>{spec}</li>
-                          )) || "No specifications available"}
+                          {product.specifications?.length > 0 ? (
+                            product.specifications.map((spec, i) => (
+                              <li key={i}>{spec}</li>
+                            ))
+                          ) : (
+                            <li>No specifications available</li>
+                          )}
                         </ul>
                       </div>
                     </motion.div>
@@ -378,15 +384,25 @@ export default function ProductPage() {
                 </AnimatePresence>
               </div>
 
-              <div className="flex gap-4 mt-8">
+              <div className="flex gap-4 mt-8 flex-wrap">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex-1 bg-gradient-to-r from-gray-700 to-gray-600 px-8 py-4 rounded-xl font-semibold hover:from-gray-600 hover:to-gray-500 transition-all"
+                  className="
+                    flex-1
+                    bg-gradient-to-r from-gray-700 to-gray-600
+                    px-8 py-4
+                    rounded-xl
+                    font-semibold
+                    hover:from-gray-600 hover:to-gray-500
+                    transition-all
+                    min-w-[150px]
+                  "
                   onClick={() => handleCartClick(qty === 0 ? 1 : 0)}
                 >
                   {qty === 0 ? "Add to Cart" : "Update Cart"}
                 </motion.button>
+
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -423,8 +439,11 @@ export default function ProductPage() {
             </motion.div>
           </div>
 
+          {/* Similar Products */}
           <div className="mt-16">
-            <h2 className="text-3xl font-bold mb-8">Similar Products</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-8">
+              Similar Products
+            </h2>
             <div className="relative group">
               <div
                 ref={containerRef}
@@ -434,14 +453,23 @@ export default function ProductPage() {
                   <motion.div
                     key={product.uniq_id}
                     whileHover={{ scale: 1.02 }}
-                    className="flex-shrink-0 w-72 bg-gray-800 rounded-xl p-4 hover:shadow-xl transition-all"
+                    className="
+                      flex-shrink-0
+                      w-60
+                      sm:w-72
+                      bg-gray-800
+                      rounded-xl
+                      p-4
+                      hover:shadow-xl
+                      transition-all
+                    "
                   >
                     <Image
                       src={product.image}
                       alt={product.product_name}
                       width={400}
                       height={400}
-                      className="w-full h-48 object-cover rounded-lg"
+                      className="w-full h-44 sm:h-48 object-cover rounded-lg"
                     />
                     <div className="mt-4">
                       <h3 className="text-lg font-semibold truncate">

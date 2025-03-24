@@ -53,7 +53,7 @@ export default function FlashSale() {
           <AnimatePresence>
             {isContentVisible && (
               <motion.div
-                className="fixed right-24 top-1/2 transform -translate-y-1/2 w-[90vw] max-w-md bg-gradient-to-r from-black to-gray-900 text-white rounded-lg shadow-xl p-6 flex flex-col items-center gap-4"
+                className="fixed right-24 top-1/2 transform -translate-y-1/2 w-[80vw] max-w-md bg-gradient-to-r from-black to-gray-900 text-white rounded-lg shadow-xl p-6 flex flex-col items-center gap-4"
                 initial={{ opacity: 0, x: 100 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 100 }}

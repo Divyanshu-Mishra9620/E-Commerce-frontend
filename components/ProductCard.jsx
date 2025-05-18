@@ -2,22 +2,25 @@
 import { useWishlist } from "@/context/WishlistContext";
 import Image from "next/image";
 import { FaHeart } from "react-icons/fa";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import Spinner from "./Spinner";
 
 const ProductCard = ({ product, showBadge = false, badgeText = "" }) => {
   const router = useRouter();
   const { wishlistItems, removeItem, addToWishlist } = useWishlist();
 
   const [isUpdating, setIsUpdating] = useState(false);
-
+  const [isPending, startTransition] = useTransition();
   const inWishlist = wishlistItems?.some(
     (item) => item?.product._id === product._id
   );
 
   const handleCardClick = () => {
-    router.push(`/product/${product.uniq_id}`);
+    startTransition(() => {
+      router.push(`/product/${product.uniq_id}`);
+    });
   };
 
   const handleHeart = async (e) => {
@@ -41,6 +44,14 @@ const ProductCard = ({ product, showBadge = false, badgeText = "" }) => {
       setIsUpdating(false);
     }
   };
+
+  if (isPending) {
+    return (
+      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
+        <Spinner size="md" />
+      </div>
+    );
+  }
 
   return (
     <div

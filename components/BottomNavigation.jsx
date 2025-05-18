@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useTransition } from "react";
 import {
   ShoppingCart,
   Heart,
@@ -11,15 +11,16 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
+import Spinner from "./Spinner";
 
 const BottomNavigation = () => {
   const pathname = usePathname();
   const [visible, setVisible] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
 
   const lastScrollY = useRef(0);
   const isActive = (href) => pathname === href;
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   const handleScroll = () => {
     const currentScrollY = window.scrollY;
@@ -36,18 +37,10 @@ const BottomNavigation = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [visible]);
 
-  useEffect(() => {
-    setIsLoading(false);
-  }, [pathname]);
-
   const handleClick = async (href) => {
-    try {
-      setIsLoading(true);
+    startTransition(() => {
       router.push(`${href}`);
-    } catch (error) {
-    } finally {
-      setIsLoading(false);
-    }
+    });
   };
 
   const navItems = [
@@ -102,30 +95,11 @@ const BottomNavigation = () => {
         </div>
       </motion.div>
 
-      <AnimatePresence>
-        {isLoading && (
-          <motion.div
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[999] flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div className="text-center">
-              <Image
-                src="/underConstruction.gif"
-                alt="Loading..."
-                width={200}
-                height={200}
-                priority
-                unoptimized
-                className="filter grayscale brightness-75 contrast-125"
-              />
-              <p className="text-gray-300 mt-4 text-sm">Loading page...</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isPending && (
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
+          <Spinner size="md" />
+        </div>
+      )}
     </>
   );
 };

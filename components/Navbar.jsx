@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Menu,
@@ -21,28 +20,31 @@ import { signOut, useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import "@/app/_styles/global.css";
 import { useCart } from "@/context/CartContext";
-import Image from "next/image";
-const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
-export default function Navbar({ user }) {
+import { useRouter } from "next/navigation";
+import Spinner from "./Spinner";
+export default function Navbar(user) {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isVisible, setIsVisible] = React.useState(true);
   const [lastScrollY, setLastScrollY] = React.useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const [isSearchFocused, setIsSearchFocused] = React.useState(false);
-
+  const [isAdmin, setIsAdmin] = React.useState(false);
   const { data: session } = useSession();
 
-  const [query, setQuery] = React.useState("");
-  const [isSearching, setIsSearching] = React.useState(false);
-  const router = useRouter();
-
   const { cartItems } = useCart();
-
   const cartItemLength = cartItems.reduce(
     (acc, item) => acc + item.quantity,
     0
   );
+
+  React.useEffect(() => {
+    if (user?.user?.role === "admin") {
+      setIsAdmin(true);
+    } else {
+      setIsAdmin(false);
+    }
+  }, [user]);
 
   const handleUserIconClick = () => {
     if (!session) {
@@ -60,24 +62,29 @@ export default function Navbar({ user }) {
       }
     }
   };
+  const [isPending, startTransition] = React.useTransition();
+  const [query, setQuery] = React.useState("");
+  const router = useRouter();
 
-  const handleSearch = async (e) => {
+  const handleSearch = (e) => {
     e.preventDefault();
     if (!query.trim()) return;
-
-    setIsSearching(true);
-    try {
+    startTransition(() => {
       router.push(`/search?q=${encodeURIComponent(query)}`);
-    } finally {
-      setIsSearching(false);
-      setQuery("");
-    }
+    });
+    setQuery("");
   };
 
   const handleCartClick = (e) => {
     e.preventDefault();
-    if (user) router.push("/profile/carts");
-    else router.push("/api/auth/signin");
+    if (user)
+      startTransition(() => {
+        router.push("/profile/carts");
+      });
+    else
+      startTransition(() => {
+        router.push("/api/auth/signin");
+      });
   };
 
   React.useEffect(() => {
@@ -119,27 +126,12 @@ export default function Navbar({ user }) {
     await signOut({ callbackUrl: "/api/auth/signin" });
   }
 
-  if (isSearching) {
-    return (
-      <div className="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center">
-        <Image
-          src="/search.gif"
-          alt="Loading..."
-          width={200}
-          height={200}
-          priority
-          unoptimized
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-gray-800 opacity-30 mix-blend-multiply" />
-      </div>
-    );
-  }
-
   const handleProClick = (path) => {
     setIsDropdownOpen(false);
     setMobileMenuOpen(false);
-    router.push(path);
+    startTransition(() => {
+      router.push(path);
+    });
   };
 
   return (
@@ -221,6 +213,11 @@ export default function Navbar({ user }) {
             >
               <Search size={18} />
             </button>
+            {isPending && (
+              <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+                <Spinner size="md" />
+              </div>
+            )}
           </form>
         </div>
 
@@ -233,6 +230,15 @@ export default function Navbar({ user }) {
               transition={{ duration: 0.2 }}
               className="flex items-center space-x-4"
             >
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="text-gray-200 hover:text-white transition-colors duration-200 font-semibold border border-white px-3 py-1 rounded-md"
+                >
+                  Admin
+                </Link>
+              )}
+
               <div className="relative user-dropdown hidden md:block">
                 <button
                   onClick={handleUserIconClick}
@@ -262,6 +268,7 @@ export default function Navbar({ user }) {
                         },
                         exit: {
                           opacity: 0,
+
                           transition: {
                             staggerChildren: 0.05,
                             staggerDirection: -1,
@@ -279,6 +286,11 @@ export default function Navbar({ user }) {
                           exit: { opacity: 0, y: -10 },
                         }}
                       >
+                        {isPending && (
+                          <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+                            <Spinner size="md" />
+                          </div>
+                        )}
                         <div
                           onClick={(e) => {
                             e.preventDefault();
@@ -443,6 +455,27 @@ export default function Navbar({ user }) {
               animate="visible"
               exit="exit"
             >
+              {isAdmin && (
+                <motion.li
+                  variants={{
+                    hidden: { opacity: 0, y: -10 },
+                    visible: { opacity: 1, y: 0 },
+                    exit: { opacity: 0, y: 0 },
+                  }}
+                >
+                  <div
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleProClick("/admin");
+                    }}
+                    className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Admin Dashboard
+                  </div>
+                </motion.li>
+              )}
+
               <motion.li
                 variants={{
                   hidden: { opacity: 0, y: -10 },

@@ -9,9 +9,10 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
-import { Info, Loader2 } from "lucide-react";
+import { Info } from "lucide-react";
 import { motion } from "framer-motion";
 import { useDragScroll } from "@/hooks/useDragScroll";
+import Spinner from "./Spinner";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
@@ -104,7 +105,7 @@ export default function OrderCarousel() {
       </h2>
       {loadingOrders ? (
         <div className="flex justify-center items-center py-8">
-          <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+          <Spinner className="w-8 h-8 text-gray-400 animate-spin" />
         </div>
       ) : errorOrders ? (
         <p className="text-red-400 text-center">{errorOrders}</p>
@@ -182,7 +183,7 @@ export default function OrderCarousel() {
       </h2>
       {loadingReviews ? (
         <div className="flex justify-center items-center py-8">
-          <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+          <Spinner className="w-8 h-8 text-gray-400 animate-spin" />
         </div>
       ) : errorReviews ? (
         <p className="text-red-400 text-center">{errorReviews}</p>

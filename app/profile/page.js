@@ -1,12 +1,12 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import OrderCarousel from "@/components/OrderCarousel";
-import { Loader2, MapPin, User } from "lucide-react";
+import { MapPin, User } from "lucide-react";
 import "@/app/_styles/global.css";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import Image from "next/image";
+import CyberLoader from "@/components/CyberLoader";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
@@ -20,15 +20,6 @@ export default function Profile() {
     postalCode: "",
   });
   const [loading, setLoading] = useState(false);
-  const [showLoader, setShowLoader] = useState(true);
-
-  const timerRef = useRef();
-
-  useEffect(() => {
-    timerRef.current = setTimeout(() => {
-      setShowLoader(false);
-    }, 3000);
-  }, []);
 
   const [user, setUser] = useState(null);
   const router = useRouter();
@@ -72,19 +63,8 @@ export default function Profile() {
   return (
     <>
       <Navbar />
-      {showLoader || loading ? (
-        <div className="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center">
-          <Image
-            src="/underConstruction.gif"
-            alt="Loading..."
-            width={200}
-            height={200}
-            priority
-            unoptimized
-            sizes="100vw"
-          />
-          <div className="absolute inset-0 bg-gray-800 opacity-30 mix-blend-multiply" />
-        </div>
+      {loading ? (
+        <CyberLoader />
       ) : (
         <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-7xl mt-8">

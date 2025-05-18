@@ -1,7 +1,13 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import React, { useEffect, useState, useRef, useContext } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useContext,
+  useTransition,
+} from "react";
 import "@/app/_styles/global.css";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, ChevronDown } from "lucide-react";
@@ -9,6 +15,7 @@ import ReviewSection from "@/components/ReviewSection";
 import ProductContext from "@/context/ProductContext";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
+import CyberLoader from "@/components/CyberLoader";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
@@ -257,22 +264,15 @@ export default function ProductPage() {
           image: imageUrl,
         };
       }) || [];
+  const [isPending, startTransition] = useTransition();
+  const handleView = (uniq_id) => {
+    startTransition(() => {
+      router.push(`/product/${uniq_id}`);
+    });
+  };
 
   if (isLoading || loader) {
-    return (
-      <div className="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center">
-        <Image
-          src="/underConstruction.gif"
-          alt="Loading..."
-          width={200}
-          height={200}
-          priority
-          unoptimized
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-gray-800 opacity-30 mix-blend-multiply" />
-      </div>
-    );
+    return <CyberLoader />;
   }
 
   if (!product && !loader && !isLoading) {
@@ -464,6 +464,7 @@ export default function ProductPage() {
                       transition-all
                     "
                   >
+                    {isPending && <CyberLoader />}
                     <Image
                       src={product.image}
                       alt={product.product_name}
@@ -479,9 +480,7 @@ export default function ProductPage() {
                         ₹{product.discounted_price}
                       </p>
                       <button
-                        onClick={() =>
-                          router.push(`/product/${product.uniq_id}`)
-                        }
+                        onClick={() => handleView(product.uniq_id)}
                         className="mt-4 w-full py-2 bg-gray-700 rounded-lg hover:bg-gray-600"
                       >
                         View Product

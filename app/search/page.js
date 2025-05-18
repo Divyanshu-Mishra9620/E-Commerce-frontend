@@ -1,12 +1,19 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { Suspense, useContext, useEffect, useState } from "react";
+import React, {
+  Suspense,
+  useContext,
+  useEffect,
+  useState,
+  useTransition,
+} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductContext from "@/context/ProductContext";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import { SlidersHorizontal, X, ArrowUpDown, Check, Star } from "lucide-react";
+import Spinner from "@/components/Spinner";
 
 const SearchPageContent = () => {
   const searchParams = useSearchParams();
@@ -14,19 +21,18 @@ const SearchPageContent = () => {
   const [prods, setProds] = useState([]);
   const [loader, setLoader] = useState(false);
 
-  // Filter and Sort States
   const [sortOrder, setSortOrder] = useState("none");
-  const [minPrice, setMinPrice] = useState(""); // slider + manual
-  const [maxPrice, setMaxPrice] = useState(""); // slider + manual
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
-  const [productLoader, setProductLoader] = useState(false);
 
   const query = searchParams.get("q") || "";
   const { products, isLoading } = useContext(ProductContext) || {
     products: [],
     isLoading: false,
   };
+  const [isPending, startTransition] = useTransition();
 
   const sortOptions = [
     { value: "none", label: "Relevance" },
@@ -34,7 +40,6 @@ const SearchPageContent = () => {
     { value: "highToLow", label: "Price: High to Low" },
   ];
 
-  // Main Filtering + Sorting Effect
   useEffect(() => {
     const fetchAndFilterProducts = async () => {
       if (!query) {
@@ -44,11 +49,9 @@ const SearchPageContent = () => {
       setLoader(true);
 
       try {
-        // Convert query to lowercase + split by whitespace
         const decodedQuery = decodeURIComponent(query).toLowerCase().trim();
         const searchTerms = decodedQuery.split(/\s+/);
 
-        // Filter by search terms
         let filteredProducts = products?.filter((product) => {
           product.image = product.image
             ?.replace(/\s+/g, "")
@@ -74,25 +77,21 @@ const SearchPageContent = () => {
           );
         });
 
-        // Parse numeric values from minPrice and maxPrice
         const parsedMin = parseFloat(minPrice);
         const parsedMax = parseFloat(maxPrice);
 
-        // Filter by minPrice if valid
         if (!isNaN(parsedMin)) {
           filteredProducts = filteredProducts.filter(
             (p) => parseFloat(p.discounted_price) >= parsedMin
           );
         }
 
-        // Filter by maxPrice if valid
         if (!isNaN(parsedMax)) {
           filteredProducts = filteredProducts.filter(
             (p) => parseFloat(p.discounted_price) <= parsedMax
           );
         }
 
-        // Apply Sorting
         if (sortOrder === "lowToHigh") {
           filteredProducts.sort(
             (a, b) =>
@@ -118,22 +117,6 @@ const SearchPageContent = () => {
     fetchAndFilterProducts();
   }, [query, products, sortOrder, minPrice, maxPrice]);
 
-  if (productLoader) {
-    return (
-      <div className="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center">
-        <Image
-          src="/underConstruction.gif"
-          alt="Loading..."
-          width={200}
-          height={200}
-          priority
-          unoptimized
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-gray-800 opacity-30 mix-blend-multiply" />
-      </div>
-    );
-  }
   // Clear all filters
   const clearFilters = () => {
     setSortOrder("none");
@@ -141,16 +124,18 @@ const SearchPageContent = () => {
     setMaxPrice("");
   };
 
-  const handleProdClick = async (product) => {
-    setProductLoader(true);
-    try {
+  const handleProdClick = (product) => {
+    startTransition(() => {
       router.push(`/product/${product.uniq_id}`);
-    } catch (error) {
-      console.error("Error loading Product", error);
-    } finally {
-      setProductLoader(false);
-    }
+    });
   };
+  if (isPending) {
+    return (
+      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
+        <Spinner size="md" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -181,9 +166,7 @@ const SearchPageContent = () => {
             </div>
           </motion.div>
 
-          {/* Filter/Sort Controls */}
           <div className="flex items-center gap-3 mb-8">
-            {/* Sort Dropdown */}
             <div className="relative">
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -280,13 +263,11 @@ const SearchPageContent = () => {
                   </div>
 
                   <div className="space-y-6">
-                    {/* Price Range */}
                     <div>
                       <h4 className="text-sm font-medium mb-4 dark:text-gray-300">
                         Price Range
                       </h4>
 
-                      {/* Manual Input Fields */}
                       <div className="flex items-center gap-4 mb-6">
                         <div className="w-1/2">
                           <label className="block text-xs font-semibold mb-1 dark:text-gray-300">
@@ -316,7 +297,6 @@ const SearchPageContent = () => {
                         </div>
                       </div>
 
-                      {/* Minimum Price Slider */}
                       <div className="mb-6">
                         <label className="block text-xs font-semibold mb-1 dark:text-gray-300">
                           Minimum Price
@@ -335,7 +315,6 @@ const SearchPageContent = () => {
                         </div>
                       </div>
 
-                      {/* Maximum Price Slider */}
                       <div>
                         <label className="block text-xs font-semibold mb-1 dark:text-gray-300">
                           Maximum Price
@@ -355,7 +334,6 @@ const SearchPageContent = () => {
                       </div>
                     </div>
 
-                    {/* Action Buttons */}
                     <div className="flex gap-3 border-t pt-6">
                       <motion.button
                         whileHover={{ scale: 1.02 }}

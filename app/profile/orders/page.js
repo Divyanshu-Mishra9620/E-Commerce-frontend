@@ -1,12 +1,13 @@
 "use client";
 import { ListFilter, X } from "lucide-react";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import "@/app/_styles/global.css";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import withAuth from "@/components/withAuth";
 import Navbar from "@/components/Navbar";
 import { motion, AnimatePresence } from "framer-motion";
+import CyberLoader from "@/components/CyberLoader";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
@@ -17,16 +18,6 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
-  const [showLoader, setShowLoader] = useState(false);
-
-  const timerRef = useRef();
-  useEffect(() => {
-    timerRef.current = setTimeout(() => {
-      setShowLoader(false);
-    }, 3000);
-
-    return () => clearTimeout(timerRef.current);
-  }, []);
 
   const router = useRouter();
   React.useEffect(() => {
@@ -90,19 +81,8 @@ const Orders = () => {
   return (
     <>
       <Navbar />
-      {showLoader || loading ? (
-        <div className="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center">
-          <Image
-            src="/underConstruction.gif"
-            alt="Loading..."
-            width={200}
-            height={200}
-            priority
-            unoptimized
-            sizes="100vw"
-          />
-          <div className="absolute inset-0 bg-gray-800 opacity-30 mix-blend-multiply" />
-        </div>
+      {loading ? (
+        <CyberLoader />
       ) : (
         <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-gray-100 mt-12">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-7xl">

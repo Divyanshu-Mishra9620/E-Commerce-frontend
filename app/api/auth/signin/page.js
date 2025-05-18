@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -25,7 +26,6 @@ export default function SignIn() {
       setError("");
 
       const result = await signIn("google", { redirect: false });
-      console.log("Google Sign-In Result:", result);
 
       if (result?.error) {
         setError(result.error);
@@ -58,6 +58,7 @@ export default function SignIn() {
           });
 
           const data = await response.json();
+          console.log(data, "signin");
 
           if (!response.ok) {
             setError(data.message || "Failed to save user to database");
@@ -67,7 +68,6 @@ export default function SignIn() {
           if (typeof window !== "undefined") {
             localStorage.setItem("user", JSON.stringify(data.user));
             localStorage.setItem("token", data.token);
-            console.log("Signed in with Google successfully ✅");
           }
 
           router.push("/");
@@ -89,19 +89,18 @@ export default function SignIn() {
     setError("");
 
     const payload = { email, password };
-    console.log("Sending Payload:", payload);
 
+    console.log(payload);
     try {
       const res = await fetch(`${BACKEND_URI}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
-      console.log("API Response:", data);
 
       if (!res.ok) {
         setError(data.message || "Something went wrong");
@@ -112,7 +111,6 @@ export default function SignIn() {
       if (typeof window !== "undefined") {
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("token", data.token);
-        console.log("Signed in successfully ✅");
       }
       await signIn("credentials", {
         redirect: false,

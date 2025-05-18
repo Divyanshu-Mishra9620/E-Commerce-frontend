@@ -58,7 +58,6 @@ const Register = () => {
       setError("");
 
       const result = await signIn("google", { redirect: false });
-      console.log("Google Sign-In Result:", result);
 
       if (result?.error) {
         setError(result.error);

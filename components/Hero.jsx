@@ -1,13 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Spinner from "./Spinner";
 
 const ProductCard = ({ image, product_name, discounted_price, uniq_id }) => {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  const handleClick = () => {
+    startTransition(() => {
+      router.push(`/product/${uniq_id}`);
+    });
+  };
+
+  if (isPending) {
+    return (
+      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
+        <Spinner size="md" />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -23,7 +39,7 @@ const ProductCard = ({ image, product_name, discounted_price, uniq_id }) => {
         width={240}
         height={240}
         className="w-60 h-60 object-cover rounded-lg transition-transform duration-500 group-hover:scale-110 cursor-pointer"
-        onClick={() => router.push(`/product/${uniq_id}`)}
+        onClick={() => handleClick(uniq_id)}
         priority={true}
       />
       <div className="text-center mt-6">

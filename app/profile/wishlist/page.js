@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { Heart, ShoppingBag, Info, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -10,20 +10,11 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Navbar from "@/components/Navbar";
 import { motion, AnimatePresence } from "framer-motion";
+import CyberLoader from "@/components/CyberLoader";
 const Wishlist = () => {
   const router = useRouter();
   const { wishlistItems, loading, error, removeItem, fetchWishlist } =
     useWishlist();
-  const [showLoader, setShowLoader] = useState(true);
-  const timerRef = useRef();
-
-  useEffect(() => {
-    timerRef.current = setTimeout(() => {
-      setShowLoader(false);
-    }, 3000);
-
-    return () => clearTimeout(timerRef.current);
-  }, []);
 
   const handleRemoveItem = (productId) => {
     removeItem(productId);
@@ -40,19 +31,8 @@ const Wishlist = () => {
   return (
     <>
       <Navbar />
-      {showLoader || loading ? (
-        <div className="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center">
-          <Image
-            src="/underConstruction.gif"
-            alt="Loading..."
-            width={200}
-            height={200}
-            priority
-            unoptimized
-            sizes="100vw"
-          />
-          <div className="absolute inset-0 bg-gray-800 opacity-30 mix-blend-multiply" />
-        </div>
+      {loading ? (
+        <CyberLoader />
       ) : (
         <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-7xl mt-8">

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trash2, Plus, Minus, X, Package, Search } from "lucide-react";
@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDebounce } from "use-debounce";
 import Navbar from "@/components/Navbar";
+import CyberLoader from "@/components/CyberLoader";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
@@ -22,19 +23,8 @@ const Cart = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [debouncedSearchInput] = useDebounce(searchInput, 300);
-  const [showLoader, setShowLoader] = useState(true);
 
   const [user, setUser] = useState(null);
-
-  const timerRef = useRef();
-
-  useEffect(() => {
-    timerRef.current = setTimeout(() => {
-      setShowLoader(false);
-    }, 3000);
-
-    return () => clearTimeout(timerRef.current);
-  }, []);
 
   React.useEffect(() => {
     if (typeof window !== "undefined") {
@@ -128,19 +118,8 @@ const Cart = () => {
   return (
     <>
       <Navbar />
-      {showLoader || loading ? (
-        <div className="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center">
-          <Image
-            src="/underConstruction.gif"
-            alt="Loading..."
-            width={200}
-            height={200}
-            priority
-            unoptimized
-            sizes="100vw"
-          />
-          <div className="absolute inset-0 bg-gray-800 opacity-30 mix-blend-multiply" />
-        </div>
+      { loading ? (
+        <CyberLoader />
       ) : (
         <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-gray-100">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-7xl">

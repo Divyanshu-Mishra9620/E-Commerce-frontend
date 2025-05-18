@@ -24,8 +24,6 @@ export const authOptions = {
       },
       async authorize(credentials) {
         try {
-          console.log("Credentials received:", credentials);
-
           const res = await fetch(`${BACKEND_URI}/api/auth/check-user`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -36,7 +34,6 @@ export const authOptions = {
           });
 
           const data = await res.json();
-          console.log("Backend response:", data);
 
           if (!res.ok || !data.user) {
             console.error(

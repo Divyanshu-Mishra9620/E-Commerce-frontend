@@ -1,12 +1,13 @@
 "use client";
 import { useRouter } from "next/navigation";
-import React, { useRef } from "react";
+import React, { useRef, useTransition } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useDragScroll } from "@/hooks/useDragScroll";
 import "@/app/_styles/global.css";
 import toast from "react-hot-toast";
 import { useCart } from "@/context/CartContext";
+import Spinner from "./Spinner";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
@@ -15,7 +16,7 @@ const BestDealsGrid = ({ products }) => {
   const scrollRef = useRef(null);
   const productList = Array.isArray(products) ? products : [];
   const { setCartItems } = useCart();
-
+  const [isPending, startTransition] = useTransition();
   useDragScroll(scrollRef);
 
   async function handleCartClick(deal, e) {
@@ -63,6 +64,20 @@ const BestDealsGrid = ({ products }) => {
     }
   }
 
+  const handleDeals = (uniq_id) => {
+    startTransition(() => {
+      router.push(`/product/${uniq_id}`);
+    });
+  };
+
+  if (isPending) {
+    return (
+      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
+        <Spinner size="md" />
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -106,9 +121,7 @@ const BestDealsGrid = ({ products }) => {
                 rounded-xl border border-gold-500/20 hover:border-gold-500/40
                 p-1.5 shadow-2xl transition-all duration-500 hover:shadow-gold-500/30
                 flex flex-col transform hover:-translate-y-1.5 relative hover:cursor-pointer"
-                onClick={() => {
-                  router.push(`/product/${deal.uniq_id}`);
-                }}
+                onClick={() => handleDeals(deal.uniq_id)}
               >
                 <div
                   className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 

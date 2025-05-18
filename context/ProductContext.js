@@ -7,12 +7,22 @@ const ProductContext = createContext({
   products: [],
   isLoading: true,
 });
+const DB_NAME = "ProductDB";
+const DB_VERSION = 2;
 
 const initializeDB = async () => {
-  return openDB("ProductDB", 1, {
-    upgrade(db) {
-      if (!db.objectStoreNames.contains("products")) {
-        db.createObjectStore("products", { keyPath: "id" });
+  return openDB(DB_NAME, DB_VERSION, {
+    upgrade(db, oldVersion) {
+      switch (oldVersion) {
+        case 0:
+        case 1:
+          if (!db.objectStoreNames.contains("metadata")) {
+            db.createObjectStore("metadata", { keyPath: "id" });
+          }
+        default:
+          if (!db.objectStoreNames.contains("products")) {
+            db.createObjectStore("products", { keyPath: "id" });
+          }
       }
     },
   });
@@ -50,7 +60,14 @@ export const ProductProvider = ({ children }) => {
     try {
       console.log("Fetching wait bhai...");
 
-      const db = await initializeDB();
+      const db = await initializeDB().catch(async (error) => {
+        if (error.name === "VersionError") {
+          console.log("Database version conflict, resetting...");
+          await deleteDB(DB_NAME);
+          return initializeDB();
+        }
+        throw error;
+      });
       console.log("db", db);
 
       const cachedProducts = await getDataFromDB(db);
@@ -74,6 +91,15 @@ export const ProductProvider = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const deleteDB = (name) => {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.deleteDatabase(name);
+      request.onsuccess = resolve;
+      request.onerror = reject;
+      request.onblocked = () => reject("Database blocked");
+    });
   };
 
   useEffect(() => {

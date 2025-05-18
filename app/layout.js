@@ -5,7 +5,7 @@ import { CartProvider } from "@/context/CartContext";
 import { ProductProvider } from "@/context/ProductContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 import { SessionProvider } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
 
@@ -24,6 +24,10 @@ export default function RootLayout({ children, session }) {
       }
     }
   }, [router]);
+
+  const pathname = usePathname();
+  const isAdminRoute = pathname.startsWith("/admin");
+
   return (
     <html lang="en">
       <body>
@@ -31,9 +35,9 @@ export default function RootLayout({ children, session }) {
           <ProductProvider>
             <CartProvider>
               <WishlistProvider>
-                <Navbar user={user} />
+                {!isAdminRoute && <Navbar user={user} />}
                 {children}
-                <BottomNavigation />
+                {!isAdminRoute && <BottomNavigation />}
               </WishlistProvider>
             </CartProvider>
           </ProductProvider>

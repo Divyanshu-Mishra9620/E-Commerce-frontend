@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Lock, Bell, MapPin, Globe, LogOut } from "lucide-react";
 import "@/app/_styles/global.css";
 import withAuth from "@/components/withAuth";
@@ -8,6 +8,7 @@ import { signOut } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import CyberLoader from "@/components/CyberLoader";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
@@ -33,17 +34,8 @@ function Settings() {
     currency: "INR",
   });
   const [loading, setLoading] = useState(false);
-  const [showLoader, setShowLoader] = useState(false);
 
   const [user, setUser] = useState(null);
-
-  const timerRef = useRef();
-
-  useEffect(() => {
-    timerRef.current = setTimeout(() => {
-      setShowLoader(false);
-    });
-  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -141,19 +133,8 @@ function Settings() {
   return (
     <>
       <Navbar />
-      {showLoader || loading ? (
-        <div className="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center">
-          <Image
-            src="/underConstruction.gif"
-            alt="Loading..."
-            width={200}
-            height={200}
-            priority
-            unoptimized
-            sizes="100vw"
-          />
-          <div className="absolute inset-0 bg-gray-800 opacity-30 mix-blend-multiply" />
-        </div>
+      {loading ? (
+        <CyberLoader />
       ) : (
         <div className="mt-20">
           <motion.div

@@ -35,7 +35,7 @@ const Orders = () => {
   }, [router]);
   useEffect(() => {
     const fetchOrders = async () => {
-      if (!user._id) return;
+      if (!user?._id) return;
       try {
         setLoading(true);
         const response = await fetch(`${BACKEND_URI}/api/orders/${user?._id}`);
@@ -55,7 +55,7 @@ const Orders = () => {
     };
 
     fetchOrders();
-  }, [user._id]);
+  }, [user?._id]);
 
   const handleFilterChange = (status) => {
     setFilters((prevFilters) => {

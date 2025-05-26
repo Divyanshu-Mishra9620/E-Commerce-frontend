@@ -15,8 +15,10 @@ export const CartProvider = ({ children }) => {
       setError(null);
       const savedUser = JSON.parse(localStorage.getItem("user"));
       if (!savedUser?._id) {
-        throw new Error("User not found in local storage");
+        router.push("/api/auth/signin");
+        return;
       }
+
       const response = await fetch(`${BACKEND_URI}/api/cart/${savedUser?._id}`);
       console.log(response);
 
@@ -36,8 +38,12 @@ export const CartProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    fetchCart();
-  }, []);
+    if (localStorage.getItem("user")) {
+      fetchCart();
+    } else {
+      router.push("/api/auth/signin");
+    }
+  }, [router]);
 
   const addToCart = async (product, quantity = 1) => {
     setCartItems((prev) => [...prev, { product, quantity }]);

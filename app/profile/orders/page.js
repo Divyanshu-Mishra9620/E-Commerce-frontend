@@ -20,20 +20,24 @@ const Orders = () => {
   const [user, setUser] = useState(null);
 
   const router = useRouter();
-  React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      if (parsedUser?._id) {
+        setUser(parsedUser);
       } else {
         router.push("/api/auth/signin");
       }
+    } else {
+      router.push("/api/auth/signin");
     }
   }, [router]);
   useEffect(() => {
     const fetchOrders = async () => {
-      if (!user) return;
+      if (!user._id) return;
       try {
+        setLoading(true);
         const response = await fetch(`${BACKEND_URI}/api/orders/${user?._id}`);
 
         if (!response.ok) {
@@ -51,7 +55,7 @@ const Orders = () => {
     };
 
     fetchOrders();
-  }, [user]);
+  }, [user._id]);
 
   const handleFilterChange = (status) => {
     setFilters((prevFilters) => {
@@ -72,8 +76,17 @@ const Orders = () => {
 
   if (error) {
     return (
-      <div className="flex justify-center items-center min-h-screen text-xl font-bold text-red-500">
-        Error: {error}
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <h2 className="text-2xl font-bold text-red-500 mb-4">
+          Error Loading Orders
+        </h2>
+        <p className="text-gray-600 mb-6">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Retry
+        </button>
       </div>
     );
   }

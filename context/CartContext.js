@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/router";
 import { createContext, useContext, useState, useEffect } from "react";
 
 const CartContext = createContext();
@@ -8,6 +9,7 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const router = useRouter();
 
   const fetchCart = async () => {
     try {

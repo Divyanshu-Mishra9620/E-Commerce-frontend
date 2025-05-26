@@ -125,7 +125,6 @@ export default function Users() {
         </div>
       </motion.div>
 
-      {/* Users List */}
       <div className="grid gap-6">
         <AnimatePresence>
           {filtered.length > 0 ? (
@@ -232,7 +231,6 @@ export default function Users() {
         </AnimatePresence>
       </div>
 
-      {/* Delete Modal */}
       <AnimatePresence>
         {deleteUser && (
           <motion.div

@@ -8,9 +8,11 @@ import Deals from "@/components/Deals";
 import WishlistSection from "@/components/Wishlist";
 import MostVisitedSection from "@/components/MostVisitedSection";
 import Footer from "@/components/Footer";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import ProductContext from "@/context/ProductContext";
 import CyberLoader from "@/components/CyberLoader";
+import TabNavigation from "@/components/TabNavigation";
+import ProductSeller from "@/components/ProductSeller";
 
 export default function Page() {
   const { products, isLoading, error } = useContext(ProductContext);
@@ -20,6 +22,11 @@ export default function Page() {
     damping: 30,
     restDelta: 0.001,
   });
+  const [activeTab, setActiveTab] = useState("Home");
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   if (error) {
     return (
@@ -49,37 +56,46 @@ export default function Page() {
       />
 
       <main>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <FlashSale />
-        </motion.div>
-
         <SectionWrapper>
-          <Hero products={products} />
+          <TabNavigation handleTabChange={handleTabChange} />
         </SectionWrapper>
 
-        <SectionWrapper delay={0.2}>
-          <Explore />
-        </SectionWrapper>
+        {activeTab === "Home" && (
+          <>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <FlashSale />
+            </motion.div>
+            
+            <SectionWrapper>
+              <Hero products={products} />
+            </SectionWrapper>
 
-        <SectionWrapper delay={0.3}>
-          <BestDeals products={products} />
-        </SectionWrapper>
+            <SectionWrapper delay={0.2}>
+              <Explore />
+            </SectionWrapper>
 
-        <SectionWrapper delay={0.4}>
-          <Deals products={products} />
-        </SectionWrapper>
+            <SectionWrapper delay={0.3}>
+              <BestDeals products={products} />
+            </SectionWrapper>
 
-        <SectionWrapper delay={0.5}>
-          <WishlistSection />
-        </SectionWrapper>
+            <SectionWrapper delay={0.4}>
+              <Deals products={products} />
+            </SectionWrapper>
 
-        <SectionWrapper delay={0.6}>
-          <MostVisitedSection products={products} />
-        </SectionWrapper>
+            <SectionWrapper delay={0.5}>
+              <WishlistSection />
+            </SectionWrapper>
+
+            <SectionWrapper delay={0.6}>
+              <MostVisitedSection products={products} />
+            </SectionWrapper>
+          </>
+        )}
+        {activeTab === "ProductSeller" && <ProductSeller />}
       </main>
 
       <motion.div

@@ -6,7 +6,6 @@ export default function Spinner({
   strokeWidth = 3,
   className = "",
 }) {
-  // Size mapping
   const sizes = {
     xs: "h-4 w-4",
     sm: "h-6 w-6",
@@ -15,7 +14,6 @@ export default function Spinner({
     xl: "h-12 w-12",
   };
 
-  // Animation style (can be moved to CSS if preferred)
   const spinAnimation = {
     animation: "spin 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite",
   };

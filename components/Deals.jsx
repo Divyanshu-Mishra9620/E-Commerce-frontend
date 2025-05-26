@@ -118,35 +118,58 @@ export default function Deals({ products }) {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="hero-section"
+      className="min-h-screen bg-gray-50 dark:bg-gray-900"
     >
-      <div className="p-4 bg-gray-50 dark:bg-gray-950 min-h-screen">
-        <h1 className="text-4xl font-bold text-center mb-8 text-gray-800 dark:text-gray-200">
-          Our Collections
-        </h1>
-
-        <div className="relative w-full h-64 mb-12 overflow-hidden rounded-xl">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        {/* Hero Section */}
+        <div className="relative aspect-[3/1] mb-16 overflow-hidden rounded-2xl shadow-xl">
           <Image
             src="/summer-banner.jpg"
-            alt="summer Banner"
+            alt="Summer Collection"
             fill
             className="object-cover"
+            priority
           />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-            <h2 className="text-3xl font-bold text-white text-center">
-              Explore Our Latest Arrivals
-            </h2>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-black/20">
+            <div className="flex h-full items-center pl-8 md:pl-16">
+              <h2 className="text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
+                New Season Arrivals
+                <span className="block mt-2 text-xl font-light text-gray-200 sm:text-2xl">
+                  Discover Our Curated Collections
+                </span>
+              </h2>
+            </div>
           </div>
         </div>
 
-        <BestDealsGrid deals={deals.summerDeals} category="Summer Collection" />
-        <BestDealsGrid deals={deals.sportsDeals} category="Sports Gear" />
-        <BestDealsGrid
-          deals={deals.kitchenDeals}
-          category="Kitchen Essentials"
-        />
-        <BestDealsGrid deals={deals.smartphoneDeals} category="Smartphones" />
-        <BestDealsGrid deals={deals.clothesDeals} category="Fashion" />
+        {/* Category Grid */}
+        <div className="space-y-12">
+          <BestDealsGrid
+            deals={deals.summerDeals}
+            category="Summer Collection"
+            gradient="from-blue-400 to-cyan-500"
+          />
+          <BestDealsGrid
+            deals={deals.sportsDeals}
+            category="Sports Gear"
+            gradient="from-green-400 to-emerald-600"
+          />
+          <BestDealsGrid
+            deals={deals.kitchenDeals}
+            category="Kitchen Essentials"
+            gradient="from-orange-400 to-red-500"
+          />
+          <BestDealsGrid
+            deals={deals.smartphoneDeals}
+            category="Smartphones"
+            gradient="from-purple-400 to-indigo-600"
+          />
+          <BestDealsGrid
+            deals={deals.clothesDeals}
+            category="Fashion"
+            gradient="from-pink-400 to-rose-600"
+          />
+        </div>
       </div>
     </motion.div>
   );

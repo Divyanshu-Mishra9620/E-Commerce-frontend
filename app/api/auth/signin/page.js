@@ -24,104 +24,116 @@ export default function SignIn() {
     try {
       setLoading(true);
       setError("");
-
-      const result = await signIn("google", { redirect: false });
+      const result = await signIn("google", {
+        redirect: false,
+        callbackUrl: window.location.origin,
+      });
 
       if (result?.error) {
-        setError(result.error);
-        setLoading(false);
-        return;
+        throw new Error(result.error);
       }
     } catch (err) {
-      setError("Failed to sign in with Google");
+      setError("Google sign-in failed. Please try again.");
       console.error("Google Sign-In error:", err);
+    } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (status === "authenticated" && session?.user) {
-      const { name, email, image: profilePic } = session.user;
+    let isSubscribed = true;
 
-      const saveUserToDatabase = async () => {
-        try {
-          const response = await fetch(`${BACKEND_URI}/api/auth/google`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name,
-              email,
-              profilePic,
-            }),
-          });
+    const saveUserToDatabase = async () => {
+      if (!session?.user) return;
 
-          const data = await response.json();
-          console.log(data, "signin");
+      try {
+        setLoading(true);
+        const { name, email, image: profilePic } = session.user;
 
-          if (!response.ok) {
-            setError(data.message || "Failed to save user to database");
-            return;
-          }
+        const response = await fetch(`${BACKEND_URI}/api/auth/google`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, profilePic }),
+        });
 
-          if (typeof window !== "undefined") {
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Authentication failed");
+        }
+
+        if (isSubscribed && typeof window !== "undefined") {
+          try {
             localStorage.setItem("user", JSON.stringify(data.user));
             localStorage.setItem("token", data.token);
+            router.push("/");
+          } catch (storageErr) {
+            console.error("Storage error:", storageErr);
+            setError("Failed to save authentication data");
           }
-
-          router.push("/");
-        } catch (err) {
-          setError("Failed to save user to database");
-          console.error("Error saving user to database:", err);
-        } finally {
-          setLoading(false);
         }
-      };
+      } catch (err) {
+        if (isSubscribed) {
+          setError("Authentication failed. Please try again.");
+          console.error("Auth error:", err);
+        }
+      } finally {
+        if (isSubscribed) setLoading(false);
+      }
+    };
 
+    if (status === "authenticated") {
       saveUserToDatabase();
     }
+
+    return () => {
+      isSubscribed = false;
+    };
   }, [session, status, router]);
 
   const handleCredentialsSignIn = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
 
-    const payload = { email, password };
+    if (!email || !password) {
+      setError("Please fill in all fields");
+      return;
+    }
 
-    console.log(payload);
     try {
-      const res = await fetch(`${BACKEND_URI}/api/auth/login`, {
+      setLoading(true);
+      setError("");
+
+      const backendRes = await fetch(`${BACKEND_URI}/api/auth/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
+      const data = await backendRes.json();
 
-      if (!res.ok) {
-        setError(data.message || "Something went wrong");
-        setLoading(false);
-        return;
+      if (!backendRes.ok) {
+        throw new Error(data.message || "Login failed");
       }
 
       if (typeof window !== "undefined") {
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("token", data.token);
       }
-      await signIn("credentials", {
+
+      const result = await signIn("credentials", {
         redirect: false,
         email,
         password,
-        callbackUrl: "/",
       });
+
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+
       router.push("/");
     } catch (err) {
-      setError("Server error, please try again later.");
-      console.error("Sign-in error:", err);
+      setError(err.message || "Login failed. Please try again.");
+      console.error("Login error:", err);
     } finally {
       setLoading(false);
     }

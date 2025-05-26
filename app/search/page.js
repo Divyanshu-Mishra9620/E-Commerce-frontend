@@ -117,7 +117,6 @@ const SearchPageContent = () => {
     fetchAndFilterProducts();
   }, [query, products, sortOrder, minPrice, maxPrice]);
 
-  // Clear all filters
   const clearFilters = () => {
     setSortOrder("none");
     setMinPrice("");
@@ -358,7 +357,6 @@ const SearchPageContent = () => {
             )}
           </AnimatePresence>
 
-          {/* Product Grid */}
           {loader ? (
             <div className="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center">
               <Image

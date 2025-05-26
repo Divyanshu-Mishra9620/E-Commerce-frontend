@@ -49,6 +49,8 @@ export default function OrderCarousel() {
         }
 
         const data = await response.json();
+        console.log(data.orders);
+
         setOrders(data.orders || []);
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -114,8 +116,8 @@ export default function OrderCarousel() {
       ) : (
         <Carousel className="w-full max-w-screen-lg">
           <CarouselContent>
-            {orders?.map((order, index) => {
-              const product = order?.products[0]?.product;
+            {orders[0]?.products?.map((order, index) => {
+              const product = order?.product;
               const reviews = product?.reviews || [];
               const averageRating = calculateAverageRating(reviews);
               const roundedRating = Math.round(averageRating);

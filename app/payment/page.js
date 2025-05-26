@@ -28,6 +28,8 @@ export default function PaymentPage() {
   });
 
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -122,23 +124,44 @@ export default function PaymentPage() {
     if (!address.state) newErrors.state = "State is required";
     if (!address.country) newErrors.country = "Country is required";
     if (!address.postalCode) newErrors.postalCode = "Postal Code is required";
+    if (!/^\d{6}$/.test(address.postalCode)) {
+      newErrors.postalCode = "Invalid postal code format";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validatePaymentForm = () => {
+    const newErrors = {};
+
+    if (!address.street) newErrors.street = "Street is required";
+    if (!address.city) newErrors.city = "City is required";
+    if (!address.state) newErrors.state = "State is required";
+    if (!address.country) newErrors.country = "Country is required";
+    if (!address.postalCode) newErrors.postalCode = "Postal Code is required";
+    if (!/^\d{6}$/.test(address.postalCode)) {
+      newErrors.postalCode = "Invalid postal code format";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handlePayment = async () => {
-    if (!validateAddress()) {
-      alert("Please fill in all address fields correctly.");
-      return;
-    }
-
-    await saveAddress();
-
     try {
+      setIsLoading(true);
+      setError(null);
+
+      if (!validatePaymentForm()) {
+        throw new Error("Please fill in all required fields correctly.");
+      }
+
+      await saveAddress();
+
       const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error("No authentication token found");
+        throw new Error("Please login to continue");
       }
 
       const orderResponse = await fetch(
@@ -147,6 +170,7 @@ export default function PaymentPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             products,
@@ -183,59 +207,65 @@ export default function PaymentPage() {
         throw new Error(errorData.message || "Failed to initiate payment");
       }
 
-      const data = await paymentResponse.json();
+      const paymentData = await paymentResponse.json();
 
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_API_KEY,
-        amount: data.order.amount,
-        currency: data.order.currency,
-        order_id: data.order.id,
+        amount: paymentData.order.amount,
+        currency: paymentData.order.currency,
+        order_id: paymentData.order.id,
         name: "ShopEase",
-        description: `Order #${order._id}`,
+        description: `Order #${order.order._id}`,
         image: "/lamp.png",
         prefill: {
-          name: user.name || "",
-          email: user.email || "",
-          contact: user.phone || "",
+          name: user?.name || "",
+          email: user?.email || "",
+          contact: user?.phone || "",
         },
         theme: {
           color: "#222",
         },
-        handler: async (response) => {
-          const verifyResponse = await fetch(
-            `${BACKEND_URI}/api/payments/verify`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                razorpayOrderId: response.razorpay_order_id,
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpaySignature: response.razorpay_signature,
-              }),
+        handler: async function (response) {
+          try {
+            const verifyResponse = await fetch(
+              `${BACKEND_URI}/api/payments/verify`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                  razorpayOrderId: response.razorpay_order_id,
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpaySignature: response.razorpay_signature,
+                }),
+              }
+            );
+
+            if (!verifyResponse.ok) {
+              throw new Error("Payment verification failed");
             }
-          );
 
-          if (!verifyResponse.ok) {
-            const errorData = await verifyResponse.json();
-            throw new Error(errorData.message || "Payment verification failed");
+            localStorage.removeItem("cart");
+
+            window.location.href = `/profile/orders`;
+          } catch (error) {
+            setError(error.message);
           }
-
-          alert("Payment Successful!");
-          window.location.href = `/profile/orders`;
         },
       };
 
       const rzp = new window.Razorpay(options);
       rzp.on("payment.failed", (response) => {
-        alert(`Payment Failed: ${response.error.description}`);
+        setError(`Payment Failed: ${response.error.description}`);
       });
       rzp.open();
     } catch (error) {
+      setError(error.message);
       console.error("Payment Error:", error);
-      alert(`Payment Failed: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -513,11 +543,17 @@ export default function PaymentPage() {
               </div>
 
               <div className="mt-6">
+                {error && (
+                  <div className="text-red-500 mb-4 text-center">{error}</div>
+                )}
                 <button
                   onClick={handlePayment}
-                  className="w-full bg-gray-700 text-gray-100 py-3 rounded-lg hover:bg-gray-600 transition-colors"
+                  disabled={isLoading}
+                  className={`w-full ${
+                    isLoading ? "bg-gray-500" : "bg-gray-700 hover:bg-gray-600"
+                  } text-gray-100 py-3 rounded-lg transition-colors`}
                 >
-                  Pay Now
+                  {isLoading ? "Processing..." : "Pay Now"}
                 </button>
               </div>
             </div>

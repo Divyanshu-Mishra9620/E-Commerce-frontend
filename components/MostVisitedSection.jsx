@@ -5,10 +5,10 @@ import { FaFire } from "react-icons/fa";
 
 const MostVisitedSection = ({ products }) => {
   const mostVisitedItems = products
-    .filter((product) => product.reviews && product.reviews > 0)
+    ?.filter((product) => product.reviews && product.reviews > 0)
     .slice(0, 10);
   const randomItems =
-    mostVisitedItems.length === 0 ? products.slice(0, 10) : mostVisitedItems;
+    mostVisitedItems?.length === 0 ? products.slice(0, 10) : mostVisitedItems;
 
   return (
     <motion.section
@@ -32,7 +32,7 @@ const MostVisitedSection = ({ products }) => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          {randomItems.map((item, index) => (
+          {randomItems?.map((item, index) => (
             <motion.div
               key={item.uniq_id}
               initial={{ opacity: 0, y: 20 }}

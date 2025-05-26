@@ -11,6 +11,8 @@ import CyberLoader from "@/components/CyberLoader";
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
 export default function Profile() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [hasFetchedAddress, setHasFetchedAddress] = useState(false);
   const [address, setAddress] = useState({
     street: "",
@@ -19,51 +21,63 @@ export default function Profile() {
     country: "",
     postalCode: "",
   });
-  const [loading, setLoading] = useState(false);
-
   const [user, setUser] = useState(null);
   const router = useRouter();
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      } else {
-        router.push("/api/auth/signin");
+  const fetchUserData = async (userEmail) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_URI}/api/users/email/${userEmail}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch user data");
+
+      const data = await response.json();
+      if (data.address) {
+        setAddress(data.address);
+        setHasFetchedAddress(true);
       }
+    } catch (error) {
+      setError(error.message);
+      console.error("Error fetching user data:", error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [router]);
+  };
 
   useEffect(() => {
-    const fetchUserAddress = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(
-          `${BACKEND_URI}/api/users/email/${user.email}`
-        );
-        const data = await response.json();
+    const checkAuth = async () => {
+      const storedUser = localStorage.getItem("user");
+      if (!storedUser) {
+        router.push("/api/auth/signin");
+        return;
+      }
 
-        if (data.address) {
-          setAddress(data.address);
-          setHasFetchedAddress(true);
-        }
+      try {
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
+        await fetchUserData(userData.email);
       } catch (error) {
-        console.error("Error fetching user address:", error);
-      } finally {
-        setLoading(false);
+        setError("Invalid user data");
+        localStorage.removeItem("user");
+        router.push("/api/auth/signin");
       }
     };
 
-    if (user?.email && !hasFetchedAddress) {
-      fetchUserAddress();
-    }
-  }, [user, hasFetchedAddress]);
+    checkAuth();
+  }, [router]);
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-red-500">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <>
       <Navbar />
-      {loading ? (
+      {isLoading ? (
         <CyberLoader />
       ) : (
         <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
@@ -122,7 +136,6 @@ export default function Profile() {
                 </div>
               </motion.div>
 
-              {/* Address */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

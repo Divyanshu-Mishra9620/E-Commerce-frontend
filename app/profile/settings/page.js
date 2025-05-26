@@ -7,7 +7,6 @@ import withAuth from "@/components/withAuth";
 import { signOut } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import CyberLoader from "@/components/CyberLoader";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
@@ -255,7 +254,6 @@ function Settings() {
                         Edit Address
                       </h2>
                       <form onSubmit={handleSaveAddress} className="space-y-4">
-                        {/* Street */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Street
@@ -268,7 +266,6 @@ function Settings() {
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
-                        {/* City */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             City

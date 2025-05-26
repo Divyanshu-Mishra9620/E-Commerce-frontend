@@ -195,7 +195,6 @@ export default function Dashboard() {
       variants={stagger}
       className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 min-h-screen bg-gray-50"
     >
-      {/* Top Stats Cards */}
       <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           {
@@ -246,7 +245,6 @@ export default function Dashboard() {
 
       {/* Main Content Area */}
       <div className="md:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Performance Cards */}
         {[
           {
             title: "Today's Performance",
@@ -304,7 +302,6 @@ export default function Dashboard() {
           </motion.div>
         ))}
 
-        {/* Charts */}
         {[
           {
             title: "Hourly Activity",
@@ -361,7 +358,6 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Top Products */}
       <motion.div
         variants={fadeIn}
         className="bg-white p-4 sm:p-6 rounded-xl shadow-xs hover:shadow-sm transition-all row-span-2 flex flex-col"

@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import Spinner from "./Spinner";
 
 const categories = [
@@ -10,32 +10,43 @@ const categories = [
     title: "Fashion",
     href: "/categories/fashion",
     image: "/clothes.jpg",
+    description: "Trendy apparel for all occasions",
+    color: "bg-indigo-100 dark:bg-indigo-900/50",
   },
   {
     title: "Home & Living",
     href: "/categories/home-living",
     image: "/utensils.jpg",
+    description: "Everything for your home",
+    color: "bg-amber-100 dark:bg-amber-900/50",
   },
   {
     title: "Beauty & Health",
     href: "/categories/beauty-health",
     image: "/beauty.jpg",
+    description: "Self-care essentials",
+    color: "bg-pink-100 dark:bg-pink-900/50",
   },
   {
     title: "Sports & Outdoors",
     href: "/categories/sports-outdoors",
     image: "/sports.jpg",
+    description: "Gear for active lifestyles",
+    color: "bg-emerald-100 dark:bg-emerald-900/50",
   },
   {
     title: "Electronics",
     href: "/categories/electronics",
     image: "/electronics.jpg",
+    description: "Cutting-edge tech",
+    color: "bg-blue-100 dark:bg-blue-900/50",
   },
 ];
 
 const ExploreGrid = () => {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [hoveredIndex, setHoveredIndex] = useState(null);
 
   const handleCategory = (category, e) => {
     e.preventDefault();
@@ -44,77 +55,108 @@ const ExploreGrid = () => {
     });
   };
 
-  if (isPending)
+  if (isPending) {
     return (
-      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
-        <Spinner size="md" />
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <Spinner size="lg" />
       </div>
     );
+  }
 
   return (
-    <motion.div
+    <motion.section
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="hero-section"
+      className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
     >
-      <div
-        className="mt-8 p-4 border border-[#b8860b]/30 
-           bg-gradient-to-br from-black via-[#2a2108] to-black
-           shadow-[0_25px_50px_-12px_rgba(184,134,11,0.25)]"
-      >
-        <h3
-          className="text-3xl font-bold mb-6 px-2 tracking-tighter
-             bg-gradient-to-r from-[#b8860b] to-[#daa520] bg-clip-text text-transparent"
+      <div className="text-center mb-12">
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
         >
-          Explore Categories
-        </h3>
+          Shop by Category
+        </motion.h2>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
+        >
+          Discover products across our carefully curated categories
+        </motion.p>
+      </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {categories.map((category, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="group relative aspect-square cursor-pointer"
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+        {categories.map((category, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+            className="relative group"
+            onMouseEnter={() => setHoveredIndex(index)}
+            onMouseLeave={() => setHoveredIndex(null)}
+          >
+            <div
+              className={`absolute inset-0 rounded-2xl ${
+                category.color
+              } transition-all duration-300 ${
+                hoveredIndex === index ? "opacity-100" : "opacity-50"
+              }`}
+            />
+
+            <div
+              className={`relative h-full rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-all duration-300 ${
+                hoveredIndex === index
+                  ? "ring-2 ring-primary-500 scale-[1.02]"
+                  : ""
+              }`}
               onClick={(e) => handleCategory(category.title, e)}
             >
-              <div
-                className="absolute inset-0 rounded-xl overflow-hidden border-2 border-[#b8860b]/30 
-                   transition-all group-hover:border-[#b8860b]/60"
-              >
+              <div className="aspect-square relative">
                 <Image
                   src={category.image}
                   alt={category.title}
-                  width={400}
-                  height={400}
-                  className="w-full h-full object-cover transform transition-all duration-500 
-                       group-hover:scale-105 saturate-90 group-hover:saturate-125"
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  quality={90}
+                  priority={index < 3}
                 />
-                <div
-                  className="absolute inset-0 bg-gradient-to-t from-black via-transparent 
-                     to-transparent opacity-90"
-                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               </div>
 
-              <div className="absolute bottom-0 left-0 right-0 p-4 text-center">
-                <span
-                  className="text-xl font-bold bg-gradient-to-r from-[#b8860b] to-[#daa520] 
-                     bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+              <div className="absolute inset-0 flex flex-col justify-end p-6">
+                <motion.h3
+                  className="text-xl font-bold text-white mb-1"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
                 >
                   {category.title}
-                </span>
+                </motion.h3>
+                <motion.p
+                  className="text-gray-200 text-sm"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0.8 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                >
+                  {category.description}
+                </motion.p>
+                <motion.button
+                  className="mt-3 w-full py-2 bg-white/90 text-gray-900 font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Shop Now
+                </motion.button>
               </div>
-
-              <div
-                className="absolute inset-0 bg-[#b8860b]/10 group-hover:bg-[#b8860b]/20 
-                   transition-all rounded-xl"
-              />
-            </motion.div>
-          ))}
-        </div>
+            </div>
+          </motion.div>
+        ))}
       </div>
-    </motion.div>
+    </motion.section>
   );
 };
 

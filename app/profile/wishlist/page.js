@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import { Heart, ShoppingBag, Info, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -15,18 +15,48 @@ const Wishlist = () => {
   const router = useRouter();
   const { wishlistItems, loading, error, removeItem, fetchWishlist } =
     useWishlist();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [actionError, setActionError] = useState(null);
 
-  const handleRemoveItem = (productId) => {
-    removeItem(productId);
-    console.log(productId);
+  const filteredItems = useMemo(() => {
+    return wishlistItems?.filter(
+      (item) => item?.product && !item.product.isDeleted
+    );
+  }, [wishlistItems]);
 
-    toast.success("Removed from wishlist", {
-      position: "bottom-right",
-      className: "bg-gray-800 text-gray-100",
-    });
+  const handleRemoveItem = async (productId) => {
+    try {
+      setIsProcessing(true);
+      setActionError(null);
+      await removeItem(productId);
+      toast.success("Removed from wishlist", {
+        position: "bottom-right",
+        className: "bg-gray-800 text-gray-100",
+      });
+    } catch (error) {
+      setActionError("Failed to remove item");
+      console.error("Remove item error:", error);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  if (error) return <div>Error: {error}</div>;
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-red-400 text-center">
+          <h2 className="text-xl font-bold mb-2">Error Loading Wishlist</h2>
+          <p>{error}</p>
+          <button
+            onClick={() => fetchWishlist()}
+            className="mt-4 px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -35,6 +65,12 @@ const Wishlist = () => {
         <CyberLoader />
       ) : (
         <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
+          {actionError && (
+            <div className="fixed top-20 right-4 bg-red-500/10 text-red-400 p-4 rounded-lg">
+              {actionError}
+            </div>
+          )}
+
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-7xl mt-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -137,6 +173,7 @@ const Wishlist = () => {
                               whileHover={{ scale: 1.1 }}
                               className="text-red-400 hover:text-red-300"
                               onClick={() => handleRemoveItem(item.product._id)}
+                              disabled={isProcessing}
                             >
                               <Heart className="w-5 h-5 fill-current" />
                             </motion.button>

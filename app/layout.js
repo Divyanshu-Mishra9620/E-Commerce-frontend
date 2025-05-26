@@ -8,6 +8,7 @@ import { SessionProvider } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
+import { NavigationProvider } from "@/context/NavigationContext";
 
 export default function RootLayout({ children, session }) {
   const [user, setUser] = useState(null);
@@ -31,17 +32,19 @@ export default function RootLayout({ children, session }) {
   return (
     <html lang="en">
       <body>
-        <SessionProvider session={session}>
-          <ProductProvider>
-            <CartProvider>
-              <WishlistProvider>
-                {!isAdminRoute && <Navbar user={user} />}
-                {children}
-                {!isAdminRoute && <BottomNavigation />}
-              </WishlistProvider>
-            </CartProvider>
-          </ProductProvider>
-        </SessionProvider>
+        <NavigationProvider>
+          <SessionProvider session={session}>
+            <ProductProvider>
+              <CartProvider>
+                <WishlistProvider>
+                  {!isAdminRoute && <Navbar user={user} />}
+                  {children}
+                  {!isAdminRoute && <BottomNavigation />}
+                </WishlistProvider>
+              </CartProvider>
+            </ProductProvider>
+          </SessionProvider>
+        </NavigationProvider>
         <Toaster
           position="bottom-right"
           toastOptions={{

@@ -18,6 +18,7 @@ export default function Products() {
   const [editModal, setEditModal] = useState(null);
   const [fetchedProducts, setFetchedProducts] = useState([]);
   const [addModal, setAddModal] = useState(false);
+  const [user, setUser] = useState(null);
   const [newProduct, setNewProduct] = useState({
     product_name: "",
     discounted_price: "",
@@ -39,6 +40,19 @@ export default function Products() {
       setFetchedProducts(products);
     }
   }, [products]);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      setNewProduct((prev) => ({
+        ...prev,
+        creator: parsedUser._id,
+        createdBy: parsedUser.role === "admin" ? "admin" : "seller",
+      }));
+    }
+  }, []);
 
   const totalPages = Math.ceil((fetchedProducts?.length || 0) / 50);
 
@@ -131,6 +145,7 @@ export default function Products() {
     e.preventDefault();
 
     try {
+      if (!user) return;
       const res = await fetch(`${BACKEND_URI}/api/products/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -160,7 +175,6 @@ export default function Products() {
 
   return (
     <div className="px-4 sm:px-6 py-6 bg-gradient-to-b from-slate-900 to-slate-800 min-h-screen">
-      {/* Search and Add Button Section */}
       <div className="max-w-7xl mx-auto mb-6 md:mb-8 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <div className="w-full md:flex-1 max-w-2xl space-y-3 md:space-y-4">
           <motion.input
@@ -398,23 +412,33 @@ export default function Products() {
                 onSubmit={handleAddSubmit}
                 className="grid grid-cols-1 gap-4 md:gap-6"
               >
-                {Object.keys(newProduct).map((key) => (
-                  <div key={key} className="space-y-1 md:space-y-2">
-                    <label className="text-xs md:text-sm font-medium text-slate-300 capitalize">
-                      {key.replace(/_/g, " ")}
-                    </label>
-                    <input
-                      type={
-                        typeof newProduct[key] === "number" ? "number" : "text"
-                      }
-                      id={key}
-                      value={newProduct[key]}
-                      onChange={handleAdd}
-                      className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-slate-900/50 border border-slate-700 rounded-lg md:rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm md:text-base"
-                      placeholder={`Enter ${key.replace(/_/g, " ")}...`}
-                    />
-                  </div>
-                ))}
+                {/* Hidden fields for creator and createdBy */}
+                <input type="hidden" name="creator" value={user?._id || ""} />
+                <input
+                  type="hidden"
+                  name="createdBy"
+                  value={user?.role === "admin" ? "admin" : "seller"}
+                />
+
+                {Object.entries(newProduct).map(([key, value]) => {
+                  if (key === "creator" || key === "createdBy") return null;
+
+                  return (
+                    <div key={key} className="space-y-1 md:space-y-2">
+                      <label className="text-xs md:text-sm font-medium text-slate-300 capitalize">
+                        {key.replace(/_/g, " ")}
+                      </label>
+                      <input
+                        type={typeof value === "number" ? "number" : "text"}
+                        id={key}
+                        value={value}
+                        onChange={handleAdd}
+                        className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-slate-900/50 border border-slate-700 rounded-lg md:rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm md:text-base"
+                        placeholder={`Enter ${key.replace(/_/g, " ")}...`}
+                      />
+                    </div>
+                  );
+                })}
                 <div className="flex flex-col sm:flex-row justify-end gap-3 mt-4 md:mt-6">
                   <motion.button
                     whileHover={{ scale: 1.05 }}

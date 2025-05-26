@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { getSession, signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
 import { AiOutlineMail, AiOutlineLock } from "react-icons/ai";
@@ -129,8 +129,12 @@ export default function SignIn() {
       if (result?.error) {
         throw new Error(result.error);
       }
+      const session = await getSession();
 
-      router.push("/");
+      if (session?.user) {
+        localStorage.setItem("user", JSON.stringify(session.user));
+        router.push("/");
+      }
     } catch (err) {
       setError(err.message || "Login failed. Please try again.");
       console.error("Login error:", err);

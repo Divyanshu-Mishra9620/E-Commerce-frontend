@@ -38,8 +38,6 @@ const saveDataToDB = async (db, data) => {
 
   await store.clear();
 
-  console.log("Products to save:", data);
-
   await Promise.all(
     data.map((product) => {
       if (!product.id) {
@@ -58,17 +56,13 @@ export const ProductProvider = ({ children }) => {
 
   const fetchProducts = async () => {
     try {
-      console.log("Fetching wait bhai...");
-
       const db = await initializeDB().catch(async (error) => {
         if (error.name === "VersionError") {
-          console.log("Database version conflict, resetting...");
           await deleteDB(DB_NAME);
           return initializeDB();
         }
         throw error;
       });
-      console.log("db", db);
 
       const cachedProducts = await getDataFromDB(db);
 
@@ -79,8 +73,6 @@ export const ProductProvider = ({ children }) => {
       }
 
       const { products } = await fetchAllData();
-      console.log("Fetch ho gya:", products);
-      console.log(products);
 
       setProducts(products);
 

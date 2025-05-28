@@ -1,12 +1,24 @@
 "use client";
 
 import ProductContext from "@/context/ProductContext";
-import { CirclePlus, Pencil, Search, Star, Tag, Trash2 } from "lucide-react";
+import {
+  Calendar,
+  CirclePlus,
+  Clock,
+  Pencil,
+  Search,
+  Star,
+  Tag,
+  Trash2,
+  Zap,
+} from "lucide-react";
 import Image from "next/image";
 import React, { useContext, useState, useEffect } from "react";
 import { HiArrowLeft, HiArrowRight } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
+import useSubscriptionCheck from "@/hooks/useSubscriptionCheck";
 
 const getImageUrl = (imageString) => {
   if (!imageString) return "/images/lamp.jpg";
@@ -47,6 +59,17 @@ export default function SellerPage() {
     brand: "",
     image_url: "",
   });
+
+  const [currentSubscription, setCurrentSubscription, subLaoding] =
+    useState(null);
+
+  const router = useRouter();
+
+  const { subscription, subLoading, isValid, error } = useSubscriptionCheck();
+  useEffect(() => {
+    if (subLoading) return;
+    setCurrentSubscription(subscription);
+  }, [subscription, subLoading]);
 
   useEffect(() => {
     const initializeSellerData = async () => {
@@ -142,7 +165,6 @@ export default function SellerPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(editModal);
 
     try {
       const res = await fetch(`${BACKEND_URI}/api/products/${editModal._id}`, {
@@ -492,12 +514,141 @@ export default function SellerPage() {
     </div>
   );
 
+  const SubscriptionDetails = () => {
+    if (!currentSubscription) return null;
+
+    const endDate = new Date(currentSubscription.endDate);
+    const startDate = new Date(currentSubscription.startDate);
+
+    const formatDate = (date) => {
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    };
+
+    const calculateSavings = () => {
+      const monthlyPrice =
+        currentSubscription.amount / currentSubscription.duration;
+      const basicMonthly = 299;
+      return Math.round(((basicMonthly - monthlyPrice) / basicMonthly) * 100);
+    };
+
+    return (
+      <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-6 mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <div>
+            <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-200">
+              <Zap className="text-yellow-400" />
+              Your Subscription
+            </h2>
+            <p className="text-gray-400 mt-1">
+              Manage your seller account and products
+            </p>
+          </div>
+
+          <div className="bg-indigo-900/30 text-indigo-300 px-4 py-2 rounded-full text-sm font-medium">
+            {currentSubscription.planName}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-gray-800/50 p-4 rounded-lg">
+            <h3 className="text-sm text-gray-400 mb-2">Status</h3>
+            <div className="flex items-center gap-2">
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  currentSubscription.status === "active"
+                    ? "bg-green-500"
+                    : "bg-red-500"
+                }`}
+              />
+              <span className="font-medium capitalize text-gray-200">
+                {currentSubscription.status}
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-gray-800/50 p-4 rounded-lg">
+            <h3 className="text-sm text-gray-400 mb-2">Started On</h3>
+            <p className="font-medium text-gray-200">{formatDate(startDate)}</p>
+          </div>
+
+          <div className="bg-gray-800/50 p-4 rounded-lg">
+            <h3 className="text-sm text-gray-400 mb-2">Expires On</h3>
+            <p className="font-medium text-gray-200">{formatDate(endDate)}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-gray-800/50 p-4 rounded-lg">
+            <h3 className="text-sm text-gray-400 mb-2 flex items-center gap-2 ">
+              <Clock className="w-4 h-4" />
+              Days Remaining
+            </h3>
+            <p className="text-2xl font-bold text-emerald-400">
+              {currentSubscription.daysRemaining}
+            </p>
+          </div>
+
+          <div className="bg-gray-800/50 p-4 rounded-lg">
+            <h3 className="text-sm text-gray-400 mb-2 flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              Duration
+            </h3>
+            <div className="flex items-baseline gap-2">
+              <p className="text-xl font-bold text-gray-200">
+                ₹{currentSubscription.amount}
+              </p>
+              <span className="text-gray-400">
+                for {currentSubscription.duration} months
+              </span>
+            </div>
+            {calculateSavings() > 0 && (
+              <p className="text-sm text-green-400 mt-1">
+                You're saving {calculateSavings()}% compared to monthly payments
+              </p>
+            )}
+          </div>
+        </div>
+
+        {currentSubscription.daysRemaining <= 30 && (
+          <div className="mt-6 bg-yellow-900/30 border border-yellow-700 text-yellow-200 p-4 rounded-lg">
+            <p>
+              Your subscription will expire soon. Renew to avoid interruption of
+              your seller privileges.
+            </p>
+            <button
+              onClick={() => router.push("/pricing")}
+              className="mt-2 text-yellow-100 hover:text-white underline"
+            >
+              Renew now
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  if (subLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-gray-400">
+            Loading your subscription details...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return <p className="text-center mt-8 text-lg">Loading products...</p>;
   }
 
-  let flag = true;
-  if (!flag) {
+  if (!isValid) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-950 text-gray-100 px-4">
         <h2 className="text-3xl font-semibold mb-4">Become a Seller</h2>
@@ -507,7 +658,7 @@ export default function SellerPage() {
         </p>
         <button
           className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded text-white text-lg mb-4"
-          onClick={() => router.push("/subscribe")}
+          onClick={() => router.push("/paymentSub")}
         >
           Subscribe Now
         </button>
@@ -523,9 +674,13 @@ export default function SellerPage() {
   return (
     <div className="pt-24 min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <SubscriptionDetails />
+
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-white">Seller Dashboard</h1>
+            <h1 className="text-2xl font-bold text-white">
+              Product Management
+            </h1>
             <p className="text-slate-400 mt-1">
               Manage your products and inventory
             </p>
@@ -590,10 +745,10 @@ export default function SellerPage() {
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               className="
-    bg-slate-800 p-6 md:p-8 rounded-xl md:rounded-2xl border
-    w-full max-w-md md:max-w-2xl
-    max-h-[90vh] overflow-y-auto
-  "
+              bg-slate-800 p-6 md:p-8 rounded-xl md:rounded-2xl border
+              w-full max-w-md md:max-w-2xl
+              max-h-[90vh] overflow-y-auto
+            "
             >
               <h2 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">
                 Add New Product
@@ -616,10 +771,10 @@ export default function SellerPage() {
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               className="
-    bg-slate-800 p-6 md:p-8 rounded-xl md:rounded-2xl border
-    w-full max-w-md md:max-w-2xl
-    max-h-[90vh] overflow-y-auto
-  "
+              bg-slate-800 p-6 md:p-8 rounded-xl md:rounded-2xl border
+              w-full max-w-md md:max-w-2xl
+              max-h-[90vh] overflow-y-auto
+            "
             >
               <h2 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">
                 Edit Product

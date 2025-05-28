@@ -19,7 +19,6 @@ const ProfileForm = () => {
     email: "",
     password: "",
   });
-  console.log(session);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -53,8 +52,6 @@ const ProfileForm = () => {
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        console.log(position.coords);
-
         setLatitude(position.coords.latitude);
         setLongitude(position.coords.longitude);
         setLoading(false);

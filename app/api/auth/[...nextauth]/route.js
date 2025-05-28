@@ -150,12 +150,8 @@ export const authOptions = {
   },
 
   events: {
-    async signIn({ user, account }) {
-      console.log(`User ${user.email} signed in via ${account.provider}`);
-    },
-    async signOut({ token }) {
-      console.log(`User ${token.email} signed out`);
-    },
+    async signIn({ user, account }) {},
+    async signOut({ token }) {},
   },
 
   pages: {

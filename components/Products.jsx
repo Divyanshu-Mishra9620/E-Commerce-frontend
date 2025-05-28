@@ -120,7 +120,6 @@ export default function Products() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(editModal);
 
     try {
       const res = await fetch(`${BACKEND_URI}/api/products/${editModal._id}`, {
@@ -154,7 +153,6 @@ export default function Products() {
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.message || "error adding product");
-      console.log(data);
 
       setFetchedProducts((prev) => [...prev, data.product]);
       setAddModal(false);

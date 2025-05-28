@@ -11,10 +11,8 @@ export const fetchAllData = async () => {
     const data = await response.json();
 
     if (Array.isArray(data)) {
-      console.log("Fetched products:", data);
       return { products: data };
     } else if (data?.products && Array.isArray(data.products)) {
-      console.log("Fetched products:", data.products);
       return { products: data.products };
     } else {
       console.error("❌❌❌❌❌❌❌❌ Invalid Response:", data);

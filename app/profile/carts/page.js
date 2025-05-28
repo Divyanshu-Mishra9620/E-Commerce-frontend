@@ -58,7 +58,6 @@ const Cart = () => {
       router.push("/api/auth/signin");
       return;
     }
-    console.log(productId);
 
     try {
       const res = await fetch(`${BACKEND_URI}/api/wishlist/${user._id}`, {

@@ -22,7 +22,6 @@ export const CartProvider = ({ children }) => {
       }
 
       const response = await fetch(`${BACKEND_URI}/api/cart/${savedUser?._id}`);
-      console.log(response);
 
       if (!response.ok) {
         throw new Error("Failed to fetch cart");

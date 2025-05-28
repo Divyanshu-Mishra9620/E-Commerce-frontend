@@ -117,21 +117,6 @@ export default function PaymentPage() {
     setAddress((prev) => ({ ...prev, [name]: value }));
   };
 
-  const validateAddress = () => {
-    const newErrors = {};
-    if (!address.street) newErrors.street = "Street is required";
-    if (!address.city) newErrors.city = "City is required";
-    if (!address.state) newErrors.state = "State is required";
-    if (!address.country) newErrors.country = "Country is required";
-    if (!address.postalCode) newErrors.postalCode = "Postal Code is required";
-    if (!/^\d{6}$/.test(address.postalCode)) {
-      newErrors.postalCode = "Invalid postal code format";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const validatePaymentForm = () => {
     const newErrors = {};
 

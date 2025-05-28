@@ -20,7 +20,6 @@ export default function RootLayout({ children, session }) {
       if (storedUser) {
         setUser(JSON.parse(storedUser));
       } else {
-        console.log(typeof window);
         router.push("/api/auth/signin");
       }
     }

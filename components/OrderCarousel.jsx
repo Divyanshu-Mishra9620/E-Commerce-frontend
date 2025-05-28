@@ -49,7 +49,6 @@ export default function OrderCarousel() {
         }
 
         const data = await response.json();
-        console.log(data.orders);
 
         setOrders(data.orders || []);
       } catch (error) {

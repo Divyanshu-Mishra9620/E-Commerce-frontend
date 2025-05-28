@@ -165,8 +165,6 @@ export default function Dashboard() {
       monthlyData[createdMonth].orders++;
   });
 
-  console.log(orders);
-
   const productCounts = {};
   orders?.forEach((order) => {
     order.products.forEach((prod) => {

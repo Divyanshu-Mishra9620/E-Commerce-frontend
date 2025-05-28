@@ -94,7 +94,6 @@ function Settings() {
       if (!res.ok) throw new Error("Failed to update address");
 
       const data = await res.json();
-      console.log("Address updated:", data);
 
       setIsAddressUpdated(true);
       closeModal();

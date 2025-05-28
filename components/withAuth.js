@@ -17,13 +17,8 @@ const withAuth = (WrappedComponent) => {
     const pathname = usePathname();
 
     useEffect(() => {
-      console.log("Current path:", pathname);
-      console.log("Is public route?", isPublicRoute(pathname));
-      console.log("Auth status:", status);
-
       if (!isPublicRoute(pathname)) {
         if (status === "unauthenticated") {
-          console.log("Redirecting to signin");
           const callbackUrl = encodeURIComponent(pathname);
           router.push(`/api/auth/signin?callbackUrl=${callbackUrl}`);
         }

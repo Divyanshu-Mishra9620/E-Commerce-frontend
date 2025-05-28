@@ -12,11 +12,6 @@ export async function middleware(req) {
     if (!token) {
       return NextResponse.redirect(new URL("/auth/signin", req.url));
     }
-
-    if (token.user?.role !== "admin") {
-      console.log("Token in middleware:", token);
-      // return NextResponse.redirect(new URL("/unauthorized", req.url));
-    }
   }
 
   return NextResponse.next();

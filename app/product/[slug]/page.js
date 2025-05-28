@@ -8,7 +8,12 @@ import React, {
   useContext,
   useTransition,
 } from "react";
-import "@/app/_styles/global.css";
+import Image from "next/image";
+import CyberLoader from "@/components/CyberLoader";
+import ProductLoader from "@/components/ProductLoader";
+import ReviewSection from "@/components/ReviewSection";
+import ProductContext from "@/context/ProductContext";
+import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart,
@@ -17,14 +22,31 @@ import {
   ShoppingCart,
   Star,
 } from "lucide-react";
-import ReviewSection from "@/components/ReviewSection";
-import ProductContext from "@/context/ProductContext";
-import Image from "next/image";
-import CyberLoader from "@/components/CyberLoader";
-import ProductLoader from "@/components/ProductLoader";
-import toast from "react-hot-toast";
+import "@/app/_styles/global.css";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
+
+function SafeImage({ src, alt, width, height, ...rest }) {
+  const [imgSrc, setImgSrc] = useState(src);
+
+  const handleError = () => {
+    if (imgSrc !== "/images/lamp.jpg") {
+      setImgSrc("/images/lamp.jpg");
+    }
+  };
+
+  return (
+    <Image
+      {...rest}
+      src={imgSrc}
+      alt={alt}
+      width={width}
+      height={height}
+      onError={handleError}
+      unoptimized
+    />
+  );
+}
 
 export default function ProductPage() {
   const params = useParams();
@@ -42,22 +64,22 @@ export default function ProductPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  const processImageUrl = (imageUrl) => {
-    if (!imageUrl) return "/lamp.jpg";
+  const getImageUrl = (imageString) => {
+    if (!imageString) return "/images/lamp.jpg";
     try {
-      if (imageUrl.startsWith("[") && imageUrl.endsWith("]")) {
-        const urls = JSON.parse(imageUrl);
-        return urls[0] || "/lamp.jpg";
-      }
-      const cleanedUrl = imageUrl.replace(/\s+/g, "").replace(/[\[\]"']/g, "");
-      if (!cleanedUrl || cleanedUrl === "null" || cleanedUrl === "undefined") {
-        return "/lamp.jpg";
-      }
-      return cleanedUrl;
+      let cleanedUrl = imageString
+        .replace(/\s+/g, "")
+        .replace(/[\[\]]/g, "")
+        .trim();
+      if (!cleanedUrl) return "/images/lamp.jpg";
+      if (cleanedUrl.startsWith("http")) return cleanedUrl;
+      if (cleanedUrl.startsWith("/")) return cleanedUrl;
+      return "/images/lamp.jpg";
     } catch (error) {
       console.error("Error processing image URL:", error);
-      return "/lamp.jpg";
+      return "/images/lamp.jpg";
     }
   };
 
@@ -91,9 +113,9 @@ export default function ProductPage() {
         if (foundProduct) {
           const processedProduct = {
             ...foundProduct,
-            image: processImageUrl(foundProduct.image),
-            images: foundProduct.images?.map(processImageUrl) || [
-              processImageUrl(foundProduct.image),
+            image: getImageUrl(foundProduct.image),
+            images: foundProduct.images?.map(getImageUrl) || [
+              getImageUrl(foundProduct.image),
             ],
           };
           setProduct(processedProduct);
@@ -155,14 +177,11 @@ export default function ProductPage() {
     try {
       const res = await fetch(`${BACKEND_URI}/api/wishlist/${user._id}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId }),
       });
 
       if (res.ok) {
-        const data = await res.json();
         setIsInWishlist(!isInWishlist);
         toast.success(
           isInWishlist ? "Removed from wishlist" : "Added to wishlist"
@@ -194,13 +213,8 @@ export default function ProductPage() {
     try {
       const res = await fetch(`${BACKEND_URI}/api/cart/${user._id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          productId: product._id,
-          quantity: newQuantity,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: product._id, quantity: newQuantity }),
       });
 
       if (res.ok) {
@@ -209,7 +223,6 @@ export default function ProductPage() {
           (item) => item.product === product._id
         );
         setQty(updatedCartItem?.quantity || 0);
-
         toast.success(
           qty === 0 ? "Product added to cart" : "Cart updated successfully"
         );
@@ -228,66 +241,35 @@ export default function ProductPage() {
     ...(product?.product_category_tree || "").toLowerCase().split(" >> "),
   ].filter(Boolean);
 
-  const similarProducts =
-    products
-      ?.filter((prod) => {
-        if (prod.uniq_id === product?.uniq_id) return false;
+  const similarProducts = products
+    ?.filter((prod) => prod.uniq_id !== product?.uniq_id)
+    .filter((prod) => {
+      const prodKeywords = [
+        ...(prod.product_name || "").toLowerCase().split(" "),
+        ...(prod.description || "").toLowerCase().split(" "),
+        ...(prod.product_category_tree || "").toLowerCase().split(" >> "),
+      ].filter(Boolean);
+      return currentProductKeywords.some((kw) => prodKeywords.includes(kw));
+    })
+    .slice(0, 20)
+    .map((prod) => ({
+      ...prod,
+      image: prod.image.replace(/\s+/g, "").replace(/[\[\]]/g, ""),
+    }));
 
-        const prodKeywords = [
-          ...(prod.product_name || "").toLowerCase().split(" "),
-          ...(prod.description || "").toLowerCase().split(" "),
-          ...(prod.product_category_tree || "").toLowerCase().split(" >> "),
-        ].filter(Boolean);
-
-        const matchCount = currentProductKeywords.reduce((count, keyword) => {
-          if (
-            prodKeywords.some((prodKeyword) => prodKeyword.includes(keyword))
-          ) {
-            return count + 1;
-          }
-          return count;
-        }, 0);
-
-        return matchCount > 0;
-      })
-      .sort((a, b) => {
-        const countA = currentProductKeywords.reduce((count, keyword) => {
-          if (
-            (a.product_name || "").toLowerCase().includes(keyword) ||
-            (a.description || "").toLowerCase().includes(keyword) ||
-            (a.product_category_tree || "").toLowerCase().includes(keyword)
-          ) {
-            return count + 1;
-          }
-          return count;
-        }, 0);
-
-        const countB = currentProductKeywords.reduce((count, keyword) => {
-          if (
-            (b.product_name || "").toLowerCase().includes(keyword) ||
-            (b.description || "").toLowerCase().includes(keyword) ||
-            (b.product_category_tree || "").toLowerCase().includes(keyword)
-          ) {
-            return count + 1;
-          }
-          return count;
-        }, 0);
-
-        return countB - countA;
-      })
-      .slice(0, 20)
-      .map((prod) => {
-        const imageUrl = prod.image?.replace(/\s+/g, "").replace(/[\[\]]/g, "");
-        return {
-          ...prod,
-          image: imageUrl,
-        };
-      }) || [];
-  const [isPending, startTransition] = useTransition();
-
-  if (isLoading || loader || isPending || isNavigating) {
-    return <CyberLoader />;
-  }
+  if (isLoading || loader || isPending || isNavigating) return <CyberLoader />;
+  if (!product)
+    return (
+      <div className="container mx-auto p-6 text-center">
+        <h1 className="text-2xl font-bold">Product Not Found</h1>
+        <button
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md"
+          onClick={() => router.push("/")}
+        >
+          Go Back
+        </button>
+      </div>
+    );
 
   const PriceDisplay = ({ price, className }) => (
     <div className={`flex items-center ${className}`}>
@@ -306,7 +288,7 @@ export default function ProductPage() {
         <Star
           key={i}
           className={`w-4 h-4 ${
-            i < rating ? "text-amber-400 fill-amber-400" : "text-gray-600"
+            i < rating ? "text-amber-400 fill-ambre-400" : "text-gray-600"
           }`}
         />
       ))}
@@ -316,17 +298,17 @@ export default function ProductPage() {
 
   const ImageGallery = ({ images }) => (
     <div className="flex gap-4 mt-4">
-      {images.map((img, index) => (
+      {images.map((img, idx) => (
         <button
-          key={index}
-          onClick={() => setSelectedImage(index)}
+          key={idx}
+          onClick={() => setSelectedImage(idx)}
           className={`w-16 h-16 rounded-lg overflow-hidden border-2 ${
-            selectedImage === index ? "border-emerald-400" : "border-gray-700"
+            selectedImage === idx ? "border-emerald-400" : "border-gray-700"
           }`}
         >
-          <Image
-            src={img.replace(/\s+/g, "").replace(/[\[\]]/g, "")}
-            alt={`Thumbnail ${index + 1}`}
+          <SafeImage
+            src={getImageUrl(img)}
+            alt={`Thumbnail ${idx + 1}`}
             width={64}
             height={64}
             className="w-full h-full object-cover"
@@ -363,27 +345,21 @@ export default function ProductPage() {
                 onClick={() => setShowImageModal(true)}
                 className="w-full h-96 relative rounded-xl overflow-hidden"
               >
-                <Image
-                  src={
-                    product?.image.replace(/\s+/g, "").replace(/[\[\]]/g, "") ||
-                    "/images/lamp.jpg"
-                  }
-                  alt={product?.product_name || "Product"}
-                  fill
+                <SafeImage
+                  src={getImageUrl(product.image)}
+                  alt={product.product_name}
+                  width={500}
+                  height={500}
                   className="object-contain hover:scale-105 transition-transform"
-                  onError={(e) => {
-                    console.log("Image load error:", e);
-                    e.target.src = "/images/lamp.jpg";
-                  }}
-                  priority={true}
                 />
               </button>
               <ImageGallery
                 images={[
-                  product?.image?.replace(/\s+/g, "").replace(/[\[\]]/g, ""),
+                  getImageUrl(product?.image),
+                  ...(product?.images || []),
                 ]
                   .filter(Boolean)
-                  .map(processImageUrl)}
+                  .map(getImageUrl)}
               />
             </div>
           </motion.div>
@@ -533,7 +509,6 @@ export default function ProductPage() {
           <h2 className="text-3xl font-bold mb-8">Similar Products</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {similarProducts.map((product) => {
-              const processedImage = processImageUrl(product.image);
               return (
                 <motion.div
                   key={product.uniq_id}
@@ -542,14 +517,12 @@ export default function ProductPage() {
                 >
                   {isNavigating && <ProductLoader />}
                   <div className="relative aspect-square rounded-lg overflow-hidden">
-                    <Image
-                      src={processedImage}
+                    <SafeImage
+                      src={getImageUrl(product.image)}
                       alt={product.product_name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform"
-                      onError={(e) => {
-                        e.target.src = "/placeholder.jpg";
-                      }}
+                      width={500}
+                      height={500}
+                      className="object-contain hover:scale-105 transition-transform"
                     />
                   </div>
                   <div className="mt-4">
@@ -585,15 +558,12 @@ export default function ProductPage() {
             onClick={() => setShowImageModal(false)}
           >
             <div className="relative max-w-4xl w-full">
-              <Image
-                src={
-                  product.image?.replace(/\s+/g, "").replace(/[\[\]]/g, "") ||
-                  "images/lamp.jpg"
-                }
+              <SafeImage
+                src={getImageUrl(product.image)}
                 alt={product.product_name}
                 width={1200}
                 height={1200}
-                className="w-full h-full object-contain"
+                className="object-contain hover:scale-105 transition-transform"
               />
             </div>
           </motion.div>

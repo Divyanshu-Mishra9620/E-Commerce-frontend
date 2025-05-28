@@ -12,7 +12,7 @@ const ProductCard = ({
   product_name,
   discounted_price,
   uniq_id,
-  original_price,
+  retail_price,
 }) => {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -49,7 +49,7 @@ const ProductCard = ({
         <Image
           src={
             image?.replace(/\s+/g, "").replace(/[\[\]]/g, "") ||
-            "/placeholder-product.jpg"
+            "/images-lamp.jpg"
           }
           alt={product_name || "Product Image"}
           fill
@@ -59,10 +59,10 @@ const ProductCard = ({
           )}
           priority={true}
         />
-        {original_price && discounted_price < original_price && (
+        {retail_price && discounted_price < retail_price && (
           <div className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
             {Math.round(
-              ((original_price - discounted_price) / original_price) * 100
+              ((retail_price - discounted_price) / retail_price) * 100
             )}
             % OFF
           </div>
@@ -78,9 +78,9 @@ const ProductCard = ({
           <p className="text-xl font-bold text-primary-600 dark:text-primary-400">
             ₹{discounted_price?.toLocaleString() || "0.00"}
           </p>
-          {original_price && discounted_price < original_price && (
+          {retail_price && discounted_price < retail_price && (
             <p className="text-sm text-gray-500 dark:text-gray-400 line-through">
-              ₹{original_price?.toLocaleString()}
+              ₹{retail_price?.toLocaleString()}
             </p>
           )}
         </div>
@@ -187,50 +187,55 @@ export default function Hero({ products }) {
         )}
 
         <div className="absolute inset-0 flex transition-transform duration-700 ease-in-out">
-          {productList.map((product, index) => (
-            <div
-              key={product._id}
-              className="w-full h-full flex-shrink-0 flex items-center justify-center p-12"
-            >
-              <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="flex flex-col justify-center space-y-6">
-                  <motion.h1
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white"
-                  >
-                    {product.product_name}
-                  </motion.h1>
-                  <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="text-lg text-gray-600 dark:text-gray-300"
-                  >
-                    {product.description ||
-                      "Premium quality product with exceptional features."}
-                  </motion.p>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
-                    className="flex items-center gap-4"
-                  >
-                    <button className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors duration-200">
-                      Shop Now
-                    </button>
-                    <button className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
-                      Learn More
-                    </button>
-                  </motion.div>
-                </div>
-                <div className="flex items-center justify-center">
-                  <ProductCard {...product} />
+          {productList.map((product, index) => {
+            return (
+              <div
+                key={product._id}
+                className="w-full h-full flex-shrink-0 flex items-center justify-center p-12"
+              >
+                <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="flex flex-col justify-center space-y-6">
+                    <motion.h1
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                      className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white"
+                    >
+                      {product.product_name.length < 100
+                        ? product.product_name
+                        : "Some Anonymous Product"}
+                    </motion.h1>
+                    <motion.p
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 }}
+                      className="text-lg text-gray-600 dark:text-gray-300"
+                    >
+                      {!product.description.trim().includes("http://")
+                        ? product.description
+                        : "Premium quality product with exceptional features."}
+                    </motion.p>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 }}
+                      className="flex items-center gap-4"
+                    >
+                      <button className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors duration-200">
+                        Shop Now
+                      </button>
+                      <button className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+                        Learn More
+                      </button>
+                    </motion.div>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <ProductCard {...product} />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {productList.length > 1 && (

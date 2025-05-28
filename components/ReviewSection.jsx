@@ -77,7 +77,6 @@ const ReviewSection = ({ productId }) => {
 
       const data = await response.json();
       setReviews(data.reviews || []);
-      console.log(data.reviews);
 
       if (user) {
         const userReview = (data.reviews || []).find(

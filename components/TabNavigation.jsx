@@ -87,7 +87,7 @@ const TabNavigation = ({ handleTabChange, isTabLoading }) => {
                     />
                     <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15a24.98 24.98 0 01-8-1.308z" />
                   </svg>
-                  Seller
+                  Popular
                 </span>
                 {activeTab === "ProductSeller" && (
                   <motion.div

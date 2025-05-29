@@ -14,29 +14,47 @@ export default function ProductSeller() {
   const router = useRouter();
 
   useEffect(() => {
-    setIsLoading(true);
-    const fetchedProducts = async () => {
-      try {
-        const res = await fetch(`${BACKEND_URI}/api/products`);
-        if (!res.ok) {
-          throw new Error("Failed to fetch products");
-        }
-        const data = await res.json();
-        console.log(data);
+    const fetchProducts = async () => {
+      setIsLoading(true);
 
-        const filtered = data?.filter((product) => {
+      try {
+        const cachedProducts = localStorage.getItem("sellerProducts");
+        const cachedTimestamp = localStorage.getItem("sellerProductsTimestamp");
+
+        if (cachedProducts && cachedTimestamp) {
+          const oneHourAgo = Date.now() - 3600000;
+          if (parseInt(cachedTimestamp) > oneHourAgo) {
+            setSellerProducts(JSON.parse(cachedProducts));
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        const res = await fetch(`${BACKEND_URI}/api/products`);
+        if (!res.ok) throw new Error("Failed to fetch products");
+
+        const data = await res.json();
+
+        const filteredProducts = data?.filter((product) => {
           const creator = String(product.createdBy).trim().toLowerCase();
           return ["admin", "seller"].includes(creator);
         });
-        setSellerProducts(filtered);
+
+        localStorage.setItem(
+          "sellerProducts",
+          JSON.stringify(filteredProducts)
+        );
+        localStorage.setItem("sellerProductsTimestamp", Date.now().toString());
+
+        setSellerProducts(filteredProducts);
       } catch (error) {
-        console.error("Product filtering failed:", error);
+        console.error("Failed to fetch products:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchedProducts();
+    fetchProducts();
   }, []);
 
   const handleProdClick = (productId) => {

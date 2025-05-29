@@ -6,7 +6,7 @@ import { ProductProvider } from "@/context/ProductContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 import { SessionProvider } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Toaster } from "react-hot-toast";
 import { NavigationProvider } from "@/context/NavigationContext";
 
@@ -23,7 +23,9 @@ export default function RootLayout({ children, session }) {
         router.push("/api/auth/signin");
       }
     }
-  }, [router]);
+  }, []);
+
+  const memoizedUser = useMemo(() => user, [user?.id]);
 
   const pathname = usePathname();
   const isAdminRoute = pathname.startsWith("/admin");
@@ -36,7 +38,7 @@ export default function RootLayout({ children, session }) {
             <ProductProvider>
               <CartProvider>
                 <WishlistProvider>
-                  {!isAdminRoute && <Navbar user={user} />}
+                  {!isAdminRoute && <Navbar user={memoizedUser} />}
                   {children}
                   {!isAdminRoute && <BottomNavigation />}
                 </WishlistProvider>

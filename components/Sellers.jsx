@@ -5,9 +5,6 @@ import { motion } from "framer-motion";
 import {
   User,
   Mail,
-  Key,
-  Calendar,
-  Plus,
   Search,
   Activity,
   Package,
@@ -168,7 +165,7 @@ export default function Sellers() {
             >
               <div className="space-y-4">
                 {/* Seller Header */}
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between flex-wrap">
                   <div className="flex items-center gap-3">
                     <div className="bg-indigo-900/20 p-2.5 rounded-lg">
                       <User className="h-6 w-6 text-indigo-400" />
@@ -182,7 +179,7 @@ export default function Sellers() {
                       </p>
                     </div>
                   </div>
-                  <span className="text-xs px-2 py-1 bg-gray-700 rounded-full text-gray-300">
+                  <span className="text-xs px-2 py-1 bg-gray-700 rounded-full text-gray-300 max-h-30">
                     Joined {new Date(user.createdAt).toLocaleDateString()}
                   </span>
                 </div>
@@ -208,8 +205,8 @@ export default function Sellers() {
                       </div>
                     </div>
 
-                    <div className="p-3 bg-gray-700/30 rounded-lg">
-                      <div className="flex items-center gap-2 text-sm">
+                    <div className="p-3 bg-gray-700/30 rounded-lg ">
+                      <div className="flex items-center gap-2 text-sm max-h-12 flex-wrap">
                         <Package className="h-4 w-4 text-amber-400" />
                         <span className="text-gray-300">Products:</span>
                         <span className="text-gray-400">24</span>

@@ -11,7 +11,6 @@ import {
   Heart,
   Tag,
   Settings,
-  LogOut,
   HelpCircle,
   IndianRupee,
   LayoutGrid,
@@ -24,7 +23,7 @@ import { useRouter } from "next/navigation";
 import Spinner from "./Spinner";
 import NavigationLoader from "./NavigationLoader";
 
-export default function Navbar(user) {
+export default function Navbar({ user }) {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isVisible, setIsVisible] = React.useState(true);
@@ -42,7 +41,7 @@ export default function Navbar(user) {
   );
 
   React.useEffect(() => {
-    if (user?.user?.role === "admin") {
+    if (user?.role === "admin") {
       setIsAdmin(true);
     } else {
       setIsAdmin(false);

@@ -8,11 +8,12 @@ import Deals from "@/components/Deals";
 import WishlistSection from "@/components/Wishlist";
 import MostVisitedSection from "@/components/MostVisitedSection";
 import Footer from "@/components/Footer";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import ProductContext from "@/context/ProductContext";
 import CyberLoader from "@/components/CyberLoader";
 import TabNavigation from "@/components/TabNavigation";
 import ProductSeller from "@/components/ProductSeller";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
   const { products, isLoading, error } = useContext(ProductContext);
@@ -23,10 +24,20 @@ export default function Page() {
     restDelta: 0.001,
   });
   const [activeTab, setActiveTab] = useState("Home");
+  const [user, setUser] = useState(null);
+
+  const router = useRouter();
+
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (!storedUser) router.push("/api/auth/signin");
+    setUser(storedUser);
+  }, []);
 
   if (error) {
     return (
@@ -69,7 +80,7 @@ export default function Page() {
             >
               <FlashSale />
             </motion.div>
-            
+
             <SectionWrapper>
               <Hero products={products} />
             </SectionWrapper>

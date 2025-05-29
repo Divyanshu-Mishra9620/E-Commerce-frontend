@@ -1,13 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  useContext,
-  useTransition,
-} from "react";
+import React, { useEffect, useState, useContext, useTransition } from "react";
 import Image from "next/image";
 import CyberLoader from "@/components/CyberLoader";
 import ProductLoader from "@/components/ProductLoader";
@@ -43,7 +37,7 @@ function SafeImage({ src, alt, width, height, ...rest }) {
       width={width}
       height={height}
       onError={handleError}
-      unoptimized
+      unoptimized={false}
     />
   );
 }
@@ -52,7 +46,6 @@ export default function ProductPage() {
   const params = useParams();
   const slug = params.slug;
   const router = useRouter();
-  const containerRef = useRef(null);
 
   const [qty, setQty] = useState(0);
   const [user, setUser] = useState(null);
@@ -71,12 +64,24 @@ export default function ProductPage() {
     try {
       let cleanedUrl = imageString
         .replace(/\s+/g, "")
-        .replace(/[\[\]]/g, "")
+        .replace(/[\[\]'"]/g, "")
         .trim();
+
       if (!cleanedUrl) return "/images/lamp.jpg";
-      if (cleanedUrl.startsWith("http")) return cleanedUrl;
-      if (cleanedUrl.startsWith("/")) return cleanedUrl;
-      return "/images/lamp.jpg";
+
+      if (
+        cleanedUrl.startsWith("http://") ||
+        cleanedUrl.startsWith("https://")
+      ) {
+        return cleanedUrl;
+      }
+
+      if (cleanedUrl.startsWith("/")) {
+        return cleanedUrl;
+      }
+
+      cleanedUrl = cleanedUrl.replace(/^images\//, "");
+      return `/images/${cleanedUrl}`;
     } catch (error) {
       console.error("Error processing image URL:", error);
       return "/images/lamp.jpg";
@@ -376,8 +381,8 @@ export default function ProductPage() {
               <RatingDisplay />
               <PriceDisplay price={product.discounted_price} className="mt-4" />
 
-              <div className="mt-6 p-4 bg-gray-800 rounded-lg">
-                <p className="text-gray-300 leading-relaxed">
+              <div className="mt-6 p-4 bg-gray-800 rounded-lg max-h-64 overflow-y-auto">
+                <p className="text-gray-300 leading-relaxed break-words whitespace-pre-line">
                   {product.description}
                 </p>
               </div>
@@ -526,12 +531,12 @@ export default function ProductPage() {
                     />
                   </div>
                   <div className="mt-4">
-                    <h3 className="font-medium truncate">
+                    <h3 className="font-medium break-words max-h-12 overflow-hidden">
                       {product.product_name}
                     </h3>
                     <PriceDisplay
                       price={product.discounted_price}
-                      className="mt-2"
+                      className="mt-2 overflow-hidden max-h-12"
                     />
                     <button
                       onClick={() => handleView(product.uniq_id)}

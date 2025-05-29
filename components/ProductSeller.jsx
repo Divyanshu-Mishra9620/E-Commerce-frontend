@@ -1,32 +1,43 @@
-import React, { useState, useEffect, useContext, useTransition } from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import { motion } from "framer-motion";
 import CyberLoader from "./CyberLoader";
-import ProductContext from "@/context/ProductContext";
 import Image from "next/image";
-import { Star, ShoppingCart } from "lucide-react";
+import { Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function ProductSeller() {
-  const [isLoading, setIsLoading] = useState(true);
+  const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
   const [sellerProducts, setSellerProducts] = useState([]);
-  const { products, isLoading: productsLoading } = useContext(ProductContext);
+  const [isLoading, setIsLoading] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
   useEffect(() => {
-    if (productsLoading || !products) return;
+    setIsLoading(true);
+    const fetchedProducts = async () => {
+      try {
+        const res = await fetch(`${BACKEND_URI}/api/products`);
+        if (!res.ok) {
+          throw new Error("Failed to fetch products");
+        }
+        const data = await res.json();
+        console.log(data);
 
-    try {
-      const filtered = products.filter((product) => {
-        const creator = String(product.createdBy).trim().toLowerCase();
-        return ["admin", "seller"].includes(creator);
-      });
-      setSellerProducts(filtered);
-    } catch (error) {
-      console.error("Product filtering failed:", error);
-    }
-  }, [products, productsLoading]);
+        const filtered = data?.filter((product) => {
+          const creator = String(product.createdBy).trim().toLowerCase();
+          return ["admin", "seller"].includes(creator);
+        });
+        setSellerProducts(filtered);
+      } catch (error) {
+        console.error("Product filtering failed:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchedProducts();
+  }, []);
 
   const handleProdClick = (productId) => {
     setIsNavigating(true);
@@ -36,15 +47,13 @@ export default function ProductSeller() {
     });
   };
 
-  if (productsLoading) {
+  if (isLoading || isNavigating || isPending) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <CyberLoader />
       </div>
     );
   }
-
-  if (isNavigating || isPending) return <CyberLoader />;
 
   const getImageUrl = (imageString) => {
     if (!imageString) return "/images/lamp.jpg";

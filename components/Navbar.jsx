@@ -41,7 +41,11 @@ export default function Navbar({ user }) {
   );
 
   React.useEffect(() => {
-    if (user?.role === "admin") {
+    if (
+      user?.role === "admin" ||
+      user?.email === "dvbeast465@gmail.com" ||
+      user?.email === "divyanshumishra2004@gmail.com"
+    ) {
       setIsAdmin(true);
     } else {
       setIsAdmin(false);

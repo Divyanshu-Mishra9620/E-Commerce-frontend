@@ -389,7 +389,7 @@ export default function Navbar({ user }) {
 
                 <div className="relative hidden md:block">
                   <button
-                    onClick={() => handleCartClick()}
+                    onClick={(e) => handleCartClick(e)}
                     className="text-gray-200 hover:text-white focus:outline-none transition-colors duration-200 relative"
                   >
                     <ShoppingCart className="w-6 h-6" />

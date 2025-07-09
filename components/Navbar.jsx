@@ -82,6 +82,7 @@ export default function Navbar({ user }) {
 
   const handleCartClick = (e) => {
     e.preventDefault();
+    const user = localStorage.getItem("user");
     if (user)
       startTransition(() => {
         router.push("/profile/carts");

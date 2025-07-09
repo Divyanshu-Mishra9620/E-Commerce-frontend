@@ -157,7 +157,7 @@ export default function Sellers() {
         >
           {filteredSellers.map((user) => (
             <motion.li
-              key={user._id}
+              key={user?._id}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               whileHover={{ scale: 1.02 }}
@@ -175,7 +175,7 @@ export default function Sellers() {
                         {user.name || "Unnamed Seller"}
                       </h3>
                       <p className="text-sm text-indigo-400">
-                        Seller ID: #{user._id.slice(-6)}
+                        Seller ID: #{user?._id.slice(-6)}
                       </p>
                     </div>
                   </div>

@@ -80,7 +80,7 @@ const ReviewSection = ({ productId }) => {
 
       if (user) {
         const userReview = (data.reviews || []).find(
-          (rev) => rev.user?.toString() === user._id.toString()
+          (rev) => rev.user?.toString() === user?._id.toString()
         );
         setHasSubmittedReview(!!userReview);
       }
@@ -410,7 +410,7 @@ const ReviewSection = ({ productId }) => {
                       {review.comment}
                     </p>
 
-                    {user && review.user?.toString() === user._id && (
+                    {user && review.user?.toString() === user?._id && (
                       <div className="flex gap-2 pt-3 border-t border-gray-100 dark:border-gray-700 pl-[52px]">
                         <motion.button
                           whileHover={{ scale: 1.05 }}

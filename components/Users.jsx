@@ -130,7 +130,7 @@ export default function Users() {
           {filtered.length > 0 ? (
             filtered.map((user) => (
               <motion.div
-                key={user._id}
+                key={user?._id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
@@ -154,7 +154,7 @@ export default function Users() {
                         <Key className="h-5 w-5 text-gray-400 mt-0.5" />
                         <div>
                           <p className="text-sm text-gray-400">User ID</p>
-                          <p className="text-gray-300 font-mono">{user._id}</p>
+                          <p className="text-gray-300 font-mono">{user?._id}</p>
                         </div>
                       </div>
 

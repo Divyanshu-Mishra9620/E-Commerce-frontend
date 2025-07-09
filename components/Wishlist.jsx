@@ -18,7 +18,9 @@ const WishlistSection = () => {
           throw new Error("User not found in localStorage");
         }
 
-        const response = await fetch(`${BACKEND_URI}/api/wishlist/${user._id}`);
+        const response = await fetch(
+          `${BACKEND_URI}/api/wishlist/${user?._id}`
+        );
         if (!response.ok) throw new Error("Failed to fetch wishlist");
 
         const data = await response.json();

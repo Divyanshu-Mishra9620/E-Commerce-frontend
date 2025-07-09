@@ -73,7 +73,7 @@ export default function OrderCarousel() {
         const userReviews = [];
         products?.forEach((prod) => {
           const userReview = prod.reviews?.find(
-            (review) => review.user === user._id
+            (review) => review.user === user?._id
           );
           if (userReview) {
             userReviews.push({ ...userReview, product: prod });

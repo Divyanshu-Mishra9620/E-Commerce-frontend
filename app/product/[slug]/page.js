@@ -381,7 +381,7 @@ export default function ProductPage() {
               <RatingDisplay />
               <PriceDisplay price={product.discounted_price} className="mt-4" />
 
-              <div className="mt-6 p-4 bg-gray-800 rounded-lg max-h-64 overflow-y-auto">
+              <div className="mt-6 p-4 bg-gray-800 rounded-lg max-h-96 overflow-y-auto">
                 <p className="text-gray-300 leading-relaxed break-words whitespace-pre-line">
                   {product.description}
                 </p>

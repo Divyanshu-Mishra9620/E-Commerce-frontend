@@ -25,7 +25,7 @@ export default function RootLayout({ children, session }) {
     }
   }, []);
 
-  const memoizedUser = useMemo(() => user, [user?.id]);
+  const memoizedUser = useMemo(() => user, [user?._id]);
 
   const pathname = usePathname();
   const isAdminRoute = pathname.startsWith("/admin");

@@ -52,6 +52,8 @@ export default function Navbar({ user }) {
 
   const handleUserIconClick = () => {
     if (!session) {
+      console.log(pushing);
+
       router.push("/api/auth/signin");
     } else {
       if (window.innerWidth > 767) {
@@ -387,7 +389,7 @@ export default function Navbar({ user }) {
 
                 <div className="relative hidden md:block">
                   <button
-                    onClick={handleCartClick}
+                    onClick={() => handleCartClick()}
                     className="text-gray-200 hover:text-white focus:outline-none transition-colors duration-200 relative"
                   >
                     <ShoppingCart className="w-6 h-6" />

@@ -161,6 +161,7 @@ export default function PaymentPage() {
             products,
             shippingAddress: address,
             paymentMethod: "UPI",
+            user,
           }),
         }
       );

@@ -34,7 +34,7 @@ const Cart = () => {
       } else {
         router.push("/api/auth/signin");
       }
-    }
+    }else return null
   }, [router]);
 
   const openModal = (itemId) => {

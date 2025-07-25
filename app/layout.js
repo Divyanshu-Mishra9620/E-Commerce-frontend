@@ -22,7 +22,7 @@ export default function RootLayout({ children, session }) {
       } else {
         router.push("/api/auth/signin");
       }
-    }
+    } else return null;
   }, []);
 
   const memoizedUser = useMemo(() => user, [user?._id]);

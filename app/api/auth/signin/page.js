@@ -118,7 +118,7 @@ export default function SignIn() {
       if (typeof window !== "undefined") {
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("token", data.token);
-      }
+      } else return null;
 
       const result = await signIn("credentials", {
         redirect: false,

@@ -17,7 +17,7 @@ export const WishlistProvider = ({ children }) => {
       if (stored) {
         userRef.current = JSON.parse(stored);
       }
-    }
+    } else return null;
   }, []);
 
   useEffect(() => {

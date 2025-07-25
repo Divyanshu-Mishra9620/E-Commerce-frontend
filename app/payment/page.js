@@ -184,6 +184,7 @@ export default function PaymentPage() {
           body: JSON.stringify({
             orderId: order.order._id,
             amount: order.order.totalPrice,
+            user,
           }),
         }
       );

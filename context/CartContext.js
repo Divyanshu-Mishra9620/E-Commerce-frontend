@@ -1,177 +1,141 @@
 "use client";
+import { createContext, useContext, useMemo, useCallback } from "react";
+import useSWR from "swr";
+import { toast } from "react-toastify";
+import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
-import { createContext, useContext, useState, useEffect } from "react";
+const fetcher = (url) => fetch(url).then((res) => res.json());
 
 const CartContext = createContext();
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
-  const fetchCart = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const savedUser = JSON.parse(localStorage.getItem("user"));
-      if (!savedUser?._id) {
-        router.push("/api/auth/signin");
-        return;
+  if (!user && !authLoading) {
+    router.push("/api/auth/signin");
+  }
+
+  const userId = user?._id;
+
+  const swrKey = userId ? `${BACKEND_URI}/api/cart/${userId}` : null;
+
+  const { data, error, isLoading, mutate } = useSWR(swrKey, fetcher, {
+    keepPreviousData: true,
+  });
+
+  const cartItems = data?.items || [];
+
+  const performCartUpdate = useCallback(
+    async (action, payload) => {
+      if (!userId) return toast.error("Please log in to manage your cart.");
+
+      let optimisticData, apiOptions;
+
+      switch (action) {
+        case "ADD":
+          const newItem = {
+            product: payload.product,
+            quantity: payload.quantity,
+          };
+          optimisticData = { ...data, items: [...cartItems, newItem] };
+          apiOptions = {
+            method: "PUT",
+            body: JSON.stringify({
+              productId: payload.product._id,
+              quantity: payload.quantity,
+            }),
+          };
+          break;
+        case "REMOVE":
+          optimisticData = {
+            ...data,
+            items: cartItems.filter(
+              (item) => item.product._id !== payload.productId
+            ),
+          };
+          apiOptions = {
+            method: "DELETE",
+            body: JSON.stringify({ product: payload.productId }),
+          };
+          break;
+        case "UPDATE":
+          optimisticData = {
+            ...data,
+            items: cartItems.map((item) =>
+              item.product._id === payload.productId
+                ? { ...item, quantity: payload.quantity }
+                : item
+            ),
+          };
+          apiOptions = {
+            method: "PUT",
+            body: JSON.stringify({
+              productId: payload.productId,
+              quantity: payload.quantity,
+            }),
+          };
+          break;
+        case "CLEAR":
+          optimisticData = { ...data, items: [] };
+          apiOptions = { method: "DELETE" };
+          break;
+        default:
+          return;
       }
 
-      const response = await fetch(`${BACKEND_URI}/api/cart/${savedUser?._id}`);
+      await mutate(optimisticData, { revalidate: false });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch cart");
-      }
-
-      const data = await response.json();
-      localStorage.setItem("cart", JSON.stringify(data.items));
-      setCartItems(data.items || []);
-    } catch (error) {
-      console.error("Error fetching cart:", error);
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (localStorage.getItem("user")) {
-      fetchCart();
-    } else {
-      router.push("/api/auth/signin");
-    }
-  }, [router]);
-
-  const addToCart = async (product, quantity = 1) => {
-    setCartItems((prev) => [...prev, { product, quantity }]);
-    try {
-      const savedUser = JSON.parse(localStorage.getItem("user"));
-      if (!savedUser?._id) {
-        throw new Error("User not found in local storage");
-      }
-      await fetch(`${BACKEND_URI}/api/cart/${savedUser?._id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product: product._id, quantity }),
-      });
-    } catch (error) {
-      console.error(err);
-      toast.error("Failed to add to cart");
-      setCartItems((prev) =>
-        prev.forEach((item) => {
-          if (item.product._id === product._id) item.quantity--;
-        })
-      );
-    }
-  };
-
-  const removeItem = async (productId) => {
-    const old = cartItems;
-    setCartItems((prev) =>
-      prev.filter((item) => item.product._id !== productId)
-    );
-    try {
-      const savedUser = JSON.parse(localStorage.getItem("user"));
-      if (!savedUser?._id) {
-        throw new Error("User not found in local storage");
-      }
-      const response = await fetch(
-        `${BACKEND_URI}/api/cart/${savedUser?._id}`,
-        {
-          method: "DELETE",
+      try {
+        const res = await fetch(`${BACKEND_URI}/api/cart/${userId}`, {
+          ...apiOptions,
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ product: productId }),
-        }
-      );
+        });
+        if (!res.ok) throw new Error(`Failed to ${action.toLowerCase()} cart.`);
 
-      if (!response.ok) {
-        throw new Error("Failed to remove item from cart");
+        await mutate();
+      } catch (err) {
+        toast.error(err.message);
+        await mutate();
       }
-    } catch (error) {
-      console.error(err);
-      toast.error("Failed to remove item");
-      setCartItems(old);
-    }
-  };
-
-  const updateQuantity = async (productId, quantity) => {
-    const old = cartItems;
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.product._id === productId ? { ...item, quantity } : item
-      )
-    );
-    try {
-      const savedUser = JSON.parse(localStorage.getItem("user"));
-      if (!savedUser?._id) {
-        throw new Error("User not found in local storage");
-      }
-      const response = await fetch(
-        `${BACKEND_URI}/api/cart/${savedUser?._id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ productId: productId, quantity }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update item quantity");
-      }
-    } catch (error) {
-      console.error(err);
-      toast.error("Failed to update quantity");
-      setCartItems(old);
-    }
-  };
-
-  const clearCart = async () => {
-    const old = cartItems;
-    setCartItems([]);
-    try {
-      const savedUser = JSON.parse(localStorage.getItem("user"));
-      if (!savedUser?._id) {
-        throw new Error("User not found in local storage");
-      }
-      const response = await fetch(
-        `${BACKEND_URI}/api/cart/${savedUser?._id}`,
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to clear cart");
-      }
-    } catch (error) {
-      console.error("Error clearing cart:", error);
-      setError(error.message);
-      setCartItems(old);
-    }
-  };
-
-  return (
-    <CartContext.Provider
-      value={{
-        cartItems,
-        setCartItems,
-        loading,
-        error,
-        addToCart,
-        removeItem,
-        updateQuantity,
-        clearCart,
-        fetchCart,
-      }}
-    >
-      {children}
-    </CartContext.Provider>
+    },
+    [data, userId, mutate, cartItems]
   );
+
+  const { cartCount, cartTotal } = useMemo(() => {
+    const count = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+    const total = cartItems.reduce(
+      (acc, item) => acc + item.quantity * (item.product.price || 599),
+      0
+    );
+    return { cartCount: count, cartTotal: total };
+  }, [cartItems]);
+
+  const value = useMemo(
+    () => ({
+      cartItems,
+      isLoading,
+      error,
+      cartCount,
+      cartTotal,
+      addToCart: (product, quantity = 1) =>
+        performCartUpdate("ADD", { product, quantity }),
+      removeItem: (productId) => performCartUpdate("REMOVE", { productId }),
+      updateQuantity: (productId, quantity) =>
+        performCartUpdate("UPDATE", { productId, quantity }),
+      clearCart: () => performCartUpdate("CLEAR"),
+    }),
+    [cartItems, isLoading, error, cartCount, cartTotal, performCartUpdate]
+  );
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
 
-export const useCart = () => useContext(CartContext);
+export const useCart = () => {
+  const context = useContext(CartContext);
+  if (context === undefined) {
+    throw new Error("useCart must be used within a CartProvider");
+  }
+  return context;
+};

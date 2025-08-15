@@ -54,7 +54,6 @@ export default function KidsPage() {
         transition={{ duration: 0.5 }}
         className="container mx-auto px-4 py-16 sm:py-24"
       >
-        {/* Hero Section */}
         <div className="text-center mb-16">
           <motion.h1
             initial={{ y: -20, opacity: 0 }}
@@ -75,7 +74,6 @@ export default function KidsPage() {
           </motion.p>
         </div>
 
-        {/* Categories Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {categories.map((category, index) => (
             <motion.div
@@ -116,7 +114,6 @@ export default function KidsPage() {
           ))}
         </div>
 
-        {/* CTA Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

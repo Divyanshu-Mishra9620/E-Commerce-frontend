@@ -8,15 +8,22 @@ import Deals from "@/components/Deals";
 import WishlistSection from "@/components/Wishlist";
 import MostVisitedSection from "@/components/MostVisitedSection";
 import Footer from "@/components/Footer";
-import { useContext, useEffect, useState } from "react";
-import ProductContext from "@/context/ProductContext";
+import { useState } from "react";
 import CyberLoader from "@/components/CyberLoader";
 import TabNavigation from "@/components/TabNavigation";
 import ProductSeller from "@/components/ProductSeller";
-import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useHomepageData } from "@/hooks/useHomepageData";
 
 export default function Page() {
-  const { products, isLoading, error } = useContext(ProductContext);
+  const { products, isLoading, error } = useHomepageData();
+  const { status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      router.push("/api/auth/signin");
+    },
+  });
+
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
@@ -24,37 +31,20 @@ export default function Page() {
     restDelta: 0.001,
   });
   const [activeTab, setActiveTab] = useState("Home");
-  const [user, setUser] = useState(null);
-
-  const router = useRouter();
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (!storedUser) router.push("/api/auth/signin");
-    setUser(storedUser);
-  }, []);
+  if (status === "loading" || isLoading) {
+    return <CyberLoader />;
+  }
 
   if (error) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex justify-center items-center min-h-screen text-xl font-bold text-red-500"
-      >
-        Failed to load products. Please try again later.
-      </motion.div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen">
-        <CyberLoader />
+      <div className="flex justify-center items-center min-h-screen text-red-500">
+        Failed to load products.
       </div>
     );
   }
@@ -73,14 +63,6 @@ export default function Page() {
 
         {activeTab === "Home" && (
           <>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <FlashSale />
-            </motion.div>
-
             <SectionWrapper>
               <Hero products={products} />
             </SectionWrapper>

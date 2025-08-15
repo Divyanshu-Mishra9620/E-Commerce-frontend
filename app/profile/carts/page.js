@@ -1,44 +1,35 @@
 "use client";
+
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trash2, Plus, Minus, X, Package, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import "@/app/_styles/global.css";
-import withAuth from "@/components/withAuth";
-import { useCart } from "@/context/CartContext";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { useDebounce } from "use-debounce";
+import "react-toastify/dist/ReactToastify.css";
+
+import withAuth from "@/components/withAuth";
 import Navbar from "@/components/Navbar";
 import CyberLoader from "@/components/CyberLoader";
-
-const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
+import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
+import { toast } from "react-hot-toast";
 
 const Cart = () => {
-  const { cartItems, loading, error, removeItem, updateQuantity, fetchCart } =
+  const { cartItems, isLoading, error, removeItem, updateQuantity, cartTotal } =
     useCart();
-  const [searchInput, setSearchInput] = useState("");
+  const { addToWishlist } = useWishlist();
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
+
+  const [searchInput, setSearchInput] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [debouncedSearchInput] = useDebounce(searchInput, 300);
 
-  const [user, setUser] = useState(null);
-
-  React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      } else {
-        router.push("/api/auth/signin");
-      }
-    }else return null
-  }, [router]);
-
-  const openModal = (itemId) => {
-    setSelectedItem(itemId);
+  const openModal = (productId) => {
+    setSelectedItem(productId);
     setShowModal(true);
   };
 
@@ -48,92 +39,70 @@ const Cart = () => {
   };
 
   const handleDelete = (productId) => {
-    setShowModal(false);
     removeItem(productId);
+    closeModal();
   };
 
-  const toggleWishlist = async (productId) => {
-    if (!user) {
-      alert("Please log in to add items to your wishlist");
-      router.push("/api/auth/signin");
-      return;
-    }
+  const moveToWishlist = async (product) => {
+    if (!user) return toast.error("Please log in first.");
 
-    try {
-      const res = await fetch(`${BACKEND_URI}/api/wishlist/${user._id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          productId: productId,
-        }),
-      });
+    await addToWishlist(product);
+    await removeItem(product._id);
 
-      if (res.ok) {
-        const data = await res.json();
-        toast.success("Item moved to wishlist!", { position: "bottom-right" });
-      } else {
-        const errorData = await res.json();
-        console.error("Failed to update wishlist:", errorData);
-      }
-    } catch (error) {
-      console.error("Error updating wishlist:", error);
-    } finally {
-      setShowModal(false);
-    }
+    toast.success("Item moved to wishlist!");
+    closeModal();
   };
 
-  const filteredItems = useMemo(() => {
-    return cartItems?.filter((item) =>
-      item?.product?.product_name
-        ?.toLowerCase()
-        .includes(debouncedSearchInput.toLowerCase())
-    );
-  }, [debouncedSearchInput, cartItems]);
-
-  const handleCartClick = (change, productId) => {
-    const item = cartItems?.find((item) => item?.product?._id === productId);
+  const handleQuantityChange = (productId, change) => {
+    const item = cartItems.find((item) => item.product._id === productId);
     if (!item) return;
 
     const newQuantity = item.quantity + change;
     if (newQuantity < 1) {
-      removeItem(productId);
+      openModal(item.product);
     } else {
       updateQuantity(productId, newQuantity);
     }
   };
 
-  const calculateTotal = useMemo(() => {
-    return filteredItems?.reduce(
-      (total, item) =>
-        total + (+item?.product?.discounted_price || 799) * item?.quantity,
-      0
+  const filteredItems = useMemo(() => {
+    if (!cartItems) return [];
+    return cartItems.filter((item) =>
+      item.product?.product_name
+        ?.toLowerCase()
+        .includes(debouncedSearchInput.toLowerCase())
     );
-  }, [filteredItems]);
+  }, [debouncedSearchInput, cartItems]);
 
-  if (error) return <div>Error: {error}</div>;
+  if (isLoading || authLoading)
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <CyberLoader />
+      </div>
+    );
+
+  if (error) return <div>Error: {error.message}</div>;
 
   return (
     <>
       <Navbar />
-      {loading ? (
+      {isLoading ? (
         <CyberLoader />
       ) : (
-        <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-gray-100">
+        <div className="min-h-screen bg-gray-50 text-gray-800">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-7xl">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-8"
+              className="mb-8 mt-8"
             >
-              <div className="relative mt-8">
+              <div className="relative">
                 <input
                   type="text"
                   placeholder="Search in cart..."
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  className="w-full px-6 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-100 placeholder-gray-400"
+                  className="w-full px-6 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <Search
                   className="absolute right-4 top-3.5 text-gray-400"
@@ -142,45 +111,24 @@ const Cart = () => {
               </div>
             </motion.div>
 
-            {loading ? (
-              <div className="grid gap-4">
-                {[...Array(3)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex items-center justify-between p-4 bg-gray-800 rounded-xl animate-pulse"
-                  >
-                    <div className="w-20 h-20 bg-gray-700 rounded-lg"></div>
-                    <div className="flex-1 ml-4 space-y-2">
-                      <div className="h-4 bg-gray-700 rounded w-3/4"></div>
-                      <div className="h-3 bg-gray-700 rounded w-1/2"></div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gray-700 rounded-full"></div>
-                      <div className="w-8 h-8 bg-gray-700 rounded-full"></div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            ) : cartItems?.length === 0 ? (
+            {cartItems?.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="flex flex-col items-center justify-center min-h-[60vh] text-center"
               >
-                <div className="mb-6 p-6 bg-gray-800 rounded-full">
+                <div className="mb-6 p-6 bg-gray-100 rounded-full">
                   <Package className="w-16 h-16 text-gray-400" />
                 </div>
-                <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-gray-200 to-gray-400 bg-clip-text text-transparent">
+                <h2 className="text-3xl font-bold mb-2 text-gray-800">
                   Your Cart is Empty
                 </h2>
-                <p className="text-gray-400 mb-6 max-w-md">
-                  Explore our premium collection and find something special
+                <p className="text-gray-600 mb-6 max-w-md">
+                  Looks like you haven't added anything to your cart yet.
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
-                  className="px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl font-medium hover:shadow-lg"
+                  className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold"
                   onClick={() => router.push("/")}
                 >
                   Discover Products
@@ -198,63 +146,61 @@ const Cart = () => {
                       key={item.product._id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="flex items-center justify-between p-4 bg-gray-800 rounded-xl border border-gray-700 hover:border-gray-600 transition-all"
+                      transition={{ delay: index * 0.05 }}
+                      className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 shadow-sm"
                     >
                       <div className="flex items-center gap-4 flex-1">
-                        <div className="relative w-20 h-20 rounded-lg overflow-hidden">
+                        <div className="relative w-20 h-20 rounded-lg overflow-hidden shrink-0">
                           <Image
                             src={
-                              item.product.image
-                                .replace(/\s+/g, "")
-                                .replace(/[\[\]]/g, "") || "/lamp.jpg"
+                              item.product.image?.replace(/\s+|[\[\]]/g, "") ||
+                              "/lamp.jpg"
                             }
                             alt={item.product.product_name}
                             fill
                             className="object-cover"
-                            placeholder="blur"
-                            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent" />
                         </div>
-                        <div className="flex-1">
-                          <h3 className="font-medium line-clamp-1">
+                        <div>
+                          <h3 className="font-semibold text-gray-800 line-clamp-1">
                             {item.product.product_name}
                           </h3>
-                          <p className="text-gray-400 text-sm">
+                          <p className="text-gray-600 text-sm">
                             ₹
                             {(
-                              (+item.product.discounted_price || 799) *
-                              item.quantity
+                              item.product.discounted_price * item.quantity
                             ).toFixed(2)}
                           </p>
                         </div>
                       </div>
-
                       <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-3 bg-gray-700 px-3 py-1 rounded-xl">
+                        <div className="flex items-center gap-3 bg-gray-100 px-3 py-1 rounded-full">
                           <motion.button
                             whileTap={{ scale: 0.9 }}
-                            className="text-gray-300 hover:text-white"
+                            className="text-gray-600 hover:text-gray-900"
                             onClick={() =>
-                              handleCartClick(-1, item.product._id)
+                              handleQuantityChange(item.product._id, -1)
                             }
                           >
                             <Minus className="w-5 h-5" />
                           </motion.button>
-                          <span className="font-medium">{item.quantity}</span>
+                          <span className="font-medium w-4 text-center text-gray-800">
+                            {item.quantity}
+                          </span>
                           <motion.button
                             whileTap={{ scale: 0.9 }}
-                            className="text-gray-300 hover:text-white"
-                            onClick={() => handleCartClick(1, item.product._id)}
+                            className="text-gray-600 hover:text-gray-900"
+                            onClick={() =>
+                              handleQuantityChange(item.product._id, 1)
+                            }
                           >
                             <Plus className="w-5 h-5" />
                           </motion.button>
                         </div>
                         <motion.button
                           whileHover={{ scale: 1.1 }}
-                          className="text-red-400 hover:text-red-300"
-                          onClick={() => openModal(item.product._id)}
+                          className="text-red-500 hover:text-red-600"
+                          onClick={() => openModal(item.product)}
                         >
                           <Trash2 className="w-5 h-5" />
                         </motion.button>
@@ -267,76 +213,88 @@ const Cart = () => {
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="mt-8 pt-8 border-t border-gray-700"
+                    className="mt-8 pt-8 border-t border-gray-200"
                   >
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="text-xl font-semibold">Total Amount</h3>
-                      <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-                        ₹{calculateTotal}
-                      </span>
+                    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                      <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-xl font-semibold text-gray-800">
+                          Total Amount
+                        </h3>
+                        <span className="text-2xl font-bold text-blue-600">
+                          ₹{cartTotal.toFixed(2)}
+                        </span>
+                      </div>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold"
+                        onClick={() => router.push("/payment")}
+                      >
+                        Proceed to Checkout
+                      </motion.button>
                     </div>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="w-full py-4 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl font-semibold hover:shadow-xl transition-all"
-                      onClick={() => router.push("/payment")}
-                    >
-                      Proceed to Checkout
-                    </motion.button>
                   </motion.div>
                 )}
-
-                <AnimatePresence>
-                  {showModal && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
-                      onClick={closeModal}
-                    >
-                      <motion.div
-                        initial={{ scale: 0.8 }}
-                        animate={{ scale: 1 }}
-                        exit={{ scale: 0.8 }}
-                        className="bg-gray-800 rounded-xl p-6 w-full max-w-md border border-gray-700"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <div className="flex justify-between items-center mb-6">
-                          <h3 className="text-xl font-semibold">Manage Item</h3>
-                          <button
-                            onClick={closeModal}
-                            className="text-gray-400 hover:text-gray-200"
-                          >
-                            <X className="w-6 h-6" />
-                          </button>
-                        </div>
-                        <div className="flex gap-4">
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg flex items-center justify-center gap-2"
-                            onClick={() => toggleWishlist(selectedItem)}
-                          >
-                            <span>Move to Wishlist</span>
-                          </motion.button>
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            className="flex-1 py-3 bg-red-600/30 hover:bg-red-600/40 text-red-400 rounded-lg flex items-center justify-center gap-2"
-                            onClick={() => handleDelete(selectedItem)}
-                          >
-                            <Trash2 className="w-5 h-5" />
-                            <span>Remove</span>
-                          </motion.button>
-                        </div>
-                      </motion.div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </>
             )}
           </div>
         </div>
       )}
+      <AnimatePresence>
+        {showModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+            onClick={closeModal}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="bg-white rounded-xl p-6 w-full max-w-md border border-gray-200 shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-semibold text-gray-800">
+                  Manage Item
+                </h3>
+                <button
+                  onClick={closeModal}
+                  className="text-gray-500 hover:text-gray-800"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <p className="text-center text-gray-600 mb-6">
+                What would you like to do with{" "}
+                <span className="font-semibold">
+                  {selectedItem.product_name}
+                </span>
+                ?
+              </p>
+              <div className="flex gap-4">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg flex items-center justify-center gap-2"
+                  onClick={() => moveToWishlist(selectedItem)}
+                >
+                  <span>Move to Wishlist</span>
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  className="flex-1 py-3 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg flex items-center justify-center gap-2"
+                  onClick={() => handleDelete(selectedItem._id)}
+                >
+                  <Trash2 className="w-5 h-5" />
+                  <span>Remove</span>
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

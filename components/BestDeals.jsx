@@ -7,23 +7,34 @@ import { useDragScroll } from "@/hooks/useDragScroll";
 import toast from "react-hot-toast";
 import { useCart } from "@/context/CartContext";
 import Spinner from "./Spinner";
+import { useAuth } from "@/hooks/useAuth";
+import CyberLoader from "./CyberLoader";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
 const BestDealsGrid = ({ products }) => {
   const router = useRouter();
   const scrollRef = useRef(null);
-  const productList = Array.isArray(products) ? products.slice(20, 32) : [];
+  const productList = Array.isArray(products) ? products : [];
   const { setCartItems } = useCart();
   const [isPending, startTransition] = useTransition();
   const [hoveredCard, setHoveredCard] = useState(null);
+  const { user, isLoading: authLoading } = useAuth();
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <CyberLoader />
+      </div>
+    );
+  }
+
   useDragScroll(scrollRef);
 
   async function handleCartClick(deal, e) {
     e.stopPropagation();
     try {
-      const savedUser = JSON.parse(localStorage.getItem("user"));
-      if (!savedUser?._id) {
+      if (!user?._id) {
         router.push("/api/auth/signin");
         toast.error("Please sign in to add items to cart");
         return;
@@ -36,7 +47,7 @@ const BestDealsGrid = ({ products }) => {
 
       const loadingToast = toast.loading("Adding to cart...");
 
-      const response = await fetch(`${BACKEND_URI}/api/cart/${savedUser._id}`, {
+      const response = await fetch(`${BACKEND_URI}/api/cart/${user?._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -127,15 +138,18 @@ const BestDealsGrid = ({ products }) => {
               whileHover={{ y: -5 }}
               onClick={() => handleDeals(deal.uniq_id)}
             >
-              {/* Discount Badge */}
               <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wider shadow-lg z-10">
                 {Math.round(
-                  (200 / ((+deal.discounted_price || 7999) + 200)) * 100
+                  (200 /
+                    ((isNaN(+deal.discounted_price)
+                      ? 599
+                      : +deal.discounted_price) +
+                      200)) *
+                    100
                 )}
                 % OFF
               </div>
 
-              {/* Product Image */}
               <div className="relative h-64 w-full overflow-hidden">
                 <Image
                   src={
@@ -154,7 +168,6 @@ const BestDealsGrid = ({ products }) => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               </div>
 
-              {/* Product Info */}
               <div className="p-4 flex-1 flex flex-col">
                 <h4 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2 mb-2">
                   {deal.product_name}
@@ -166,12 +179,13 @@ const BestDealsGrid = ({ products }) => {
                   </span>
                   <span className="text-sm text-gray-500 dark:text-gray-400 line-through">
                     ₹
-                    {(+deal.discounted_price + 200)?.toLocaleString() ||
-                      "9,999"}
+                    {(isNaN(+deal.discounted_price)
+                      ? 599
+                      : +deal.discounted_price + 200
+                    )?.toLocaleString()}
                   </span>
                 </div>
 
-                {/* Rating and Add to Cart */}
                 <div className="flex items-center justify-between mt-4">
                   <div className="flex items-center gap-2">
                     <div className="flex text-amber-400">
@@ -218,17 +232,6 @@ const BestDealsGrid = ({ products }) => {
             </motion.div>
           </motion.div>
         ))}
-      </div>
-
-      <div className="mt-8 text-center">
-        <motion.button
-          className="px-8 py-3 bg-primary-600 hover:bg-primary-700 text-gray-900 font-medium rounded-lg shadow-md transition-all duration-300"
-          whileHover={{ y: -2 }}
-          whileTap={{ scale: 0.98 }}
-          // onClick={() => router.push("/deals")}
-        >
-          View All Deals
-        </motion.button>
       </div>
     </motion.section>
   );

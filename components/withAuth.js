@@ -4,31 +4,32 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import CyberLoader from "./CyberLoader";
 
-const isPublicRoute = (pathname) => {
-  const publicPaths = ["/api/auth/signin", "/reset-password"];
+const withAuth = (WrappedComponent, options = {}) => {
+  const { publicRoutes = [] } = options;
+  const defaultPublicRoutes = [
+    "/api/auth/signin",
+    "qpi/auth/register",
+    ...publicRoutes,
+  ];
 
-  return publicPaths.some((publicPath) => pathname.startsWith(publicPath));
-};
-
-const withAuth = (WrappedComponent) => {
   const ComponentWithAuth = (props) => {
     const { data: session, status } = useSession();
     const router = useRouter();
     const pathname = usePathname();
 
-    useEffect(() => {
-      if (!isPublicRoute(pathname)) {
-        if (status === "unauthenticated") {
-          const callbackUrl = encodeURIComponent(pathname);
-          router.push(`/api/auth/signin?callbackUrl=${callbackUrl}`);
-        }
-      }
-    }, [status, router, pathname]);
+    const isProtectedRoute = !defaultPublicRoutes.some((publicPath) =>
+      pathname.startsWith(publicPath)
+    );
 
-    if (status === "loading" && !isPublicRoute(pathname)) {
+    useEffect(() => {
+      if (isProtectedRoute && status === "unauthenticated") {
+        const callbackUrl = encodeURIComponent(pathname);
+        router.push(`/api/auth/signin?callbackUrl=${callbackUrl}`);
+      }
+    }, [status, router, pathname, isProtectedRoute]);
+    if (isProtectedRoute && status === "loading") {
       return <CyberLoader />;
     }
-
     return <WrappedComponent {...props} />;
   };
 

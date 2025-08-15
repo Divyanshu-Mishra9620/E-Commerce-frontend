@@ -54,7 +54,6 @@ export default function MenPage() {
         transition={{ duration: 0.5 }}
         className="container mx-auto px-4 py-16 sm:py-24"
       >
-        {/* Hero Section */}
         <div className="text-center mb-16">
           <motion.h1
             initial={{ y: -20, opacity: 0 }}
@@ -74,7 +73,6 @@ export default function MenPage() {
           </motion.p>
         </div>
 
-        {/* Categories Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {categories.map((category, index) => (
             <motion.div
@@ -94,7 +92,7 @@ export default function MenPage() {
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                priority={index < 3} // Prioritize loading first 3 images
+                priority={index < 3} 
               />
 
               <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
@@ -115,7 +113,6 @@ export default function MenPage() {
           ))}
         </div>
 
-        {/* CTA Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

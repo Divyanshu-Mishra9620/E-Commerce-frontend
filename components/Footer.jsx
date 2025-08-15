@@ -1,171 +1,185 @@
 "use client";
+
 import React from "react";
+import Link from "next/link";
 import {
-  FaFacebook,
+  FaFacebookF,
   FaTwitter,
   FaInstagram,
-  FaLinkedin,
+  FaLinkedinIn,
   FaYoutube,
 } from "react-icons/fa";
-import { SiVisa, SiMastercard, SiPaypal, SiApplepay } from "react-icons/si";
-import {motion} from "framer-motion"
+import {
+  SiVisa,
+  SiMastercard,
+  SiPaypal,
+  SiAmericanexpress,
+} from "react-icons/si";
+import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 
-const Footer = () => {
+const SocialIcon = ({ href, icon: Icon, brandColor }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    className={`p-2 rounded-full bg-gray-100 text-gray-500 hover:text-white transition-all duration-300 ${brandColor}`}
+  >
+    <Icon size={16} />
+  </a>
+);
+
+export default function Footer() {
   return (
-    <motion.div
+    <motion.footer
       initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="hero-section"
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5 }}
+      className="bg-white border-t border-gray-200"
     >
-      <footer className="bg-gray-900 text-white py-12 mt-16">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2">
-                <li>
-                  <a href="/" className="hover:text-gray-400 transition-colors">
-                    Home
-                  </a>
-                </li>
-                <li>
-                  <a href="/" className="hover:text-gray-400 transition-colors">
-                    About Us
-                  </a>
-                </li>
-                <li>
-                  <a href="/" className="hover:text-gray-400 transition-colors">
-                    Contact Us
-                  </a>
-                </li>
-                <li>
-                  <a href="/" className="hover:text-gray-400 transition-colors">
-                    Blog
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Customer Support</h4>
-              <ul className="space-y-2">
-                <li>
-                  <a href="/" className="hover:text-gray-400 transition-colors">
-                    Help Center
-                  </a>
-                </li>
-                <li>
-                  <a href="/" className="hover:text-gray-400 transition-colors">
-                    FAQs
-                  </a>
-                </li>
-                <li>
-                  <a href="/" className="hover:text-gray-400 transition-colors">
-                    Returns & Refunds
-                  </a>
-                </li>
-                <li>
-                  <a href="/" className="hover:text-gray-400 transition-colors">
-                    Shipping Info
-                  </a>
-                </li>
-                <li>
-                  <a href="/" className="hover:text-gray-400 transition-colors">
-                    Terms & Conditions
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-lg font-semibold mb-4">
-                Subscribe to Our Newsletter
-              </h4>
-              <p className="text-gray-400 mb-4">
-                Get the latest updates on new products and exclusive offers.
-              </p>
-              <form className="flex">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="w-full px-4 py-2 rounded-l-lg focus:outline-none text-gray-900"
-                />
-                <button
-                  type="submit"
-                  className="bg-blue-600 px-4 py-2 rounded-r-lg hover:bg-blue-700 transition-colors"
-                >
-                  Subscribe
-                </button>
-              </form>
-            </div>
-
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Follow Us</h4>
-              <div className="flex space-x-4">
-                <a
-                  href="https://facebook.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-blue-500 transition-colors"
-                >
-                  <FaFacebook className="w-6 h-6" />
-                </a>
-                <a
-                  href="https://twitter.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-blue-400 transition-colors"
-                >
-                  <FaTwitter className="w-6 h-6" />
-                </a>
-                <a
-                  href="https://instagram.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-pink-500 transition-colors"
-                >
-                  <FaInstagram className="w-6 h-6" />
-                </a>
-                <a
-                  href="https://linkedin.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-blue-600 transition-colors"
-                >
-                  <FaLinkedin className="w-6 h-6" />
-                </a>
-                <a
-                  href="https://youtube.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-red-600 transition-colors"
-                >
-                  <FaYoutube className="w-6 h-6" />
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-8 border-t border-gray-800 pt-8">
-            <h4 className="text-lg font-semibold mb-4">We Accept</h4>
-            <div className="flex space-x-4">
-              <SiVisa className="w-10 h-10 text-gray-400" />
-              <SiMastercard className="w-10 h-10 text-gray-400" />
-              <SiPaypal className="w-10 h-10 text-gray-400" />
-              <SiApplepay className="w-10 h-10 text-gray-400" />
-            </div>
-          </div>
-
-          <div className="mt-8 text-center text-gray-400">
-            <p>
-              &copy; {new Date().getFullYear()} Your E-Commerce Store. All
-              rights reserved.
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="col-span-1 md:col-span-2 lg:col-span-1">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Elysoria</h3>
+            <p className="text-gray-600 text-sm leading-relaxed">
+              Your one-stop destination for curated products that blend quality,
+              style, and innovation.
             </p>
           </div>
-        </div>
-      </footer>
-    </motion.div>
-  );
-};
 
-export default Footer;
+          <div>
+            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+              Shop
+            </h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link
+                  href="/categories"
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  Categories
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/deals"
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  Deals
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/new-arrivals"
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  New Arrivals
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+              Support
+            </h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link
+                  href="/contact"
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq" className="text-gray-600 hover:text-gray-900">
+                  FAQs
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/shipping"
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  Shipping Info
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/returns"
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  Returns
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+              Stay Connected
+            </h4>
+            <p className="text-sm text-gray-600 mb-4">
+              Get the latest updates and special offers directly in your inbox.
+            </p>
+            <form className="flex">
+              <input
+                type="email"
+                placeholder="Your email address"
+                className="w-full px-4 py-2 text-sm border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="submit"
+                aria-label="Subscribe to newsletter"
+                className="bg-blue-600 px-4 py-2 rounded-r-md hover:bg-blue-700 transition-colors"
+              >
+                <ArrowRight className="w-5 h-5 text-white" />
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div className="border-t border-gray-200 py-8 flex flex-col md:flex-row items-center justify-between gap-6">
+          <p className="text-sm text-gray-500 text-center md:text-left">
+            &copy; {new Date().getFullYear()} Elysoria. All rights reserved.
+          </p>
+          <div className="flex items-center gap-4">
+            <SocialIcon
+              href="#"
+              icon={FaFacebookF}
+              brandColor="hover:bg-[#1877F2]"
+            />
+            <SocialIcon
+              href="#"
+              icon={FaInstagram}
+              brandColor="hover:bg-[#E4405F]"
+            />
+            <SocialIcon
+              href="#"
+              icon={FaTwitter}
+              brandColor="hover:bg-[#1DA1F2]"
+            />
+            <SocialIcon
+              href="#"
+              icon={FaLinkedinIn}
+              brandColor="hover:bg-[#0A66C2]"
+            />
+            <SocialIcon
+              href="#"
+              icon={FaYoutube}
+              brandColor="hover:bg-[#FF0000]"
+            />
+          </div>
+          <div className="flex items-center gap-4">
+            <SiVisa size={32} className="text-gray-400" />
+            <SiMastercard size={32} className="text-gray-400" />
+            <SiAmericanexpress size={32} className="text-gray-400" />
+            <SiPaypal size={32} className="text-gray-400" />
+          </div>
+        </div>
+      </div>
+    </motion.footer>
+  );
+}

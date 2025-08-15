@@ -1,71 +1,54 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
 
-export default function useSubscriptionCheck() {
-  const BACKEND_URI =
-    process.env.NEXT_PUBLIC_BACKEND_URI || "http://localhost:5000";
-  const router = useRouter();
+import { useMemo } from "react";
+import { useSession } from "next-auth/react";
+import useSWR from "swr";
 
-  const [subscription, setSubscription] = useState(null);
-  const [subLoading, setSubLoading] = useState(true);
-  const [isValid, setIsValid] = useState(false);
-  const [error, setError] = useState(null);
+const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
-  useEffect(() => {
-    const checkSubscription = async () => {
-      setSubLoading(true);
-      setError(null);
+const authedFetcher = async ([url, token]) => {
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.message || "An error occurred.");
+  }
+  return res.json();
+};
 
-      try {
-        const storedUser = JSON.parse(localStorage.getItem("user"));
-        if (!storedUser) {
-          router.push("/api/auth/signin");
-          return;
-        }
+export function useSubscriptionCheck() {
+  const { data: session, status } = useSession();
 
-        const response = await fetch(
-          `${BACKEND_URI}/api/payments/payment/${storedUser._id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+  const userId = session?.user?._id;
+  const token = session?.user?.accessToken;
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Failed to fetch subscription");
-        }
+  const swrKey =
+    userId && token
+      ? [`${BACKEND_URI}/api/payments/payment/${userId}`, token]
+      : null;
 
-        const data = await response.json();
+  const { data, error, isLoading } = useSWR(swrKey, authedFetcher, {
+    revalidateOnFocus: false,
+  });
 
-        if (!data.subscription) {
-          throw new Error("No active subscription found");
-        }
+  const { subscription, isValid } = useMemo(() => {
+    if (!data || !data.subscription) {
+      return { subscription: null, isValid: false };
+    }
+    const now = new Date();
+    const endDate = new Date(data.subscription._doc.endDate);
+    if (endDate < now) {
+      return { subscription: data.subscription, isValid: false };
+    }
+    return { subscription: data.subscription, isValid: true };
+  }, [data]);
 
-        const now = new Date();
-        const endDate = new Date(data.subscription.endDate);
-
-        if (endDate < now) {
-          throw new Error("Subscription has expired");
-        }
-
-        setSubscription(data.subscription);
-        setIsValid(true);
-      } catch (err) {
-        console.error("Subscription check error:", err);
-        setError(err.message);
-        setIsValid(false);
-        toast.error(err.message || "Subscription verification failed");
-      } finally {
-        setSubLoading(false);
-      }
-    };
-
-    checkSubscription();
-  }, [router, BACKEND_URI]);
-
-  return { subscription, subLoading, isValid, error };
+  return {
+    subscription,
+    isValid,
+    error,
+    subLoading:
+      status === "loading" || (status === "authenticated" && isLoading),
+  };
 }

@@ -1,107 +1,37 @@
-import { createContext, useState, useEffect } from "react";
-import { fetchAllData } from "@/utils/fetchData";
-import { openDB } from "idb";
-import { v4 as uuidv4 } from "uuid";
+"use client";
+import { createContext, useState, useMemo } from "react";
+import useSWR from "swr";
+import { fetchProducts } from "@/utils/fetchData";
 
-const ProductContext = createContext({
-  products: [],
-  isLoading: true,
-});
-const DB_NAME = "ProductDB";
-const DB_VERSION = 2;
-
-const initializeDB = async () => {
-  return openDB(DB_NAME, DB_VERSION, {
-    upgrade(db, oldVersion) {
-      switch (oldVersion) {
-        case 0:
-        case 1:
-          if (!db.objectStoreNames.contains("metadata")) {
-            db.createObjectStore("metadata", { keyPath: "id" });
-          }
-        default:
-          if (!db.objectStoreNames.contains("products")) {
-            db.createObjectStore("products", { keyPath: "id" });
-          }
-      }
-    },
-  });
-};
-
-const getDataFromDB = async (db) => {
-  return db.getAll("products");
-};
-
-const saveDataToDB = async (db, data) => {
-  const tx = db.transaction("products", "readwrite");
-  const store = tx.objectStore("products");
-
-  await store.clear();
-
-  await Promise.all(
-    data.map((product) => {
-      if (!product.id) {
-        product.id = uuidv4();
-      }
-      return store.put(product);
-    })
-  );
-
-  await tx.done;
-};
+const ProductContext = createContext();
 
 export const ProductProvider = ({ children }) => {
-  const [products, setProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(8000);
 
-  const fetchProducts = async () => {
-    try {
-      const db = await initializeDB().catch(async (error) => {
-        if (error.name === "VersionError") {
-          await deleteDB(DB_NAME);
-          return initializeDB();
-        }
-        throw error;
-      });
-
-      const cachedProducts = await getDataFromDB(db);
-
-      if (cachedProducts.length > 0) {
-        setProducts(cachedProducts);
-        setIsLoading(false);
-        return;
-      }
-
-      const { products } = await fetchAllData();
-
-      setProducts(products);
-
-      await saveDataToDB(db, products);
-    } catch (error) {
-      console.error("❌❌❌❌❌❌❌❌ Error fetching products:", error);
-      setProducts([]);
-    } finally {
-      setIsLoading(false);
+  const { data, error, isLoading } = useSWR(
+    ["products", page, limit],
+    () => fetchProducts(page, limit),
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 10 * 60 * 1000,
     }
-  };
+  );
 
-  const deleteDB = (name) => {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.deleteDatabase(name);
-      request.onsuccess = resolve;
-      request.onerror = reject;
-      request.onblocked = () => reject("Database blocked");
-    });
-  };
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  const value = useMemo(
+    () => ({
+      products: data?.products || [],
+      totalPages: data?.totalPages || 1,
+      currentPage: page,
+      setPage,
+      isLoading: isLoading && !data,
+      error,
+    }),
+    [data, page, isLoading, error]
+  );
 
   return (
-    <ProductContext.Provider value={{ products, isLoading }}>
-      {children}
-    </ProductContext.Provider>
+    <ProductContext.Provider value={value}>{children}</ProductContext.Provider>
   );
 };
 

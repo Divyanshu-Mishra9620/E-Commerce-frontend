@@ -1,174 +1,103 @@
+"use client";
+import { useMemo } from "react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import BestDealsGrid from "./BestDealsGrid";
 import { motion } from "framer-motion";
+import BestDealsGrid from "./BestDealsGrid";
+
+const dealCategories = {
+  summerDeals: {
+    title: "Summer Collection",
+    keywords: ["summer", "beach", "vacation", "sun"],
+    gradient: "from-blue-400 to-cyan-500",
+  },
+  sportsDeals: {
+    title: "Sports Gear",
+    keywords: ["sports", "fitness", "gym", "athletic"],
+    gradient: "from-green-400 to-emerald-600",
+  },
+  clothesDeals: {
+    title: "Fashion Hub",
+    keywords: ["clothing", "fashion", "apparel", "shirt", "jeans"],
+    gradient: "from-pink-400 to-rose-600",
+  },
+  smartphoneDeals: {
+    title: "Mobile Zone",
+    keywords: ["smartphone", "mobile", "android", "iphone"],
+    gradient: "from-purple-400 to-indigo-600",
+  },
+  kitchenDeals: {
+    title: "Kitchen Essentials",
+    keywords: ["kitchen", "cooking", "appliance", "cookware"],
+    gradient: "from-orange-400 to-red-500",
+  },
+};
 
 export default function Deals({ products }) {
-  const [deals, setDeals] = useState({
-    summerDeals: [],
-    sportsDeals: [],
-    clothesDeals: [],
-    smartphoneDeals: [],
-    kitchenDeals: [],
-  });
+  const deals = useMemo(() => {
+    if (!Array.isArray(products)) return {};
 
-  const productList = Array.isArray(products) ? products : [];
+    const categorizedDeals = {};
+    const categories = Object.keys(dealCategories);
 
-  useEffect(() => {
-    if (productList) {
-      setDeals({
-        summerDeals: productList
-          .filter((product) =>
-            ["summer", "beach", "vacation", "sun", "holiday"].some(
-              (keyword) =>
-                product.product_name.toLowerCase().includes(keyword) ||
-                product.description.toLowerCase().includes(keyword) ||
-                product.category?.toLowerCase().includes(keyword)
-            )
-          )
-          .slice(0, 10),
-
-        sportsDeals: productList
-          .filter((product) =>
-            [
-              "sports",
-              "fitness",
-              "gym",
-              "outdoor",
-              "athletic",
-              "football",
-              "cricket",
-              "basketball",
-            ].some(
-              (keyword) =>
-                product.product_name.toLowerCase().includes(keyword) ||
-                product.description.toLowerCase().includes(keyword) ||
-                product.category?.toLowerCase().includes(keyword)
-            )
-          )
-          .slice(0, 10),
-
-        clothesDeals: productList
-          .filter((product) =>
-            [
-              "clothing",
-              "fashion",
-              "apparel",
-              "shirt",
-              "jeans",
-              "dress",
-              "sneakers",
-              "jacket",
-            ].some(
-              (keyword) =>
-                product.product_name.toLowerCase().includes(keyword) ||
-                product.description.toLowerCase().includes(keyword) ||
-                product.category?.toLowerCase().includes(keyword)
-            )
-          )
-          .slice(0, 10),
-
-        smartphoneDeals: productList
-          .filter((product) =>
-            [
-              "smartphone",
-              "mobile",
-              "android",
-              "iphone",
-              "5g",
-              "cellphone",
-              "apple",
-              "samsung",
-              "oneplus",
-            ].some(
-              (keyword) =>
-                product.product_name.toLowerCase().includes(keyword) ||
-                product.description.toLowerCase().includes(keyword) ||
-                product.category?.toLowerCase().includes(keyword)
-            )
-          )
-          .slice(0, 10),
-
-        kitchenDeals: productList
-          .filter((product) =>
-            [
-              "kitchen",
-              "cooking",
-              "appliance",
-              "mixer",
-              "grinder",
-              "blender",
-              "microwave",
-              "oven",
-              "utensil",
-              "cookware",
-            ].some(
-              (keyword) =>
-                product.product_name.toLowerCase().includes(keyword) ||
-                product.description.toLowerCase().includes(keyword) ||
-                product.category?.toLowerCase().includes(keyword)
-            )
-          )
-          .slice(0, 10),
-      });
+    for (const key of categories) {
+      categorizedDeals[key] = [];
     }
+
+    for (const product of products) {
+      const searchableText =
+        `${product.product_name} ${product.description} ${product.category}`.toLowerCase();
+
+      for (const key of categories) {
+        if (categorizedDeals[key].length < 10) {
+          if (
+            dealCategories[key].keywords.some((keyword) =>
+              searchableText.includes(keyword)
+            )
+          ) {
+            categorizedDeals[key].push(product);
+          }
+        }
+      }
+    }
+    return categorizedDeals;
   }, [products]);
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-gray-50 dark:bg-gray-900"
+      className="min-h-screen bg-gray-50"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        {/* Hero Section */}
-        <div className="relative aspect-[3/1] mb-16 overflow-hidden rounded-2xl shadow-xl">
+        <div className="relative aspect-[16/6] mb-16 overflow-hidden rounded-2xl shadow-lg">
           <Image
             src="/summer-banner.jpg"
-            alt="Summer Collection"
+            alt="New Season Arrivals"
             fill
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-black/20">
-            <div className="flex h-full items-center pl-8 md:pl-16">
-              <h2 className="text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex items-center p-8 md:p-16">
+            <div>
+              <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
                 New Season Arrivals
-                <span className="block mt-2 text-xl font-light text-gray-200 sm:text-2xl">
-                  Discover Our Curated Collections
-                </span>
               </h2>
+              <p className="mt-2 text-xl text-gray-200">
+                Discover Our Curated Collections
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Category Grid */}
-        <div className="space-y-12">
-          <BestDealsGrid
-            deals={deals.summerDeals}
-            category="Summer Collection"
-            gradient="from-blue-400 to-cyan-500"
-          />
-          <BestDealsGrid
-            deals={deals.sportsDeals}
-            category="Sports Gear"
-            gradient="from-green-400 to-emerald-600"
-          />
-          <BestDealsGrid
-            deals={deals.kitchenDeals}
-            category="Kitchen Essentials"
-            gradient="from-orange-400 to-red-500"
-          />
-          <BestDealsGrid
-            deals={deals.smartphoneDeals}
-            category="Smartphones"
-            gradient="from-purple-400 to-indigo-600"
-          />
-          <BestDealsGrid
-            deals={deals.clothesDeals}
-            category="Fashion"
-            gradient="from-pink-400 to-rose-600"
-          />
+        <div className="space-y-16">
+          {Object.entries(deals).map(([key, dealList]) => (
+            <BestDealsGrid
+              key={key}
+              deals={dealList}
+              category={dealCategories[key].title}
+              gradient={dealCategories[key].gradient}
+            />
+          ))}
         </div>
       </div>
     </motion.div>

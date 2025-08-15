@@ -1,119 +1,118 @@
 "use client";
-import { createContext, useContext, useState, useEffect, useRef } from "react";
+import { createContext, useContext, useMemo, useCallback } from "react";
 import { toast } from "react-toastify";
+import useSWR from "swr";
+import { useAuth } from "@/hooks/useAuth";
+
+const fetcher = (url) => fetch(url).then((res) => res.json());
 
 const WishlistContext = createContext();
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
 export const WishlistProvider = ({ children }) => {
-  const [wishlistItems, setWishlistItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const userRef = useRef(null);
+  const { user } = useAuth();
+  const userId = user?._id;
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("user");
-      if (stored) {
-        userRef.current = JSON.parse(stored);
+  const swrKey = userId ? `${BACKEND_URI}/api/wishlist/${userId}` : null;
+  const { data, error, isLoading, mutate } = useSWR(swrKey, fetcher, {
+    keepPreviousData: true,
+  });
+
+  const wishlistItems = data?.items || [];
+  const filteredWishlistItems = wishlistItems.filter(
+    (item) => item && item.product
+  );
+
+  const performOptimisticUpdate = useCallback(
+    async (action, payload) => {
+      if (!userId) return toast.error("Please log in to manage your wishlist.");
+
+      let optimisticData;
+      if (action === "add") {
+        const newItem = { product: payload };
+        optimisticData = {
+          ...data,
+          items: [...filteredWishlistItems, newItem],
+        };
+      } else {
+        optimisticData = {
+          ...data,
+          items: filteredWishlistItems.filter(
+            (item) => item.product._id !== payload
+          ),
+        };
       }
-    } else return null;
-  }, []);
 
-  useEffect(() => {
-    const fetchWishlist = async () => {
-      setLoading(true);
-      setError(null);
+      await mutate(optimisticData, { revalidate: false });
+
       try {
-        const userId = userRef.current?._id;
-        if (!userId) throw new Error("User not found");
-
-        const res = await fetch(`${BACKEND_URI}/api/wishlist/${userId}`);
-        if (!res.ok) throw new Error("Failed to fetch wishlist");
-
-        const data = await res.json();
-        setWishlistItems(data.items || []);
+        const res = await fetch(`${BACKEND_URI}/api/wishlist/${userId}`, {
+          method: action === "add" ? "POST" : "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            productId: action === "add" ? payload._id : payload,
+          }),
+        });
+        if (!res.ok) throw new Error(`Failed to ${action} item.`);
+        toast.success(`Item ${action === "add" ? "added" : "removed"}!`);
+        await mutate();
       } catch (err) {
-        console.error(err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
+        toast.error(err.message);
+        await mutate();
       }
-    };
-    fetchWishlist();
-  }, []);
+    },
+    [data, userId, mutate, wishlistItems]
+  );
 
-  const addToWishlist = async (product) => {
-    const tempItem = { _id: `temp-${Date.now()}`, product };
-    setWishlistItems((prev) => [...prev, tempItem]);
+  const addToWishlist = useCallback(
+    (product) => performOptimisticUpdate("add", product),
+    [performOptimisticUpdate]
+  );
+  const removeItem = useCallback(
+    (productId) => performOptimisticUpdate("remove", productId),
+    [performOptimisticUpdate]
+  );
 
-    try {
-      const userId = userRef.current?._id;
-      if (!userId) throw new Error("User not found");
-
-      const res = await fetch(`${BACKEND_URI}/api/wishlist/${userId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: product._id }),
-      });
-
-      if (!res.ok) throw new Error("Failed to add to wishlist");
-
-      const { wishlist } = await res.json();
-      setWishlistItems(wishlist.items);
-      localStorage.setItem("wishlist", JSON.stringify(wishlist.items));
-    } catch (err) {
-      console.error(err);
-      toast.error(err.message || "Add to wishlist failed");
-      setWishlistItems((prev) =>
-        prev.filter((item) => item._id !== tempItem._id)
-      );
-      setError(err.message);
-    }
-  };
-
-  const removeItem = async (productId) => {
-    const original = wishlistItems;
-    setWishlistItems((prev) =>
-      prev.filter((item) => item.product._id !== productId)
+  const isItemInWishlist = useMemo(() => {
+    const itemIds = new Set(
+      filteredWishlistItems
+        .filter((item) => item && item.product)
+        .map((item) => item.product._id)
     );
+    return (productId) => itemIds.has(productId);
+  }, [wishlistItems]);
 
-    try {
-      const userId = userRef.current?._id;
-      if (!userId) throw new Error("User not found");
-
-      const res = await fetch(`${BACKEND_URI}/api/wishlist/${userId}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product: productId }),
-      });
-
-      if (!res.ok) throw new Error("Failed to remove from wishlist");
-
-      const { wishlist } = await res.json();
-      setWishlistItems(wishlist.items);
-      localStorage.setItem("wishlist", JSON.stringify(wishlist.items));
-    } catch (err) {
-      console.error(err);
-      toast.error(err.message || "Remove from wishlist failed");
-      setWishlistItems(original);
-      setError(err.message);
-    }
-  };
+  const value = useMemo(
+    () => ({
+      wishlistItems,
+      isLoading: isLoading && !data,
+      error,
+      addToWishlist,
+      removeItem,
+      isItemInWishlist,
+    }),
+    [
+      wishlistItems,
+      isLoading,
+      data,
+      error,
+      addToWishlist,
+      removeItem,
+      isItemInWishlist,
+    ]
+  );
 
   return (
-    <WishlistContext.Provider
-      value={{
-        wishlistItems,
-        loading,
-        error,
-        addToWishlist,
-        removeItem,
-      }}
-    >
+    <WishlistContext.Provider value={value}>
       {children}
     </WishlistContext.Provider>
   );
 };
 
-export const useWishlist = () => useContext(WishlistContext);
+export const useWishlist = () => {
+  const context = useContext(WishlistContext);
+  if (context === undefined) {
+    throw new Error("useWishlist must be used within a WishlistProvider");
+  }
+  return context;
+};

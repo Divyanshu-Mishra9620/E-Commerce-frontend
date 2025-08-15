@@ -1,66 +1,16 @@
-"use client";
-import BottomNavigation from "@/components/BottomNavigation";
-import Navbar from "@/components/Navbar";
-import { CartProvider } from "@/context/CartContext";
-import { ProductProvider } from "@/context/ProductContext";
-import { WishlistProvider } from "@/context/WishlistContext";
-import { SessionProvider } from "next-auth/react";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { Toaster } from "react-hot-toast";
-import { NavigationProvider } from "@/context/NavigationContext";
+import { ClientLayout } from "@/components/ClientLayout";
+import "@/app/_styles/global.css";
 
-export default function RootLayout({ children, session }) {
-  const [user, setUser] = useState(null);
-  const router = useRouter();
+export const metadata = {
+  title: "Elysoria - Your E-commerce Destination",
+  description: "Discover the best products online.",
+};
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      } else {
-        router.push("/api/auth/signin");
-      }
-    } else return null;
-  }, []);
-
-  const memoizedUser = useMemo(() => user, [user?._id]);
-
-  const pathname = usePathname();
-  const isAdminRoute = pathname.startsWith("/admin");
-
+export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <NavigationProvider>
-          <SessionProvider session={session}>
-            <ProductProvider>
-              <CartProvider>
-                <WishlistProvider>
-                  {!isAdminRoute && <Navbar user={memoizedUser} />}
-                  {children}
-                  {!isAdminRoute && <BottomNavigation />}
-                </WishlistProvider>
-              </CartProvider>
-            </ProductProvider>
-          </SessionProvider>
-        </NavigationProvider>
-        <Toaster
-          position="bottom-right"
-          toastOptions={{
-            style: {
-              background: "#333",
-              color: "#fff",
-            },
-            success: {
-              style: { background: "#4caf50" },
-            },
-            error: {
-              style: { background: "#f44336" },
-            },
-          }}
-        />
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );

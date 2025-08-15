@@ -77,7 +77,6 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
-/* Add this to your global CSS file */
 @keyframes pulse {
   0% {
     opacity: 0.5;
@@ -142,12 +141,10 @@
     color: transparent;
   }
 }
-/* global.css */
 body {
   scroll-behavior: smooth;
 }
 
-/* Smooth scroll behavior */
 @media (prefers-reduced-motion: reduce) {
   body {
     scroll-behavior: auto;
@@ -222,4 +219,7 @@ input[type="range"]::-webkit-slider-thumb {
   .tracking-super {
     letter-spacing: 0.2em;
   }
+}
+body.no-scroll {
+  overflow: hidden;
 }

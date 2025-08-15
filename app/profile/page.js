@@ -1,14 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { MapPin, User } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 import PageLoader from "@/components/PageLoader";
 import OrderCarousel from "@/components/OrderCarousel";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { useAuth } from "@/hooks/useAuth";
 
 const ProfileField = ({ label, value }) => (
   <div>
@@ -22,9 +22,25 @@ const ProfileField = ({ label, value }) => (
 export default function Profile() {
   const router = useRouter();
   const { profile, isLoading, error } = useUserProfile();
-  const { user, isLoading: authLoading } = useAuth();
+  useEffect(() => {
+    if (!isLoading && !profile) {
+      signOut({ callbackUrl: "/api/auth/signin" });
+    }
+  }, [isLoading, profile]);
 
-  if (isLoading || authLoading) {
+  if (isLoading) {
+    return <PageLoader />;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500">
+        Error: {error.message}
+      </div>
+    );
+  }
+
+  if (!profile) {
     return <PageLoader />;
   }
 

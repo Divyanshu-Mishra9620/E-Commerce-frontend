@@ -40,7 +40,7 @@ const AddressForm = ({ initialAddress, onSave, onCancel }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {Object.keys(address).map((key) => (
+      {Object.keys(address)?.map((key) => (
         <div key={key}>
           <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">
             {key.replace(/([A-Z])/g, " $1")}
@@ -65,6 +65,7 @@ const AddressForm = ({ initialAddress, onSave, onCancel }) => {
         <button
           type="submit"
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          onClick={handleSubmit}
         >
           Save
         </button>
@@ -75,15 +76,16 @@ const AddressForm = ({ initialAddress, onSave, onCancel }) => {
 
 function Settings() {
   const { profile, isLoading, error, mutate } = useUserProfile();
+  console.log(profile);
+
   const { isOpen: isModalOpen, openModal, closeModal } = useModal();
 
   const handleSaveAddress = async (newAddress) => {
     try {
-      const response = await authedFetch(`/api/users/${profile._id}`, {
+      authedFetch(`/api/users/${profile._id}`, {
         method: "PUT",
         body: JSON.stringify(newAddress),
       });
-      if (!response.ok) throw new Error("Failed to update address");
 
       toast.success("Address updated successfully!");
       mutate();
@@ -160,7 +162,15 @@ function Settings() {
               Edit Address
             </h2>
             <AddressForm
-              initialAddress={profile.address}
+              initialAddress={
+                profile.address || {
+                  street: "",
+                  city: "",
+                  state: "",
+                  postalCode: "",
+                  country: "",
+                }
+              }
               onSave={handleSaveAddress}
               onCancel={closeModal}
             />

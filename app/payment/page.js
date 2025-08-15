@@ -116,19 +116,24 @@ export default function PaymentPage() {
 
   if (authLoading)
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 pt-16 md:pt-20">
+        {" "}
         <PageLoader />
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pt-16 md:pt-20">
+      {" "}
       <div className="container mx-auto max-w-4xl py-12 px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          <div className="space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
+          {" "}
+          <div className="space-y-6 md:space-y-8">
+            {" "}
             <AddressForm address={address} setAddress={setAddress} />
           </div>
-          <div className="space-y-8">
+          <div className="space-y-6 md:space-y-8 sticky top-24">
+            {" "}
             <OrderSummary cartItems={cartItems} cartTotal={cartTotal} />
             <button
               onClick={handlePayment}

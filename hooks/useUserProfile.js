@@ -14,6 +14,15 @@ export function useUserProfile() {
 
   const { data, error, isLoading, mutate } = useSWR(swrKey, fetcher);
 
+  if (!data && !isLoading) {
+    return {
+      profile: null,
+      isLoading,
+      error,
+      mutate,
+    };
+  }
+
   return {
     profile: data,
     isLoading,

@@ -76,7 +76,6 @@ const AddressForm = ({ initialAddress, onSave, onCancel }) => {
 
 function Settings() {
   const { profile, isLoading, error, mutate } = useUserProfile();
-  console.log(profile);
 
   const { isOpen: isModalOpen, openModal, closeModal } = useModal();
 

@@ -7,8 +7,7 @@ const fetcher = (url) => fetch(url).then((res) => res.json());
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
 export const useSellerProducts = () => {
-  const { user, isLoading: authLoading } = useAuth();
-  if (authLoading) return null;
+  const { user } = useAuth();
 
   const userId = user?._id;
 

@@ -10,7 +10,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import withAuth from "@/components/withAuth";
 import Navbar from "@/components/Navbar";
-import CyberLoader from "@/components/CyberLoader";
+import PageLoader from "@/components/PageLoader";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -77,7 +77,7 @@ const Cart = () => {
   if (isLoading || authLoading)
     return (
       <div className="min-h-screen bg-gray-50">
-        <CyberLoader />
+        <PageLoader />
       </div>
     );
 
@@ -87,7 +87,7 @@ const Cart = () => {
     <>
       <Navbar />
       {isLoading ? (
-        <CyberLoader />
+        <PageLoader />
       ) : (
         <div className="min-h-screen bg-gray-50 text-gray-800">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-7xl">

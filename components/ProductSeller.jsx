@@ -2,7 +2,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useSellerProducts } from "@/hooks/useSellerProducts";
-import CyberLoader from "./CyberLoader";
+import PageLoader from "./PageLoader";
 import ProductCard from "./ProductCard";
 
 export default function ProductSeller() {
@@ -10,7 +10,7 @@ export default function ProductSeller() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <CyberLoader />
+        <PageLoader />
       </div>
     );
   }

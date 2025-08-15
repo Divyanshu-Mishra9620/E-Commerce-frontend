@@ -157,7 +157,7 @@ export default function OrderCarousel() {
           Your Orders
         </h2>
         {loadingOrders ? (
-          <Spinner />
+          <Spinner className="text-blue-500" />
         ) : errorOrders ? (
           <p className="text-red-400 text-center">Failed to load orders.</p>
         ) : orders?.length === 0 ? (
@@ -178,7 +178,7 @@ export default function OrderCarousel() {
       <div>
         <h2 className="text-3xl font-bold text-gray-900 mb-8">Your Reviews</h2>
         {loadingReviews ? (
-          <Spinner />
+          <Spinner className="text-blue-500" />
         ) : errorReviews ? (
           <p className="text-red-400 text-center">Failed to load reviews.</p>
         ) : reviews.length === 0 ? (

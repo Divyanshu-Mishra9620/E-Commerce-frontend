@@ -44,7 +44,7 @@ export function ProductActions({ product }) {
   if (authLoading)
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <CyberLoader />
+        <PageLoader />
       </div>
     );
 

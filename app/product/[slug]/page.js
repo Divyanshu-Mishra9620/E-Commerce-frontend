@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 
 import ProductContext from "@/context/ProductContext";
-import CyberLoader from "@/components/CyberLoader";
+import PageLoader from "@/components/PageLoader";
 import { ProductActions } from "@/components/ProductActions";
 import { ProductGallery } from "@/components/ProductGallery";
 import { ProductDetailsAccordion } from "@/components/ProductDetailsAccordion";
@@ -56,7 +56,7 @@ export default function ProductPage() {
   if (!slug) return null;
 
   if (areProductsLoading) {
-    return <CyberLoader />;
+    return <PageLoader />;
   }
 
   if (!product) {

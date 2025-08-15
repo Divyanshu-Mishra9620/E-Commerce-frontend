@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { useCart } from "@/context/CartContext";
 import Spinner from "./Spinner";
 import { useAuth } from "@/hooks/useAuth";
-import CyberLoader from "./CyberLoader";
+import PageLoader from "./PageLoader";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
@@ -24,7 +24,7 @@ const BestDealsGrid = ({ products }) => {
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <CyberLoader />
+        <PageLoader />
       </div>
     );
   }
@@ -87,7 +87,7 @@ const BestDealsGrid = ({ products }) => {
   if (isPending) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-        <Spinner size="lg" />
+        <Spinner size="lg" className="text-blue-500" />
       </div>
     );
   }

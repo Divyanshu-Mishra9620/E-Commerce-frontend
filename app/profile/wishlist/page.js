@@ -11,7 +11,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Navbar from "@/components/Navbar";
 import { motion, AnimatePresence } from "framer-motion";
-import CyberLoader from "@/components/CyberLoader";
+import PageLoader from "@/components/PageLoader";
 
 const Wishlist = () => {
   const router = useRouter();
@@ -51,7 +51,7 @@ const Wishlist = () => {
   };
 
   if (isLoading) {
-    return <CyberLoader />;
+    return <PageLoader />;
   }
 
   if (error) {

@@ -5,7 +5,7 @@ import { MapPin, User } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import CyberLoader from "@/components/CyberLoader";
+import PageLoader from "@/components/PageLoader";
 import OrderCarousel from "@/components/OrderCarousel";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@/hooks/useAuth";
@@ -25,7 +25,7 @@ export default function Profile() {
   const { user, isLoading: authLoading } = useAuth();
 
   if (isLoading || authLoading) {
-    return <CyberLoader />;
+    return <PageLoader />;
   }
 
   if (error) {

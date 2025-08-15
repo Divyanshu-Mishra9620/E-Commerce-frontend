@@ -11,7 +11,7 @@ import { authedFetch } from "@/utils/authedFetch";
 
 import { AddressForm } from "@/components/AddressForm";
 import { OrderSummary } from "@/components/OrderSummary";
-import CyberLoader from "@/components/CyberLoader";
+import PageLoader from "@/components/PageLoader";
 
 export default function PaymentPage() {
   const router = useRouter();
@@ -111,13 +111,13 @@ export default function PaymentPage() {
   };
 
   if (isProfileLoading || !user) {
-    return <CyberLoader />;
+    return <PageLoader />;
   }
 
   if (authLoading)
     return (
       <div className="min-h-screen bg-gray-50">
-        <CyberLoader />
+        <PageLoader />
       </div>
     );
 

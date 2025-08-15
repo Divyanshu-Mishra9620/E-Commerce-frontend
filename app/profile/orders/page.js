@@ -4,7 +4,7 @@ import { ListFilter, X, Package, ShoppingBag, Link, Truck } from "lucide-react";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import { motion, AnimatePresence } from "framer-motion";
-import CyberLoader from "@/components/CyberLoader";
+import PageLoader from "@/components/PageLoader";
 import { useUserOrders } from "@/hooks/useUserOrders";
 import withAuth from "@/components/withAuth";
 
@@ -97,7 +97,7 @@ const Orders = () => {
     <>
       <Navbar />
       {isLoading && orders.length === 0 ? (
-        <CyberLoader />
+        <PageLoader />
       ) : (
         <div className="min-h-screen bg-gray-50 text-gray-800 pt-12">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-7xl">

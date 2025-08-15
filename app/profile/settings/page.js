@@ -4,7 +4,7 @@ import { Lock, MapPin, LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 import { motion } from "framer-motion";
-import CyberLoader from "@/components/CyberLoader";
+import PageLoader from "@/components/PageLoader";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { toast } from "react-hot-toast";
 import { authedFetch } from "@/utils/authedFetch";
@@ -97,7 +97,7 @@ function Settings() {
     await signOut({ callbackUrl: "/api/auth/signin" });
   };
 
-  if (isLoading) return <CyberLoader />;
+  if (isLoading) return <PageLoader />;
   if (error)
     return (
       <div className="min-h-screen flex items-center justify-center text-red-500">

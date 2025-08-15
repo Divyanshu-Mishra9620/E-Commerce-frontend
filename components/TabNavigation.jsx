@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import CyberLoader from "./CyberLoader";
+import PageLoader from "./PageLoader";
 
 const TabNavigation = ({ handleTabChange, isTabLoading }) => {
   const [activeTab, setActiveTab] = useState("Home");

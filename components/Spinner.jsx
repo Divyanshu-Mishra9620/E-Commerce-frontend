@@ -1,11 +1,8 @@
 "use client";
 
-export default function Spinner({
-  size = "md",
-  color = "text-gold-500",
-  strokeWidth = 3,
-  className = "",
-}) {
+import { cn } from "@/lib/utils";
+
+export default function Spinner({ size = "md", className = "" }) {
   const sizes = {
     xs: "h-4 w-4",
     sm: "h-6 w-6",
@@ -14,45 +11,32 @@ export default function Spinner({
     xl: "h-12 w-12",
   };
 
-  const spinAnimation = {
-    animation: "spin 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite",
-  };
-
   return (
     <div
       role="status"
-      className={`inline-flex items-center justify-center ${className}`}
-      aria-label="Loading"
+      className={cn("flex justify-center items-center", className)}
+      aria-label="Loading..."
     >
       <svg
-        className={`${sizes[size]} ${color}`}
-        style={spinAnimation}
-        viewBox="0 0 24 24"
+        className={cn("animate-spin text-blue-600", sizes[size])}
         xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
       >
         <circle
+          className="opacity-25"
           cx="12"
           cy="12"
           r="10"
-          fill="none"
           stroke="currentColor"
-          strokeWidth={strokeWidth}
-          strokeDasharray="60"
-          strokeDashoffset="50"
-          strokeLinecap="round"
-          opacity="0.8"
-        />
+          strokeWidth="4"
+        ></circle>
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
       </svg>
-      <style jsx>{`
-        @keyframes spin {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
-        }
-      `}</style>
     </div>
   );
 }

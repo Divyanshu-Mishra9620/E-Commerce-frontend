@@ -2,7 +2,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
-import Spinner from "./Spinner"; 
+import Spinner from "./Spinner";
 
 export const SearchBar = () => {
   const [query, setQuery] = useState("");
@@ -32,7 +32,11 @@ export const SearchBar = () => {
         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
         aria-label="Search"
       >
-        {isPending ? <Spinner size="sm" /> : <Search size={20} />}
+        {isPending ? (
+          <Spinner size="sm" className="text-blue-500" />
+        ) : (
+          <Search size={20} />
+        )}
       </button>
     </form>
   );

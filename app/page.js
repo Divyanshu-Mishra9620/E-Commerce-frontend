@@ -1,6 +1,5 @@
 "use client";
 import { motion, useScroll, useSpring } from "framer-motion";
-import FlashSale from "@/components/FlashSale";
 import Hero from "@/components/Hero";
 import Explore from "@/components/Explore";
 import BestDeals from "@/components/BestDeals";
@@ -9,7 +8,7 @@ import WishlistSection from "@/components/Wishlist";
 import MostVisitedSection from "@/components/MostVisitedSection";
 import Footer from "@/components/Footer";
 import { useState } from "react";
-import CyberLoader from "@/components/CyberLoader";
+import PageLoader from "@/components/PageLoader";
 import TabNavigation from "@/components/TabNavigation";
 import ProductSeller from "@/components/ProductSeller";
 import { useSession } from "next-auth/react";
@@ -38,7 +37,7 @@ export default function Page() {
   };
 
   if (status === "loading" || isLoading) {
-    return <CyberLoader />;
+    return <PageLoader />;
   }
 
   if (error) {

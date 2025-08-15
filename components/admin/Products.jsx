@@ -11,7 +11,7 @@ import { authedFetch } from "@/utils/authedFetch";
 import { ProductsTable } from "@/components/admin/ProductTable";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { Modal } from "@/components/Modals";
-import CyberLoader from "@/components/CyberLoader";
+import PageLoader from "@/components/PageLoader";
 import { FcNext, FcPrevious } from "react-icons/fc";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
@@ -73,7 +73,7 @@ export default function ProductsPage() {
 
   if (error) return <div>Failed to load products.</div>;
   if ((isLoading && products.length === 0) || authLoading)
-    return <CyberLoader />;
+    return <PageLoader />;
 
   const PaginationControls = (
     <div className="flex justify-center items-center gap-2 mt-8">

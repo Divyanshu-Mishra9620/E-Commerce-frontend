@@ -41,7 +41,7 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-16 md:pt-20">
       <AnimatePresence>
         {isLoading ? (
           <motion.div
@@ -80,7 +80,7 @@ export default function CategoriesPage() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="text-center mb-16"
             >
-              <h1 className="text-4xl sm:text-5xl font-light text-gray-900 mb-4 tracking-tight">
+              <h1 className="text-4xl sm:text-5xl font-light text-gray-900 mb-4 tracking-tight ">
                 Our Collections
               </h1>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">

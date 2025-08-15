@@ -8,7 +8,7 @@ import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import { useSearch } from "@/hooks/useSearch";
 import { FilterPanel } from "@/components/FilterPanel";
-import CyberLoader from "@/components/CyberLoader";
+import PageLoader from "@/components/PageLoader";
 
 const SearchPageContent = () => {
   const searchParams = useSearchParams();
@@ -57,7 +57,7 @@ const SearchPageContent = () => {
           </div>
 
           {isLoading && products?.length === 0 ? (
-            <CyberLoader />
+            <PageLoader />
           ) : products?.length === 0 ? (
             <div className="text-center py-20">
               <h2 className="text-2xl font-semibold">No results found</h2>
@@ -99,7 +99,7 @@ const SearchPageContent = () => {
 };
 
 const SearchPage = () => (
-  <Suspense fallback={<CyberLoader />}>
+  <Suspense fallback={<PageLoader />}>
     <SearchPageContent />
   </Suspense>
 );

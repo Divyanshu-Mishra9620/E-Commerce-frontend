@@ -58,7 +58,7 @@ const ExploreGrid = () => {
   if (isPending) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <Spinner size="lg" />
+        <Spinner size="lg" className="text-blue-500" />
       </div>
     );
   }

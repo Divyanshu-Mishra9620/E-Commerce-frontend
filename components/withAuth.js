@@ -2,7 +2,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
-import CyberLoader from "./CyberLoader";
+import PageLoader from "./PageLoader";
 
 const withAuth = (WrappedComponent, options = {}) => {
   const { publicRoutes = [] } = options;
@@ -28,7 +28,7 @@ const withAuth = (WrappedComponent, options = {}) => {
       }
     }, [status, router, pathname, isProtectedRoute]);
     if (isProtectedRoute && status === "loading") {
-      return <CyberLoader />;
+      return <PageLoader />;
     }
     return <WrappedComponent {...props} />;
   };

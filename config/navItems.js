@@ -8,7 +8,12 @@ import {
   LayoutGrid,
   Tag,
   IndianRupee,
+  UserCog,
 } from "lucide-react";
+
+export const adminNavItems = [
+  { href: "/admin", icon: UserCog, label: "Admin" },
+];
 
 export const mainNavItems = [
   { href: "/", icon: House, label: "Home" },

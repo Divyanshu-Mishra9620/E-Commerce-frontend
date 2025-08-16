@@ -17,7 +17,7 @@ export const fetchProducts = async (page = 1, limit = 4000) => {
 
     return data;
   } catch (error) {
-    console.error("❌ Error fetching products:", error);
+    console.error("Error fetching products:", error);
     throw error;
   }
 };

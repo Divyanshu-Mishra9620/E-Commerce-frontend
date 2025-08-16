@@ -1,10 +1,10 @@
 "use client";
 import { useSession } from "next-auth/react";
 import useSWR from "swr";
-import { fetcher } from "../lib/fetcher";
 import ProductCard from "./ProductCard";
 import { SkeletonCard } from "./SkeletonCard";
 import { motion } from "framer-motion";
+import { authedFetch } from "@/utils/authedFetch";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
@@ -14,7 +14,7 @@ const WishlistSection = () => {
 
   const swrKey = userId ? `${BACKEND_URI}/api/wishlist/${userId}` : null;
 
-  const { data, error } = useSWR(swrKey, fetcher, {
+  const { data, error } = useSWR(swrKey, authedFetch, {
     revalidateOnFocus: false,
     keepPreviousData: true,
   });

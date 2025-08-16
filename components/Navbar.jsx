@@ -127,7 +127,7 @@ export default function Navbar() {
               className="fixed inset-0 bg-black/50 z-40 lg:hidden"
               onClick={() => setMobileMenuOpen(false)}
             />
-            <MobileMenu onClose={() => setMobileMenuOpen(false)} />
+            <MobileMenu onClose={() => setMobileMenuOpen(false)} isAdmin={isAdmin} />
           </>
         )}
       </AnimatePresence>

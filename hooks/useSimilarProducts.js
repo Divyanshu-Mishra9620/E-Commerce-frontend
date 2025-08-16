@@ -9,8 +9,5 @@ export function useSimilarProducts(productId) {
     ? `${BACKEND_URI}/api/optimized-products/${productId}/similar`
     : null;
   const { data, error, isLoading } = useSWR(swrKey, fetcher);
-  console.log(data);
-  console.log(isLoading);
-  console.log(error);
   return { similarProducts: data || [], isLoading, error };
 }

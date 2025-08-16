@@ -12,6 +12,7 @@ import {
   mainNavItems,
   profileNavItems,
   extraNavItems,
+  adminNavItems,
 } from "@/config/navItems";
 
 const MobileMenuItem = ({ href, icon: Icon, text, onClick, badgeCount }) => (
@@ -32,8 +33,8 @@ const MobileMenuItem = ({ href, icon: Icon, text, onClick, badgeCount }) => (
   </Link>
 );
 
-export const MobileMenu = ({ onClose }) => {
-  const { isAuthenticated, isAdmin, user, isLoading: authLoading } = useAuth();
+export const MobileMenu = ({ onClose, isAdmin }) => {
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const { cartCount } = useCart();
   const { wishlistItems } = useWishlist();
 
@@ -90,6 +91,17 @@ export const MobileMenu = ({ onClose }) => {
           </button>
         </header>
         <nav className="flex-grow overflow-y-auto">
+          {isAdmin &&
+            adminNavItems.map((item) => (
+              <MobileMenuItem
+                key={item.href}
+                href={item.href}
+                icon={item.icon}
+                text={item.label}
+                onClick={onClose}
+              />
+            ))}
+          <hr className="my-2" />
           {mainNavItems.map((item) => (
             <MobileMenuItem
               key={item.href}

@@ -27,6 +27,7 @@ export const authedFetch = async (url, options = {}) => {
   }
 
   const data = await response.json();
+  console.log(data);
 
   if (!response.ok) {
     throw new Error(data.message || "An error occurred.");

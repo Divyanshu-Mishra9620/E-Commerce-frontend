@@ -23,7 +23,6 @@ const SearchPageContent = () => {
     filters,
     sortOrder
   );
-  console.log(products);
 
   if (error)
     return (

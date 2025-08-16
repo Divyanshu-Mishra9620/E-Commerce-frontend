@@ -7,7 +7,7 @@ const ProductContext = createContext();
 
 export const ProductProvider = ({ children }) => {
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(8000);
+  const [limit, setLimit] = useState(4000);
 
   const { data, error, isLoading } = useSWR(
     ["products", page, limit],

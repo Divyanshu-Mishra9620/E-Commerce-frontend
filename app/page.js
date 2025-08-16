@@ -13,9 +13,11 @@ import TabNavigation from "@/components/TabNavigation";
 import ProductSeller from "@/components/ProductSeller";
 import { useSession } from "next-auth/react";
 import { useHomepageData } from "@/hooks/useHomepageData";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
   const { products, isLoading, error } = useHomepageData();
+  const router = useRouter();
   const { status } = useSession({
     required: true,
     onUnauthenticated() {

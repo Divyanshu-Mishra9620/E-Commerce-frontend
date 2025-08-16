@@ -12,6 +12,7 @@ import { ProductGallery } from "@/components/ProductGallery";
 import { ProductDetailsAccordion } from "@/components/ProductDetailsAccordion";
 import { SimilarProductsList } from "@/components/SimilarProductsList";
 import { ReviewSection } from "@/components/ReviewSection";
+import { useProduct } from "@/hooks/useProduct";
 
 const PriceDisplay = ({ product }) => (
   <div className="flex items-center">
@@ -46,26 +47,16 @@ export default function ProductPage() {
   const params = useParams();
   const slug = params?.slug;
 
-  const { products, isLoading: areProductsLoading } =
-    useContext(ProductContext);
+  const { product, isLoading, error } = useProduct(slug);
 
-  const product = useMemo(
-    () => products.find((p) => p.uniq_id === slug),
-    [products, slug]
-  );
-  if (!slug) return null;
+  if (isLoading) return <PageLoader />;
 
-  if (areProductsLoading) {
-    return <PageLoader />;
-  }
-
-  if (!product) {
+  if (error || !product)
     return (
-      <div className="min-h-screen flex items-center justify-center text-xl text-gray-700">
-        Product not found.
+      <div className="min-h-screen flex items-center justify-center">
+        Product not found
       </div>
     );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 pt-14">
@@ -97,7 +88,7 @@ export default function ProductPage() {
           </motion.div>
         </div>
 
-        <SimilarProductsList currentProduct={product} allProducts={products} />
+        <SimilarProductsList currentProduct={product} productId={product._id} />
 
         <ReviewSection productId={product._id} className="mt-16" />
       </div>

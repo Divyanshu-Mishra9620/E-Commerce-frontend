@@ -3,7 +3,7 @@ import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import { fetcher } from "../lib/fetcher";
 import ProductCard from "./ProductCard";
-import SkeletonCard from "./SkeletonCard";
+import { SkeletonCard } from "./SkeletonCard";
 import { motion } from "framer-motion";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;

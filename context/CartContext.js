@@ -1,5 +1,11 @@
 "use client";
-import { createContext, useContext, useMemo, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useCallback,
+  useEffect,
+} from "react";
 import useSWR from "swr";
 import { toast } from "react-toastify";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,12 +16,14 @@ const CartContext = createContext();
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
 export const CartProvider = ({ children }) => {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
 
-  if (!user && !authLoading) {
-    router.push("/api/auth/signin");
-  }
+  useEffect(() => {
+    if (!isAuthLoading && !user) {
+      router.push("/api/auth/signin");
+    }
+  }, [user, isAuthLoading, router]);
 
   const userId = user?._id;
 

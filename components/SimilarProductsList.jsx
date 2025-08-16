@@ -1,39 +1,20 @@
 "use client";
 
-import React, { useMemo } from "react";
-import { motion } from "framer-motion";
+import React from "react";
 import ProductCard from "./ProductCard";
+import { useSimilarProducts } from "@/hooks/useSimilarProducts";
 
-export function SimilarProductsList({ currentProduct, allProducts }) {
-  const similarProducts = useMemo(() => {
-    if (!currentProduct || !allProducts) return [];
+export function SimilarProductsList({ productId }) {
+  const { similarProducts, isLoading } = useSimilarProducts(productId);
 
-    const getKeywords = (product) =>
-      new Set([
-        ...(product.product_name || "").toLowerCase().split(" "),
-        ...(product.category || "").toLowerCase().split(" "),
-      ]);
+  if (isLoading)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading similar products...
+      </div>
+    );
 
-    const currentKeywords = getKeywords(currentProduct);
-
-    return allProducts
-      .filter((p) => p.uniq_id !== currentProduct.uniq_id)
-      .map((p) => {
-        const otherKeywords = getKeywords(p);
-        const intersection = new Set(
-          [...currentKeywords].filter((kw) => otherKeywords.has(kw))
-        );
-        return { product: p, score: intersection.size };
-      })
-      .filter((p) => p.score > 1)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 8)
-      .map((p) => p.product);
-  }, [currentProduct, allProducts]);
-
-  if (similarProducts.length === 0) {
-    return null;
-  }
+  if (similarProducts.length === 0) return null;
 
   return (
     <section className="mt-16">

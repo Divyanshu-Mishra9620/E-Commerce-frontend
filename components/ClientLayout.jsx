@@ -15,6 +15,8 @@ import BottomNavigation from "@/components/BottomNavigation";
 export function ClientLayout({ children, session }) {
   const pathname = usePathname();
   const isAdminRoute = pathname.startsWith("/admin");
+  const isLoginRoute = pathname.startsWith("/api/auth");
+  const isPaymentRoute = pathname.startsWith("/payment");
 
   return (
     <NavigationProvider>
@@ -26,11 +28,13 @@ export function ClientLayout({ children, session }) {
         <ProductProvider>
           <CartProvider>
             <WishlistProvider>
-              {!isAdminRoute && <Navbar />}
+              {!isAdminRoute && !isLoginRoute && !isPaymentRoute && <Navbar />}
 
               <main>{children}</main>
 
-              {!isAdminRoute && <BottomNavigation />}
+              {!isAdminRoute && !isLoginRoute && !isPaymentRoute && (
+                <BottomNavigation />
+              )}
 
               <Toaster
                 position="bottom-right"

@@ -1,6 +1,6 @@
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
-export const fetchProducts = async (page = 1, limit = 8000) => {
+export const fetchProducts = async (page = 1, limit = 4000) => {
   try {
     console.log("fetching products");
 

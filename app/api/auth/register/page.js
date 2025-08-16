@@ -1,23 +1,54 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { motion } from "framer-motion";
 import { FcGoogle } from "react-icons/fc";
-import { signIn } from "next-auth/react";
+import { User, Mail, KeyRound, Loader2 } from "lucide-react";
+import Image from "next/image";
 
-const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
+const FormInput = ({
+  icon: Icon,
+  type,
+  name,
+  value,
+  onChange,
+  placeholder,
+  required,
+}) => (
+  <div className="relative">
+    <Icon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+    <input
+      type={type}
+      name={name}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      required={required}
+      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
+);
 
-const Register = () => {
+export default function RegisterPage() {
   const router = useRouter();
+  const { status } = useSession();
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
-    role: "user",
   });
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/");
+    }
+  }, [status, router]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -27,159 +58,149 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    if (!formData.email.endsWith("@gmail.com")) {
-      setError("Please use a valid Gmail address.");
-      setLoading(false);
-      return;
-    }
 
     try {
-      const res = await fetch(`${BACKEND_URI}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URI}/api/auth/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Registration failed.");
 
-      if (!res.ok) throw new Error(data.message || "Registration failed");
+      const result = await signIn("credentials", {
+        redirect: false,
+        email: formData.email,
+        password: formData.password,
+      });
 
-      router.push("/api/auth/signin");
-    } catch (error) {
-      setError(error.message);
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+
+      router.push("/");
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      const result = await signIn("google", { redirect: false });
-
-      if (result?.error) {
-        setError(result.error);
-        setLoading(false);
-        return;
-      }
-      router.push("/");
-    } catch (err) {
-      setError("Failed to sign in with Google");
-      console.error("Google Sign-In error:", err);
-      setLoading(false);
-    }
+  const handleGoogleSignIn = () => {
+    signIn("google", { callbackUrl: "/" });
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
-      <div className="w-full max-w-md bg-gray-900 p-8 rounded-xl shadow-2xl border border-gray-800">
-        <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent mb-6">
-          Create an Account
-        </h2>
-
-        {error && (
-          <p className="text-red-400 text-center bg-red-900/20 p-2 rounded-lg mb-4">
-            {error}
-          </p>
-        )}
-
-        <button
-          onClick={handleGoogleSignIn}
-          disabled={loading}
-          className="w-full flex items-center justify-center gap-2 py-2 px-4 mt-4 border border-gray-700 rounded-lg bg-gray-800 text-gray-200 hover:bg-gray-700 transition-all"
-        >
-          <FcGoogle className="text-xl" /> Sign up with Google
-        </button>
-
-        <div className="flex items-center my-6">
-          <hr className="flex-grow border-gray-700" />
-          <span className="px-2 text-gray-400">OR</span>
-          <hr className="flex-grow border-gray-700" />
+    <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
+      <div className="grid md:grid-cols-2 max-w-4xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div className="hidden md:block relative">
+          <Image
+            src="/images/Elysoria-logo.png"
+            alt="Promotional banner"
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent p-8 flex flex-col justify-end">
+            <h2 className="text-3xl font-bold text-white">
+              Join Our Community
+            </h2>
+            <p className="text-gray-200 mt-2">
+              Create an account to get started.
+            </p>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
-              Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              required
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
+        <div className="p-8 md:p-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Create an Account
+            </h1>
+            <p className="text-gray-600 mb-8">Let's get you started!</p>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
-              Gmail
-            </label>
-            <input
-              type="email"
-              name="email"
-              required
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              placeholder="example@gmail.com"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              required
-              minLength={6}
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
-              Register As
-            </label>
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            <button
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50"
             >
-              <option value="user">User</option>
-              <option value="seller">Seller</option>
-            </select>
-          </div>
+              <FcGoogle size={22} />
+              <span className="font-medium text-gray-700">
+                Sign up with Google
+              </span>
+            </button>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all"
-          >
-            {loading ? "Registering..." : "Sign Up"}
-          </button>
-        </form>
+            <div className="flex items-center my-6">
+              <hr className="w-full border-gray-200" />
+              <span className="px-4 text-gray-400 text-sm">OR</span>
+              <hr className="w-full border-gray-200" />
+            </div>
 
-        <div className="text-center text-gray-400 mt-6">
-          Already have an account?{" "}
-          <div
-            className="text-blue-400 hover:text-blue-300 hover:underline cursor-pointer"
-            onClick={() => router.push("/api/auth/signin")}
-          >
-            Login here
-          </div>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <FormInput
+                icon={User}
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Full Name"
+                required
+              />
+              <FormInput
+                icon={Mail}
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="your@email.com"
+                required
+              />
+              <FormInput
+                icon={KeyRound}
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Password"
+                required
+              />
+
+              {error && (
+                <div className="p-3 bg-red-100 text-red-700 text-sm rounded-lg text-center">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex justify-center py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
+              >
+                {loading ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  "Create Account"
+                )}
+              </button>
+            </form>
+
+            <div className="text-center mt-6 text-sm text-gray-600">
+              <span>Already have an account? </span>
+              <Link
+                href="/api/auth/signin"
+                className="text-blue-600 hover:underline font-medium"
+              >
+                Sign in here
+              </Link>
+            </div>
+          </motion.div>
         </div>
       </div>
     </div>
   );
-};
-
-export default Register;
+}

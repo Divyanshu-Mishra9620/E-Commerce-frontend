@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMemo } from "react";
 import { toast } from "react-hot-toast";
 import { motion } from "framer-motion";
+import PageLoader from "./PageLoader";
 
 export function ProductActions({ product }) {
   const { cartItems, addToCart, updateQuantity } = useCart();

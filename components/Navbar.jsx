@@ -28,15 +28,24 @@ const navLinks = [
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [isAdmin, setIsAdmin] = React.useState(false);
 
   const { isScrolled, isVisible } = useScrollHandler();
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { cartCount } = useCart();
 
   const visibleNavLinks = React.useMemo(
     () => navLinks.filter((link) => !link.adminOnly || isAdmin),
     [isAdmin]
   );
+
+  React.useEffect(() => {
+    if (user?.role === "admin") {
+      setIsAdmin(true);
+    } else {
+      setIsAdmin(false);
+    }
+  }, [user]);
 
   return (
     <>

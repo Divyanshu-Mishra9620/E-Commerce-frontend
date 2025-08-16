@@ -1,7 +1,7 @@
 "use client";
 
 import React, { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { SlidersHorizontal } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -23,6 +23,7 @@ const SearchPageContent = () => {
     filters,
     sortOrder
   );
+  console.log(products);
 
   if (error)
     return (

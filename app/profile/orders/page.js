@@ -1,12 +1,13 @@
 "use client";
 import React, { useMemo, useState } from "react";
-import { ListFilter, X, Package, ShoppingBag, Link, Truck } from "lucide-react";
+import { ListFilter, X, ShoppingBag, Link, Truck, MapPin } from "lucide-react";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import { motion, AnimatePresence } from "framer-motion";
 import PageLoader from "@/components/PageLoader";
 import { useUserOrders } from "@/hooks/useUserOrders";
 import withAuth from "@/components/withAuth";
+import { FcAbout, FcViewDetails } from "react-icons/fc";
 
 const FilterPanel = ({ filters, onChange, onClear, onClose }) => {
   const statuses = ["Processing", "Shipped", "Delivered", "Cancelled"];
@@ -86,6 +87,11 @@ const Orders = () => {
     );
   }, [orders]);
 
+  const handleNavigate = (e, href) => {
+    e.preventDefault();
+    window.location.href = href;
+  };
+
   if (error)
     return (
       <div className="min-h-screen flex items-center justify-center text-red-500">
@@ -156,58 +162,76 @@ const Orders = () => {
                 animate={{ opacity: 1 }}
                 className="space-y-4"
               >
-                {allProductsFromOrders.map((item, index) => (
-                  <motion.div
-                    key={`${item.orderId}-${item.product._id}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm flex items-center gap-4"
-                  >
-                    <div className="relative w-24 h-24 shrink-0">
-                      <Image
-                        src={
-                          item.product.image
-                            .replace(/\s+/g, "")
-                            .replace(/[\[\]]/g, "") || "/images/lamp.jpg"
-                        }
-                        alt={item.product.product_name}
-                        fill
-                        className="rounded-lg object-cover"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <Link
-                        href={`/product/${item.product.uniq_id}`}
-                        className="font-semibold text-gray-800 hover:text-blue-600 line-clamp-1"
-                      >
-                        {item.product.product_name}
-                      </Link>
-                      <p className="text-sm text-gray-600">
-                        ₹{item.product.discounted_price}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Qty: {item.quantity}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div
-                        className={`flex items-center gap-2 text-sm font-medium ${
-                          item.orderStatus === "Delivered"
-                            ? "text-green-600"
-                            : "text-yellow-600"
-                        }`}
-                      >
-                        <Truck size={16} />
-                        <span>{item.orderStatus}</span>
+                {allProductsFromOrders.map((item, index) => {
+                  return (
+                    <motion.div
+                      key={`${item.orderId}-${item.product._id}`}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm flex items-center gap-4"
+                    >
+                      <div className="relative w-24 h-24 shrink-0">
+                        <Image
+                          src={
+                            item?.product?.image
+                              ?.replace(/\s+/g, "")
+                              .replace(/[\[\]]/g, "") || "/images/lamp.jpg"
+                          }
+                          alt={item.product.product_name}
+                          fill
+                          className="rounded-lg object-cover"
+                        />
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Ordered on{" "}
-                        {new Date(item.orderedAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
+                      <div className="flex-1">
+                        <Link
+                          href={`/product/${item.product.uniq_id}`}
+                          className="font-semibold text-gray-800 hover:text-blue-600 line-clamp-1"
+                        >
+                          {item.product.product_name}
+                        </Link>
+                        <p className="text-sm text-gray-600">
+                          ₹{item.product.discounted_price}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Qty: {item.quantity}
+                        </p>
+                      </div>
+                      <div className="text-right items-center justify-center">
+                        <div
+                          className={`flex items-center gap-2 text-sm font-medium ${
+                            item.orderStatus === "Delivered"
+                              ? "text-green-600"
+                              : "text-yellow-600"
+                          }`}
+                        >
+                          <Truck size={16} />
+                          <span>{item.orderStatus}</span>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Ordered on{" "}
+                            {new Date(item.orderedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div>
+                          <button
+                            onClick={(e) =>
+                              handleNavigate(
+                                e,
+                                `/profile/orders/order-details/${item.orderId}`
+                              )
+                            }
+                            className="p-2 text-gray-500 rounded-md hover:bg-gray-100 hover:text-blue-600 transition-colors"
+                            aria-label="View Order Details"
+                          >
+                            <MapPin size={22} />
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </motion.div>
             )}
           </div>

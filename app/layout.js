@@ -1,5 +1,6 @@
 import { ClientLayout } from "@/components/ClientLayout";
 import "@/app/_styles/global.css";
+import "leaflet/dist/leaflet.css";
 
 export const metadata = {
   title: "Elysoria - Your E-commerce Destination",

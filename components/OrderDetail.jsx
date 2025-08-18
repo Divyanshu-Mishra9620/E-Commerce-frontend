@@ -29,7 +29,6 @@ export default function OrderDetail({ order: initialOrder, isLoading, error }) {
     fallbackData: initialOrder,
   });
   const router = useRouter();
-  console.log(order);
 
   if (isLoading) return <PageLoader />;
   if (error)

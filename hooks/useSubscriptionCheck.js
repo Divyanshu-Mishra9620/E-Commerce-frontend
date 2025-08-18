@@ -19,6 +19,7 @@ const authedFetcher = async ([url, token]) => {
 
 export function useSubscriptionCheck() {
   const { data: session, status } = useSession();
+  console.log(session);
 
   const userId = session?.user?._id;
   const token = session?.user?.accessToken;
@@ -27,6 +28,8 @@ export function useSubscriptionCheck() {
     userId && token
       ? [`${BACKEND_URI}/api/payments/payment/${userId}`, token]
       : null;
+
+  console.log(swrKey);
 
   const { data, error, isLoading } = useSWR(swrKey, authedFetcher, {
     revalidateOnFocus: false,

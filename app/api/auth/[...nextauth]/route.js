@@ -34,7 +34,7 @@ export const authOptions = {
             name: data.user.name,
             email: data.user.email,
             role: data.user.role,
-            accessToken: data.accessToken,
+            accessToken: data.user.accessToken,
           };
         } catch (error) {
           throw new Error(error.message || "Invalid credentials.");

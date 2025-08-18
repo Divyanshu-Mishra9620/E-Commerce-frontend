@@ -82,6 +82,8 @@ export default function SellerPage() {
     return subLoading ? null : subscription;
   }, [subscription, subLoading]);
 
+  console.log(subscription);
+
   useEffect(() => {
     const fetchSellerProducts = async () => {
       if (!user?._id) return;

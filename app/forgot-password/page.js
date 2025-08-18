@@ -1,12 +1,49 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { AiOutlineMail } from "react-icons/ai";
+import {
+  Mail,
+  MailQuestion,
+  Loader2,
+  AlertTriangle,
+  CheckCircle,
+  ArrowLeft,
+} from "lucide-react";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
-export default function ForgotPassword() {
+const FormInput = ({ icon: Icon, value, onChange, placeholder }) => (
+  <div className="relative">
+    <Icon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+    <input
+      type="email"
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      required
+      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
+);
+
+const AlertMessage = ({ message, isError }) => {
+  if (!message) return null;
+
+  const iconColor = isError ? "text-red-400" : "text-green-400";
+  const bgColor = isError ? "bg-red-500/10" : "bg-green-500/10";
+  const Icon = isError ? AlertTriangle : CheckCircle;
+
+  return (
+    <div
+      className={`flex items-center gap-3 rounded-md p-3 text-sm ${bgColor} ${iconColor}`}
+    >
+      <Icon className="h-5 w-5 flex-shrink-0" />
+      <span>{message}</span>
+    </div>
+  );
+};
+
+export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -21,96 +58,76 @@ export default function ForgotPassword() {
     try {
       const res = await fetch(`${BACKEND_URI}/api/auth/forgot-password`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || "Something went wrong");
-        return;
+        throw new Error(data.message || "Something went wrong");
       }
 
-      setMessage("Password reset email sent. Check your inbox.");
+      setMessage(
+        "If an account with that email exists, we have sent a password reset link."
+      );
     } catch (err) {
-      setError("Failed to send reset email. Please try again.");
+      setError(err.message || "Failed to send reset email. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md p-8 bg-gray-900 rounded-xl shadow-2xl border border-gray-800"
-      >
-        <h1 className="text-3xl font-bold text-center bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent mb-8">
-          Forgot Password
-        </h1>
+    <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
+      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl backdrop-blur-sm ring-1 ring-white/10">
+        <div className="text-center">
+          <MailQuestion className="mx-auto h-12 w-12 text-blue-500" />
+          <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900">
+            Forgot Password
+          </h1>
+          <p className="mt-2 text-sm text-gray-600">
+            Enter your email and we'll send you a link to get back into your
+            account.
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
-              Email Address
-            </label>
-            <div className="relative">
-              <AiOutlineMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                placeholder="Enter your email"
-              />
-            </div>
-          </div>
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+          <FormInput
+            icon={Mail}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email address"
+          />
 
-          {error && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="p-2 bg-red-900/20 text-red-400 text-sm rounded-lg"
-            >
-              {error}
-            </motion.div>
-          )}
+          <AlertMessage message={error} isError={true} />
+          <AlertMessage message={message} isError={false} />
 
-          {message && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="p-2 bg-green-900/20 text-green-400 text-sm rounded-lg"
-            >
-              {message}
-            </motion.div>
-          )}
-
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all"
+            className="flex w-full items-center justify-center rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading ? "Sending..." : "Send Reset Link"}
-          </motion.button>
+            {loading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              "Send Reset Link"
+            )}
+          </button>
         </form>
 
-        <div className="text-center text-gray-400 mt-6">
+        <div className="mt-6 text-center">
           <Link
             href="/api/auth/signin"
-            className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
+            className="group inline-flex items-center gap-1.5 text-sm text-slate-400 transition-colors hover:text-blue-400"
           >
-            Back to Sign In
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1 text-gray-600" />
+            <span className="group-hover:underline text-gray-600">
+              Back to Sign In
+            </span>
           </Link>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

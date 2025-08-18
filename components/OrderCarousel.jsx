@@ -153,9 +153,6 @@ export default function OrderCarousel() {
   return (
     <div className="w-full max-w-screen-xl mx-auto space-y-16">
       <div>
-        <h2 className="text-3xl font-bold text-center text-white mb-8">
-          Your Orders
-        </h2>
         {loadingOrders ? (
           <Spinner className="text-blue-500" />
         ) : errorOrders ? (

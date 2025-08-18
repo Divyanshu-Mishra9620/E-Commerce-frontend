@@ -17,6 +17,9 @@ export function ClientLayout({ children, session }) {
   const isAdminRoute = pathname.startsWith("/admin");
   const isLoginRoute = pathname.startsWith("/api/auth");
   const isPaymentRoute = pathname.startsWith("/payment");
+  const passwordRoutes = pathname.startsWith(
+    "/reset-password" || "/forgot-password"
+  );
 
   return (
     <NavigationProvider>
@@ -28,13 +31,17 @@ export function ClientLayout({ children, session }) {
         <ProductProvider>
           <CartProvider>
             <WishlistProvider>
-              {!isAdminRoute && !isLoginRoute && !isPaymentRoute && <Navbar />}
+              {!isAdminRoute &&
+                !isLoginRoute &&
+                !isPaymentRoute &&
+                !passwordRoutes && <Navbar />}
 
               <main>{children}</main>
 
-              {!isAdminRoute && !isLoginRoute && !isPaymentRoute && (
-                <BottomNavigation />
-              )}
+              {!isAdminRoute &&
+                !isLoginRoute &&
+                !isPaymentRoute &&
+                !passwordRoutes && <BottomNavigation />}
 
               <Toaster
                 position="bottom-right"

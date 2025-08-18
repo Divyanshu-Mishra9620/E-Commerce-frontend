@@ -18,6 +18,8 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        if (!credentials) return null;
+
         try {
           const res = await fetch(`${BACKEND_URI}/api/auth/login`, {
             method: "POST",
@@ -32,7 +34,7 @@ export const authOptions = {
             name: data.user.name,
             email: data.user.email,
             role: data.user.role,
-            accessToken: data.token,
+            accessToken: data.accessToken,
           };
         } catch (error) {
           throw new Error(error.message || "Invalid credentials.");
@@ -59,7 +61,7 @@ export const authOptions = {
           const data = await res.json();
           user.id = data.user._id;
           user.role = data.user.role;
-          user.accessToken = data.token;
+          user.accessToken = data.accessToken;
         } catch (error) {
           return false;
         }

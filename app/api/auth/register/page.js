@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { FcGoogle } from "react-icons/fc";
 import { User, Mail, KeyRound, Loader2 } from "lucide-react";
 import Image from "next/image";
+import toast from "react-hot-toast";
 
 const FormInput = ({
   icon: Icon,
@@ -59,6 +60,11 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
 
+    if (!formData.email || !formData.password || !formData.name) {
+      toast.error("All fields are required.");
+      setLoading(false);
+      return;
+    }
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URI}/api/auth/register`,
@@ -72,17 +78,8 @@ export default function RegisterPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Registration failed.");
 
-      const result = await signIn("credentials", {
-        redirect: false,
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (result?.error) {
-        throw new Error(result.error);
-      }
-
-      router.push("/");
+      toast.success("Account created successfully! Please Sign in.");
+      router.push("/api/auth/signin");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -157,7 +154,7 @@ export default function RegisterPage() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="your@email.com"
+                placeholder="Elysoria@gmail.com"
                 required
               />
               <FormInput

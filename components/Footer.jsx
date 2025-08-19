@@ -94,7 +94,10 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="text-gray-600 hover:text-gray-900">
+                <Link
+                  href="/FAQS"
+                  className="text-gray-600 hover:text-gray-900"
+                >
                   FAQs
                 </Link>
               </li>
@@ -147,27 +150,22 @@ export default function Footer() {
           </p>
           <div className="flex items-center gap-4">
             <SocialIcon
-              href="#"
-              icon={FaFacebookF}
-              brandColor="hover:bg-[#1877F2]"
-            />
-            <SocialIcon
-              href="#"
+              href="https://www.instagram.com/elys_oria?igsh=cWZ2d2E4azdtMWVn"
               icon={FaInstagram}
               brandColor="hover:bg-[#E4405F]"
             />
             <SocialIcon
-              href="#"
+              href="https://x.com/Elysoria543215"
               icon={FaTwitter}
               brandColor="hover:bg-[#1DA1F2]"
             />
             <SocialIcon
-              href="#"
+              href="https://www.linkedin.com/in/divyanshu-mishra-12039b309/"
               icon={FaLinkedinIn}
               brandColor="hover:bg-[#0A66C2]"
             />
             <SocialIcon
-              href="#"
+              href="https://www.youtube.com/@ElysoriaYourStore"
               icon={FaYoutube}
               brandColor="hover:bg-[#FF0000]"
             />

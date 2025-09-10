@@ -1,11 +1,28 @@
 "use client";
 import useSWR from "swr";
 import { useDebounce } from "use-debounce";
+import { useAuth } from "./useAuth";
 
-const fetcher = (url) => fetch(url).then((res) => res.json());
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
+const fetcher = async (url, token) => {
+  try {
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || "An error occurred.");
+    }
+    return res.json();
+  } catch (error) {
+    console.error("Error fetching sellers:", error);
+  }
+};
+
 export function useSellers(page, searchTerm, sortBy) {
+  const { user } = useAuth();
+
   const [debouncedSearch] = useDebounce(searchTerm, 500);
 
   const params = new URLSearchParams({
@@ -15,11 +32,18 @@ export function useSellers(page, searchTerm, sortBy) {
     sort: sortBy,
   }).toString();
 
-  const swrKey = `${BACKEND_URI}/api/sellers?${params}`;
+  const swrKey =
+    user?.id && user?.accessToken
+      ? [`${BACKEND_URI}/api/sellers?${params}`, user?.accessToken]
+      : null;
 
-  const { data, error, isLoading, mutate } = useSWR(swrKey, fetcher, {
-    keepPreviousData: true,
-  });
+  const { data, error, isLoading, mutate } = useSWR(
+    swrKey,
+    ([url, token]) => fetcher(url, token),
+    {
+      keepPreviousData: true,
+    }
+  );
 
   return {
     sellers: data?.sellers || [],

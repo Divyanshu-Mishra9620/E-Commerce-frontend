@@ -4,6 +4,32 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
+async function refreshAccessToken(token) {
+  try {
+    const res = await fetch(`${BACKEND_URI}/api/auth/refresh-token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken: token.refreshToken }),
+    });
+
+    const refreshed = await res.json();
+    if (!res.ok) throw refreshed;
+
+    return {
+      ...token,
+      accessToken: refreshed.accessToken,
+      refreshToken: refreshed.refreshToken ?? token.refreshToken,
+      accessTokenExpires: Date.now() + refreshed.expiresIn * 1000,
+    };
+  } catch (error) {
+    console.error("Error refreshing access token:", error);
+    return {
+      ...token,
+      error: "RefreshAccessTokenError",
+    };
+  }
+}
+
 export const authOptions = {
   session: { strategy: "jwt" },
   providers: [
@@ -34,7 +60,9 @@ export const authOptions = {
             name: data.user.name,
             email: data.user.email,
             role: data.user.role,
-            accessToken: data.user.accessToken,
+            accessToken: data.accessToken,
+            refreshToken: data.refreshToken,
+            expiresIn: data.expiresIn,
           };
         } catch (error) {
           throw new Error(error.message || "Invalid credentials.");
@@ -62,7 +90,10 @@ export const authOptions = {
           user.id = data.user._id;
           user.role = data.user.role;
           user.accessToken = data.accessToken;
+          user.refreshToken = data.refreshToken;
+          user.expiresIn = data.expiresIn;
         } catch (error) {
+          console.error("Google Sign-In error:", error);
           return false;
         }
       }
@@ -70,18 +101,25 @@ export const authOptions = {
     },
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        token.role = user.role;
-        token.accessToken = user.accessToken;
+        return {
+          id: user.id,
+          role: user.role,
+          accessToken: user.accessToken,
+          refreshToken: user.refreshToken,
+          accessTokenExpires: Date.now() + (user.expiresIn ?? 15 * 60) * 1000,
+        };
       }
-      return token;
+      if (Date.now() < token.accessTokenExpires) {
+        return token;
+      }
+      return refreshAccessToken(token);
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user._id = token.id;
-        session.user.role = token.role;
-        session.user.accessToken = token.accessToken;
-      }
+      session.user._id = token.id;
+      session.user.role = token.role;
+      session.user.accessToken = token.accessToken;
+      session.user.refreshToken = token.refreshToken;
+      session.error = token.error;
       return session;
     },
   },

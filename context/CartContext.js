@@ -10,7 +10,15 @@ import useSWR from "swr";
 import { toast } from "react-toastify";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
-const fetcher = (url) => fetch(url).then((res) => res.json());
+import { useSession } from "next-auth/react";
+
+const fetcher = async (url, token) => {
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error("Failed to fetch cart data.");
+  return res.json();
+};
 
 const CartContext = createContext();
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
@@ -18,6 +26,7 @@ const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 export const CartProvider = ({ children }) => {
   const { user, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
+  const { data: session } = useSession();
 
   useEffect(() => {
     if (!isAuthLoading && !user) {
@@ -26,28 +35,37 @@ export const CartProvider = ({ children }) => {
   }, [user, isAuthLoading, router]);
 
   const userId = user?._id;
+  const accessToken = session?.user?.accessToken;
 
-  const swrKey = userId ? `${BACKEND_URI}/api/cart/${userId}` : null;
+  const swrKey =
+    userId && accessToken
+      ? [`${BACKEND_URI}/api/cart/${userId}`, accessToken]
+      : null;
 
-  const { data, error, isLoading, mutate } = useSWR(swrKey, fetcher, {
-    keepPreviousData: true,
-  });
+  const { data, error, isLoading, mutate } = useSWR(
+    swrKey,
+    ([url, token]) => fetcher(url, token),
+    { keepPreviousData: true }
+  );
 
   const cartItems = data?.items || [];
 
   const performCartUpdate = useCallback(
     async (action, payload) => {
       if (!userId) return toast.error("Please log in to manage your cart.");
+      if (!accessToken) return toast.error("No valid session token found.");
 
       let optimisticData, apiOptions;
 
       switch (action) {
         case "ADD":
-          const newItem = {
-            product: payload.product,
-            quantity: payload.quantity,
+          optimisticData = {
+            ...data,
+            items: [
+              ...cartItems,
+              { product: payload.product, quantity: payload.quantity },
+            ],
           };
-          optimisticData = { ...data, items: [...cartItems, newItem] };
           apiOptions = {
             method: "PUT",
             body: JSON.stringify({
@@ -96,19 +114,22 @@ export const CartProvider = ({ children }) => {
       await mutate(optimisticData, { revalidate: false });
 
       try {
-        const res = await fetch(`${BACKEND_URI}/api/cart/${userId}`, {
+        let res = await fetch(`${BACKEND_URI}/api/cart/${userId}`, {
           ...apiOptions,
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
         });
-        if (!res.ok) throw new Error(`Failed to ${action.toLowerCase()} cart.`);
 
+        if (!res.ok) throw new Error(`Failed to ${action.toLowerCase()} cart.`);
         await mutate();
       } catch (err) {
         toast.error(err.message);
         await mutate();
       }
     },
-    [data, userId, mutate, cartItems]
+    [data, userId, mutate, cartItems, accessToken]
   );
 
   const { cartCount, cartTotal } = useMemo(() => {

@@ -4,7 +4,17 @@ import { toast } from "react-toastify";
 import useSWR from "swr";
 import { useAuth } from "@/hooks/useAuth";
 
-const fetcher = (url) => fetch(url).then((res) => res.json());
+const fetcher = async (url, token) => {
+  try {
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error("Failed to fetch wishlist data.");
+    return res.json();
+  } catch (error) {
+    console.error("Error fetching wishlist data:", error);
+  }
+};
 
 const WishlistContext = createContext();
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
@@ -13,10 +23,17 @@ export const WishlistProvider = ({ children }) => {
   const { user } = useAuth();
   const userId = user?._id;
 
-  const swrKey = userId ? `${BACKEND_URI}/api/wishlist/${userId}` : null;
-  const { data, error, isLoading, mutate } = useSWR(swrKey, fetcher, {
-    keepPreviousData: true,
-  });
+  const swrKey =
+    userId && user?.accessToken
+      ? [`${BACKEND_URI}/api/wishlist/${userId}`, user?.accessToken]
+      : null;
+  const { data, error, isLoading, mutate } = useSWR(
+    swrKey,
+    ([url, token]) => fetcher(url, token),
+    {
+      keepPreviousData: true,
+    }
+  );
 
   const wishlistItems = data?.items || [];
   const filteredWishlistItems = wishlistItems.filter(
@@ -48,7 +65,10 @@ export const WishlistProvider = ({ children }) => {
       try {
         const res = await fetch(`${BACKEND_URI}/api/wishlist/${userId}`, {
           method: action === "add" ? "POST" : "DELETE",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user?.accessToken}`,
+          },
           body: JSON.stringify({
             productId: action === "add" ? payload._id : payload,
           }),

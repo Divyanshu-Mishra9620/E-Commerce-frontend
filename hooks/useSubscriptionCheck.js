@@ -1,39 +1,46 @@
 "use client";
 
-import { useMemo } from "react";
 import { useSession } from "next-auth/react";
+import { useMemo } from "react";
 import useSWR from "swr";
+import { useAuth } from "./useAuth";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
-const authedFetcher = async ([url, token]) => {
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) {
-    const errorData = await res.json();
-    throw new Error(errorData.message || "An error occurred.");
+const authedFetcher = async (url, token) => {
+  try {
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || "An error occurred.");
+    }
+    return res.json();
+  } catch (error) {
+    console.error("Error fetching sellers:", error);
   }
-  return res.json();
 };
 
 export function useSubscriptionCheck() {
-  const { data: session, status } = useSession();
-  console.log(session);
+  const { status } = useSession();
+  const { user } = useAuth();
 
-  const userId = session?.user?._id;
-  const token = session?.user?.accessToken;
+  const userId = user?._id;
+  const token = user?.accessToken;
 
   const swrKey =
     userId && token
       ? [`${BACKEND_URI}/api/payments/payment/${userId}`, token]
       : null;
 
-  console.log(swrKey);
-
-  const { data, error, isLoading } = useSWR(swrKey, authedFetcher, {
-    revalidateOnFocus: false,
-  });
+  const { data, error, isLoading } = useSWR(
+    swrKey,
+    ([url, token]) => authedFetcher(url, token),
+    {
+      revalidateOnFocus: false,
+    }
+  );
 
   const { subscription, isValid } = useMemo(() => {
     if (!data || !data.subscription) {

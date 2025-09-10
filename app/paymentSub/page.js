@@ -1,7 +1,6 @@
 "use client";
 
-import { MoveLeft, User, Check, Loader2 } from "lucide-react";
-import Link from "next/link";
+import { Check, Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -42,6 +41,7 @@ export default function PaymentSubPage() {
       router.push("/api/auth/signin?callbackUrl=/paymentSub");
     },
   });
+
   const [error, setError] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(subscriptionPlans[1]);
   const [isLoading, setIsLoading] = useState(false);
@@ -92,7 +92,7 @@ export default function PaymentSubPage() {
                 ...paymentResponse,
                 planId: selectedPlan.id,
                 duration: selectedPlan.duration,
-                user: session.user,
+                user: session?.user,
               },
             });
 

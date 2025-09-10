@@ -117,7 +117,7 @@ const Wishlist = () => {
               <AnimatePresence>
                 {filteredItems?.map((item) => (
                   <motion.div
-                    key={item.product._id}
+                    key={item.product._id + Math.random() * 1000}
                     layout
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}

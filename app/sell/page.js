@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  useContext,
-  useState,
-  useEffect,
-  useMemo,
-  useCallback,
-  use,
-} from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
@@ -24,7 +17,6 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { HiArrowLeft, HiArrowRight } from "react-icons/hi";
-import ProductContext from "@/context/ProductContext";
 import { useSubscriptionCheck } from "@/hooks/useSubscriptionCheck";
 import { useAuth } from "@/hooks/useAuth";
 import { useSession } from "next-auth/react";
@@ -51,7 +43,6 @@ const formatPrice = (price) => {
 export default function SellerPage() {
   const { user, isLoading: authLoading } = useAuth();
   const { data: session } = useSession();
-  const { products, isLoading } = useContext(ProductContext);
   const router = useRouter();
 
   const [searched, setSearched] = useState("");
@@ -81,8 +72,6 @@ export default function SellerPage() {
   const currentSubscription = useMemo(() => {
     return subLoading ? null : subscription;
   }, [subscription, subLoading]);
-
-  console.log(subscription);
 
   useEffect(() => {
     const fetchSellerProducts = async () => {
@@ -419,7 +408,7 @@ const SubscriptionDetails = ({ subscription, router }) => {
             Your subscription expires soon. Renew to maintain seller privileges.
           </p>
           <button
-            onClick={() => router.push("/app/paymentSub")}
+            onClick={() => router.push("/paymentSub")}
             className="mt-2 text-blue-600 hover:text-blue-800 underline"
           >
             Renew now

@@ -124,8 +124,8 @@ export const authOptions = {
     },
   },
   pages: {
-    signIn: "/auth/signin",
-    error: "/auth/signin",
+    signIn: "/api/auth/signin",
+    error: "/api/auth/signin",
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

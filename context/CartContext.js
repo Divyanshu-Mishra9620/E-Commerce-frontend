@@ -1,141 +1,84 @@
 "use client";
-import {
-  createContext,
-  useContext,
-  useMemo,
-  useCallback,
-  useEffect,
-} from "react";
+import { createContext, useContext, useMemo, useCallback } from "react";
 import useSWR from "swr";
 import { toast } from "react-toastify";
 import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { authedFetch } from "@/utils/authedFetch";
 
-const fetcher = async (url, token) => {
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) throw new Error("Failed to fetch cart data.");
+const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
+
+const fetcher = async (url) => {
+  const res = await authedFetch(url);
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to fetch cart data.");
+  }
   return res.json();
 };
 
 const CartContext = createContext();
-const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
 export const CartProvider = ({ children }) => {
   const { user, isLoading: isAuthLoading } = useAuth();
-  const router = useRouter();
-  const { data: session } = useSession();
-
-  useEffect(() => {
-    if (!isAuthLoading && !user) {
-      router.push("/api/auth/signin");
-    }
-  }, [user, isAuthLoading, router]);
-
   const userId = user?._id;
-  const accessToken = session?.user?.accessToken;
+  const swrKey = userId ? `${BACKEND_URI}/api/cart/${userId}` : null;
 
-  const swrKey =
-    userId && accessToken
-      ? [`${BACKEND_URI}/api/cart/${userId}`, accessToken]
-      : null;
-
-  const { data, error, isLoading, mutate } = useSWR(
-    swrKey,
-    ([url, token]) => fetcher(url, token),
-    { keepPreviousData: true }
-  );
+  const { data, error, isLoading, mutate } = useSWR(swrKey, fetcher, {
+    revalidateOnFocus: false,
+  });
 
   const cartItems = data?.items || [];
 
   const performCartUpdate = useCallback(
     async (action, payload) => {
       if (!userId) return toast.error("Please log in to manage your cart.");
-      if (!accessToken) return toast.error("No valid session token found.");
 
-      let optimisticData, apiOptions;
+      let url = `/api/cart/${userId}`;
+      let options = {};
 
       switch (action) {
         case "ADD":
-          optimisticData = {
-            ...data,
-            items: [
-              ...cartItems,
-              { product: payload.product, quantity: payload.quantity },
-            ],
-          };
-          apiOptions = {
+        case "UPDATE":
+          options = {
             method: "PUT",
-            body: JSON.stringify({
+            body: {
               productId: payload.product._id,
               quantity: payload.quantity,
-            }),
+            },
           };
           break;
         case "REMOVE":
-          optimisticData = {
-            ...data,
-            items: cartItems.filter(
-              (item) => item.product._id !== payload.productId
-            ),
-          };
-          apiOptions = {
-            method: "DELETE",
-            body: JSON.stringify({ product: payload.productId }),
-          };
-          break;
-        case "UPDATE":
-          optimisticData = {
-            ...data,
-            items: cartItems.map((item) =>
-              item.product._id === payload.productId
-                ? { ...item, quantity: payload.quantity }
-                : item
-            ),
-          };
-          apiOptions = {
-            method: "PUT",
-            body: JSON.stringify({
-              productId: payload.productId,
-              quantity: payload.quantity,
-            }),
-          };
+          url = `/api/cart/${userId}/items/${payload.productId}`;
+          options = { method: "DELETE" };
           break;
         case "CLEAR":
-          optimisticData = { ...data, items: [] };
-          apiOptions = { method: "DELETE" };
+          options = { method: "DELETE" };
           break;
         default:
           return;
       }
 
-      await mutate(optimisticData, { revalidate: false });
-
       try {
-        let res = await fetch(`${BACKEND_URI}/api/cart/${userId}`, {
-          ...apiOptions,
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
+        const res = await authedFetch(url, options);
+        if (!res.ok) throw new Error((await res.json()).message);
 
-        if (!res.ok) throw new Error(`Failed to ${action.toLowerCase()} cart.`);
-        await mutate();
+        mutate();
       } catch (err) {
         toast.error(err.message);
-        await mutate();
       }
     },
-    [data, userId, mutate, cartItems, accessToken]
+    [userId, mutate]
   );
 
   const { cartCount, cartTotal } = useMemo(() => {
-    const count = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+    if (!cartItems) return { cartCount: 0, cartTotal: 0 };
+    const count = cartItems.reduce(
+      (acc, item) => acc + (item.quantity || 0),
+      0
+    );
     const total = cartItems.reduce(
-      (acc, item) => acc + item.quantity * (item.product.price || 599),
+      (acc, item) =>
+        acc + (item.quantity || 0) * (item.product?.discounted_price || 0),
       0
     );
     return { cartCount: count, cartTotal: total };
@@ -144,7 +87,7 @@ export const CartProvider = ({ children }) => {
   const value = useMemo(
     () => ({
       cartItems,
-      isLoading,
+      isLoading: isAuthLoading || isLoading,
       error,
       cartCount,
       cartTotal,
@@ -154,9 +97,21 @@ export const CartProvider = ({ children }) => {
       updateQuantity: (productId, quantity) =>
         performCartUpdate("UPDATE", { productId, quantity }),
       clearCart: () => performCartUpdate("CLEAR"),
+      mutateCart: mutate,
     }),
-    [cartItems, isLoading, error, cartCount, cartTotal, performCartUpdate]
+    [
+      cartItems,
+      isAuthLoading,
+      isLoading,
+      error,
+      cartCount,
+      cartTotal,
+      performCartUpdate,
+      mutate,
+    ]
   );
+
+  if (isAuthLoading) return null;
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };

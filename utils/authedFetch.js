@@ -3,34 +3,44 @@ import { getSession, signOut } from "next-auth/react";
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
 export const authedFetch = async (url, options = {}) => {
-  const session = await getSession();
-  const token = session?.user?.accessToken;
+  let session = await getSession();
+  let token = session?.user?.accessToken;
 
-  const headers = { "Content-Type": "application/json", ...options.headers };
-  if (token) headers.Authorization = `Bearer ${token}`;
-  if (options.body && typeof options.body === "object") {
-    options.body = JSON.stringify(options.body);
-  }
+  const refreshToken = async () => {
+    try {
+      const res = await fetch(`${BACKEND_URI}/api/auth/refresh-token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken: session?.user?.refreshToken }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error("Failed to refresh session.");
 
-  const response = await fetch(`${BACKEND_URI}${url}`, { ...options, headers });
+      await getSession({ force: true });
+      return (await getSession())?.user?.accessToken;
+    } catch (error) {
+      await signOut({ callbackUrl: "/api/auth/signin" });
+      throw new Error("Session expired. Please log in again.");
+    }
+  };
+
+  const fetchOptions = {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      ...options.headers,
+    },
+    body: options.body ? JSON.stringify(options.body) : null,
+  };
+
+  let response = await fetch(`${BACKEND_URI}${url}`, fetchOptions);
 
   if (response.status === 401) {
-    await signOut({ callbackUrl: "/api/auth/signin" });
-    throw new Error("Session expired. Please log in again.");
+    const newToken = await refreshToken();
+    fetchOptions.headers.Authorization = `Bearer ${newToken}`;
+    response = await fetch(`${BACKEND_URI}${url}`, fetchOptions);
   }
 
-  if (
-    response.status === 204 ||
-    response.headers.get("content-length") === "0"
-  ) {
-    return null;
-  }
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "An error occurred.");
-  }
-
-  return data;
+  return response;
 };

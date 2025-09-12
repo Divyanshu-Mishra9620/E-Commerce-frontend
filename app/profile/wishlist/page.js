@@ -50,22 +50,13 @@ const Wishlist = () => {
     });
   };
 
-  if (isLoading) {
-    return <PageLoader />;
-  }
-
-  if (error) {
+  if (isLoading) return <PageLoader />;
+  if (error)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 text-red-600 text-center">
-        <div>
-          <h2 className="text-xl font-bold mb-2">Error Loading Wishlist</h2>
-          <p className="text-gray-600">
-            {error.message || "Could not connect to the server."}
-          </p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center text-red-600">
+        Error: {error.message}
       </div>
     );
-  }
 
   return (
     <>
@@ -89,7 +80,7 @@ const Wishlist = () => {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="flex flex-col items-center justify-center min-h-[60vh] text-center"
+              className="flex flex-col items-center justify-center min-h-[60vh]"
             >
               <div className="mb-6 p-6 bg-gray-100 rounded-full">
                 <Heart className="w-16 h-16 text-gray-400" strokeWidth={1.5} />
@@ -97,17 +88,15 @@ const Wishlist = () => {
               <h2 className="text-2xl font-bold mb-2 text-gray-800">
                 Your Wishlist is Empty
               </h2>
-              <p className="text-gray-600 mb-6 max-w-md">
+              <p className="text-gray-600 mb-6 max-w-md text-center">
                 Start curating your perfect selection of products.
               </p>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-sm flex items-center"
+              <button
                 onClick={() => router.push("/")}
+                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold flex items-center"
               >
-                <ShoppingBag className="mr-2" size={20} />
-                Explore Products
-              </motion.button>
+                <ShoppingBag className="mr-2" size={20} /> Explore Products
+              </button>
             </motion.div>
           ) : (
             <motion.div
@@ -117,14 +106,14 @@ const Wishlist = () => {
               <AnimatePresence>
                 {filteredItems?.map((item) => (
                   <motion.div
-                    key={item.product._id + Math.random() * 1000}
+                    key={item.product._id}
                     layout
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
-                    className="group relative bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300 flex flex-col"
+                    className="group bg-white rounded-xl border border-gray-200 hover:shadow-xl transition-shadow flex flex-col"
                   >
-                    <div className="relative aspect-square">
+                    <div className="relative aspect-square overflow-hidden">
                       <Image
                         src={
                           item.product.image?.replace(/\s+|[\[\]]/g, "") ||
@@ -133,9 +122,20 @@ const Wishlist = () => {
                         alt={item.product.product_name}
                         fill
                         className="object-cover transition-transform group-hover:scale-105"
-                        placeholder="blur"
-                        blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
                       />
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold flex items-center gap-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMoveToCart(item);
+                          }}
+                          disabled={isProcessing}
+                        >
+                          <ShoppingCart size={18} /> Move to Cart
+                        </motion.button>
+                      </div>
                     </div>
                     <div className="p-4 flex flex-col flex-grow">
                       <h3 className="font-medium line-clamp-2 text-gray-800 flex-grow">
@@ -145,9 +145,8 @@ const Wishlist = () => {
                         <span className="text-lg font-bold text-gray-900">
                           ₹{item.product.discounted_price}
                         </span>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          className="text-red-500 hover:text-red-600 p-2 rounded-full"
+                        <button
+                          className="text-red-500 hover:text-red-600 p-2 rounded-full z-10 relative"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRemoveItem(item.product._id);
@@ -156,22 +155,8 @@ const Wishlist = () => {
                           aria-label="Remove from wishlist"
                         >
                           <Heart className="w-5 h-5 fill-current" />
-                        </motion.button>
+                        </button>
                       </div>
-                    </div>
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold flex items-center gap-2 shadow-lg"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleMoveToCart(item);
-                        }}
-                        disabled={isProcessing}
-                      >
-                        <ShoppingCart size={18} />
-                        Move to Cart
-                      </motion.button>
                     </div>
                   </motion.div>
                 ))}

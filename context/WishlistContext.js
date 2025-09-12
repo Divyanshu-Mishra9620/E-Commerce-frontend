@@ -36,6 +36,7 @@ export const WishlistProvider = ({ children }) => {
   );
 
   const wishlistItems = data?.items || [];
+
   const filteredWishlistItems = wishlistItems.filter(
     (item) => item && item.product
   );

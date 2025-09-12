@@ -13,7 +13,9 @@ const fetcher = async (url) => {
     const errorData = await res.json().catch(() => ({}));
     throw new Error(errorData.message || "Failed to fetch cart data.");
   }
-  return res.json();
+  const data = await res.json();
+
+  return data;
 };
 
 const CartContext = createContext();
@@ -21,7 +23,7 @@ const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const { user, isLoading: isAuthLoading } = useAuth();
   const userId = user?._id;
-  const swrKey = userId ? `${BACKEND_URI}/api/cart/${userId}` : null;
+  const swrKey = userId ? `/api/cart/${userId}` : null;
 
   const { data, error, isLoading, mutate } = useSWR(swrKey, fetcher, {
     revalidateOnFocus: false,
@@ -38,7 +40,6 @@ export const CartProvider = ({ children }) => {
 
       switch (action) {
         case "ADD":
-        case "UPDATE":
           options = {
             method: "PUT",
             body: {
@@ -47,12 +48,30 @@ export const CartProvider = ({ children }) => {
             },
           };
           break;
+        case "UPDATE":
+          options = {
+            method: "PUT",
+            body: {
+              productId: payload.productId,
+              quantity: payload.quantity,
+            },
+          };
+          break;
         case "REMOVE":
-          url = `/api/cart/${userId}/items/${payload.productId}`;
-          options = { method: "DELETE" };
+          options = {
+            method: "DELETE",
+            body: {
+              productId: payload.productId,
+            },
+          };
           break;
         case "CLEAR":
-          options = { method: "DELETE" };
+          options = {
+            method: "DELETE",
+            body: {
+              productId: payload.productId,
+            },
+          };
           break;
         default:
           return;

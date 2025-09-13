@@ -13,14 +13,18 @@ import {
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Check, Copy, IndianRupee } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+
+const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
 export default function Dashboard() {
-  const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
   const [users, setUsers] = useState(null);
   const [carts, setCarts] = useState(null);
   const [orders, setOrders] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copiedProductId, setCopiedProductId] = useState(null);
+
+  const { user } = useAuth();
 
   const handleCopyProductId = (productId) => {
     navigator.clipboard.writeText(productId);
@@ -41,9 +45,15 @@ export default function Dashboard() {
     const fetchData = async () => {
       try {
         const [usersRes, cartsRes, ordersRes] = await Promise.all([
-          fetch(`${BACKEND_URI}/api/users`),
-          fetch(`${BACKEND_URI}/api/cart`),
-          fetch(`${BACKEND_URI}/api/orders`),
+          fetch(`${BACKEND_URI}/api/users`, {
+            headers: { Authorization: `Bearer ${user?.accessToken}` },
+          }),
+          fetch(`${BACKEND_URI}/api/cart`, {
+            headers: { Authorization: `Bearer ${user?.accessToken}` },
+          }),
+          fetch(`${BACKEND_URI}/api/orders`, {
+            headers: { Authorization: `Bearer ${user?.accessToken}` },
+          }),
         ]);
 
         const usersData = await usersRes.json();

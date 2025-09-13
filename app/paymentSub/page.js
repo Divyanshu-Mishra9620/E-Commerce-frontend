@@ -63,7 +63,7 @@ export default function PaymentSubPage() {
     setIsLoading(true);
 
     try {
-      const order = await authedFetch("/api/payments/create-subscription", {
+      const res = await authedFetch("/api/payments/create-subscription", {
         method: "POST",
         body: {
           amount: selectedPlan.price * 100,
@@ -71,6 +71,8 @@ export default function PaymentSubPage() {
           planId: selectedPlan.id,
         },
       });
+
+      const order = await res.json();
 
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_API_KEY,

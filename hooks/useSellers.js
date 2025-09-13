@@ -14,7 +14,9 @@ const fetcher = async (url, token) => {
       const errorData = await res.json();
       throw new Error(errorData.message || "An error occurred.");
     }
-    return res.json();
+
+    const data = await res.json();
+    return data;
   } catch (error) {
     console.error("Error fetching sellers:", error);
   }
@@ -33,7 +35,7 @@ export function useSellers(page, searchTerm, sortBy) {
   }).toString();
 
   const swrKey =
-    user?.id && user?.accessToken
+    user?._id && user?.accessToken
       ? [`${BACKEND_URI}/api/sellers?${params}`, user?.accessToken]
       : null;
 

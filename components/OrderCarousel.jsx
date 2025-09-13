@@ -1,11 +1,4 @@
 "use client";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -23,43 +16,42 @@ const OrderCard = ({ order }) => {
   const orderStatus = order.status || "Processing";
 
   return (
-    <CarouselItem className="md:basis-1/2 lg:basis-1/3">
-      <div className="p-1">
-        <motion.div
-          whileHover={{ y: -5 }}
-          className="bg-card rounded-lg border border-border p-4 space-y-3 hover:shadow-md transition-shadow"
-        >
-          <div className="flex items-center gap-3">
-            <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0">
-              <Image
-                src={imageUrl}
-                alt={primaryProduct?.product_name || "Product image"}
-                fill
-                className="object-cover"
-                sizes="56px"
-              />
-            </div>
-            <div className="flex-1 min-w-0">
-              <Link
-                href={`/product/${primaryProduct?.uniq_id}`}
-                className="focus:outline-none"
-              >
-                <h3 className="font-medium text-foreground hover:text-primary line-clamp-2 transition-colors">
-                  {primaryProduct?.product_name}
-                </h3>
-              </Link>
-              <p className="text-lg font-semibold text-primary mt-1">
-                ₹{order.totalPrice.toLocaleString()}
-              </p>
-            </div>
+    // Changed: Replaced CarouselItem with a div that has sizing and flex properties
+    <div className="flex-shrink-0 w-[350px]">
+      <motion.div
+        whileHover={{ y: -5 }}
+        className="bg-card rounded-lg border border-border p-4 space-y-3 hover:shadow-md transition-shadow h-full"
+      >
+        <div className="flex items-center gap-3">
+          <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0">
+            <Image
+              src={imageUrl}
+              alt={primaryProduct?.product_name || "Product image"}
+              fill
+              className="object-cover"
+              sizes="56px"
+            />
           </div>
-          <div className="text-sm text-muted-foreground">
-            Order Status:{" "}
-            <span className="font-medium text-foreground">{orderStatus}</span>
+          <div className="flex-1 min-w-0">
+            <Link
+              href={`/product/${primaryProduct?.uniq_id}`}
+              className="focus:outline-none"
+            >
+              <h3 className="font-medium text-foreground hover:text-primary line-clamp-2 transition-colors">
+                {primaryProduct?.product_name}
+              </h3>
+            </Link>
+            <p className="text-lg font-semibold text-primary mt-1">
+              ₹{order.totalPrice.toLocaleString()}
+            </p>
           </div>
-        </motion.div>
-      </div>
-    </CarouselItem>
+        </div>
+        <div className="text-sm text-muted-foreground">
+          Order Status:{" "}
+          <span className="font-medium text-foreground">{orderStatus}</span>
+        </div>
+      </motion.div>
+    </div>
   );
 };
 
@@ -122,7 +114,7 @@ export function ReviewCard({ review }) {
                 day: "numeric",
               }
             ) ||
-              new Date.now().toLocaleString("en-US", {
+              new Date().toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -160,15 +152,12 @@ export default function OrderCarousel() {
         ) : orders?.length === 0 ? (
           <p className="text-gray-400 text-center">No orders found.</p>
         ) : (
-          <Carousel>
-            <CarouselContent>
-              {orders?.map((order) => (
-                <OrderCard key={order._id} order={order} />
-              ))}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
+          // Changed: Replaced Carousel with a scrollable div
+          <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide">
+            {orders?.map((order) => (
+              <OrderCard key={order._id} order={order} />
+            ))}
+          </div>
         )}
       </div>
 

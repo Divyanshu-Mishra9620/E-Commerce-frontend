@@ -111,8 +111,6 @@ function Settings() {
       <Navbar />
       <div className="min-h-screen bg-gray-50 pt-20">
         <div className="max-w-4xl mx-auto p-6 space-y-8">
-          <h1 className="text-4xl font-bold text-gray-900">Settings</h1>
-
           <SettingsCard icon={Lock} title="Security">
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
               <span>Two-Factor Authentication</span>

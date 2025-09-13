@@ -39,7 +39,7 @@ export default function Sellers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("newest");
 
-  const { sellers, totalPages, isLoading, error, mutate } = useSellers(
+  const { sellers, isLoading, error, mutate } = useSellers(
     page,
     searchTerm,
     sortBy

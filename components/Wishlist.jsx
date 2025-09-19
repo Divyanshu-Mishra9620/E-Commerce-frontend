@@ -12,7 +12,7 @@ const WishlistSection = () => {
   const { data: session, status } = useSession();
   const userId = session?.user?._id;
 
-  const swrKey = userId ? `${BACKEND_URI}/api/wishlist/${userId}` : null;
+  const swrKey = userId ? `/api/wishlist/${userId}` : null;
 
   const { data, error } = useSWR(swrKey, authedFetch, {
     revalidateOnFocus: false,

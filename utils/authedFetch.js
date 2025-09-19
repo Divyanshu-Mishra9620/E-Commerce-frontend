@@ -35,6 +35,7 @@ export const authedFetch = async (url, options = {}) => {
     },
     body: options.body ? JSON.stringify(options.body) : null,
   };
+  console.log(`${BACKEND_URI}${url}`);
 
   let response = await fetch(`${BACKEND_URI}${url}`, fetchOptions);
 
@@ -45,5 +46,9 @@ export const authedFetch = async (url, options = {}) => {
     response = await fetch(`${BACKEND_URI}${url}`, fetchOptions);
   }
 
-  return response;
+  const data = await response.json();
+
+  console.log(data);
+
+  return data;
 };

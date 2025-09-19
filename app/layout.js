@@ -5,6 +5,9 @@ import "leaflet/dist/leaflet.css";
 export const metadata = {
   title: "Elysoria - Your E-commerce Destination",
   description: "Discover the best products online.",
+  icons: {
+    icon: "/images/Elysoria-logo.png",
+  },
 };
 
 export default function RootLayout({ children }) {

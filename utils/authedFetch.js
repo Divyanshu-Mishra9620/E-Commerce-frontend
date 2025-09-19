@@ -48,7 +48,5 @@ export const authedFetch = async (url, options = {}) => {
 
   const data = await response.json();
 
-  console.log(data);
-
   return data;
 };

@@ -66,10 +66,10 @@ export default function Deals({ products }) {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-gray-50"
+      className="min-h-screen bg-white"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="relative aspect-[16/6] mb-16 overflow-hidden rounded-2xl shadow-lg">
+        <div className="relative aspect-[16/6] mb-16 overflow-hidden rounded-2xl shadow-lg border border-slate-200">
           <Image
             src="/summer-banner.jpg"
             alt="New Season Arrivals"
@@ -77,12 +77,12 @@ export default function Deals({ products }) {
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex items-center p-8 md:p-16">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-blue-700/50 flex items-center p-8 md:p-16">
             <div>
               <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
                 New Season Arrivals
               </h2>
-              <p className="mt-2 text-xl text-gray-200">
+              <p className="mt-2 text-xl text-blue-100">
                 Discover Our Curated Collections
               </p>
             </div>

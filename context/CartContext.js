@@ -8,13 +8,7 @@ import { authedFetch } from "@/utils/authedFetch";
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
 const fetcher = async (url) => {
-  const res = await authedFetch(url);
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || "Failed to fetch cart data.");
-  }
-  const data = await res.json();
-
+  const data = await authedFetch(url);
   return data;
 };
 
@@ -29,7 +23,7 @@ export const CartProvider = ({ children }) => {
     revalidateOnFocus: false,
   });
 
-  const cartItems = data?.items || [];
+  const cartItems = data?.cart?.items || data?.items || [];
 
   const performCartUpdate = useCallback(
     async (action, payload) => {
@@ -68,9 +62,7 @@ export const CartProvider = ({ children }) => {
         case "CLEAR":
           options = {
             method: "DELETE",
-            body: {
-              productId: payload.productId,
-            },
+            body: {},
           };
           break;
         default:

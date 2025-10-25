@@ -27,10 +27,10 @@ const ProductSlide = ({ product, isActive }) => {
         animate={isActive ? "visible" : "exit"}
         className="flex flex-col justify-center text-center md:text-left"
       >
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
+        <h1 className="text-4xl md:text-5xl font-bold text-slate-900 leading-tight">
           {product?.product_name}
         </h1>
-        <p className="mt-4 text-lg text-gray-600 line-clamp-3">
+        <p className="mt-4 text-lg text-slate-700 line-clamp-3">
           {product?.description}
         </p>
         <div className="mt-8 flex gap-4 justify-center md:justify-start">
@@ -38,7 +38,7 @@ const ProductSlide = ({ product, isActive }) => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => router.push(`/product/${product?.uniq_id}`)}
-            className="flex items-center gap-2 px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700"
+            className="flex items-center gap-2 px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors"
           >
             <ShoppingBag size={20} />
             Shop Now
@@ -84,7 +84,7 @@ export default function Hero({ products }) {
 
   return (
     <section className="w-full relative my-8">
-      <div className="relative w-full h-[550px] md:h-[500px] bg-gray-100 overflow-hidden rounded-2xl shadow-sm border border-gray-200">
+      <div className="relative w-full h-[550px] md:h-[500px] bg-gradient-to-br from-slate-50 to-slate-100 overflow-hidden rounded-2xl shadow-lg border border-slate-200">
         <AnimatePresence initial={false}>
           <ProductSlide
             key={currentIndex}
@@ -101,7 +101,7 @@ export default function Hero({ products }) {
               className={`w-3 h-3 rounded-full transition-all duration-300 ${
                 index === currentIndex
                   ? "bg-blue-600 w-6"
-                  : "bg-gray-300 hover:bg-gray-400"
+                  : "bg-slate-300 hover:bg-slate-400"
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />

@@ -18,14 +18,14 @@ const NavItem = ({ href, icon: Icon, label, isActive, badgeCount }) => (
   >
     <div
       className={`flex flex-col items-center ${
-        isActive ? "text-blue-600" : "text-gray-500"
+        isActive ? "text-blue-600" : "text-slate-500"
       } group-hover:text-blue-600 transition-colors`}
     >
       <Icon className="w-6 h-6 mb-1" strokeWidth={isActive ? 2 : 1.5} />
       <span className="text-xs font-medium">{label}</span>
     </div>
     {badgeCount > 0 && (
-      <div className="absolute top-0 right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+      <div className="absolute top-0 right-1 bg-emerald-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
         {badgeCount}
       </div>
     )}
@@ -51,7 +51,7 @@ export default function BottomNavigation() {
 
   return (
     <motion.div
-      className="fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-lg border-t border-gray-200 shadow-t-lg z-50 md:hidden"
+      className="fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-lg border-t border-slate-200 shadow-t-lg z-50 md:hidden"
       animate={{ y: isVisible ? 0 : 100 }}
       transition={{ type: "spring", damping: 20, stiffness: 200 }}
     >

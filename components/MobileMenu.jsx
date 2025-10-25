@@ -19,14 +19,14 @@ const MobileMenuItem = ({ href, icon: Icon, text, onClick, badgeCount }) => (
   <Link
     href={href}
     onClick={onClick}
-    className="flex items-center justify-between px-6 py-4 text-lg text-gray-800 hover:bg-gray-100"
+    className="flex items-center justify-between px-6 py-4 text-lg text-slate-900 hover:bg-blue-50 transition-colors"
   >
     <div className="flex items-center">
-      <Icon className="w-6 h-6 mr-4 text-gray-600" />
+      <Icon className="w-6 h-6 mr-4 text-slate-600" />
       <span>{text}</span>
     </div>
     {badgeCount > 0 && (
-      <span className="bg-red-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">
+      <span className="bg-emerald-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">
         {badgeCount}
       </span>
     )}
@@ -71,21 +71,21 @@ export const MobileMenu = ({ onClose, isAdmin }) => {
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="absolute inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl flex flex-col"
+        className="absolute inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl flex flex-col border-l border-slate-200"
         onClick={(e) => e.stopPropagation()}
       >
-        <header className="flex items-center justify-between p-4 border-b">
+        <header className="flex items-center justify-between p-4 border-b border-slate-200">
           {isAuthenticated && user ? (
             <div>
-              <p className="font-semibold">{user?.name}</p>
-              <p className="text-sm text-gray-500">{user.email}</p>
+              <p className="font-semibold text-slate-900">{user?.name}</p>
+              <p className="text-sm text-slate-500">{user.email}</p>
             </div>
           ) : (
-            <p className="text-xl font-bold">Menu</p>
+            <p className="text-xl font-bold text-slate-900">Menu</p>
           )}
           <button
             onClick={onClose}
-            className="p-2 text-gray-500 hover:text-gray-800"
+            className="p-2 text-slate-500 hover:text-slate-900 transition-colors"
           >
             <X size={24} />
           </button>

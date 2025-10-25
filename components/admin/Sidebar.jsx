@@ -8,13 +8,13 @@ const NavItem = ({ name, icon: Icon, isActive, onClick }) => (
   <li>
     <button
       onClick={onClick}
-      className={`flex items-center w-full px-4 py-3 rounded-lg transition-colors duration-200 text-left text-sm font-medium ${
+      className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-200 text-left text-sm font-medium ${
         isActive
-          ? "bg-blue-600 text-white shadow-sm"
-          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+          ? "bg-blue-600 text-white shadow-md"
+          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
       }`}
     >
-      <Icon className="h-5 w-5 mr-3" />
+      <Icon className="h-5 w-5 mr-3 flex-shrink-0" />
       <span>{name}</span>
     </button>
   </li>
@@ -38,21 +38,26 @@ export function Sidebar({
           open: { x: 0 },
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="fixed top-0 left-0 h-full bg-white text-gray-800 w-64 z-50 border-r border-gray-200 shadow-lg md:translate-x-0"
+        className="fixed top-0 left-0 h-screen bg-white text-slate-900 w-64 z-50 border-r border-slate-200 md:translate-x-0 overflow-y-auto"
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 sticky top-0 bg-white">
           <Link href="/" className="flex items-center gap-2">
-            <Home className="h-6 w-6 text-blue-600" />
-            <span className="text-lg font-bold text-gray-800">Admin Panel</span>
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <Home className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-lg font-bold text-slate-900">Admin</span>
           </Link>
           {isMobile && (
-            <button onClick={onClose} className="p-2">
-              <X />
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-slate-100 rounded-lg"
+            >
+              <X className="w-5 h-5" />
             </button>
           )}
         </div>
         <nav className="p-4">
-          <ul className="space-y-2">
+          <ul className="space-y-1">
             {navItems.map((item) => (
               <NavItem
                 key={item.name}

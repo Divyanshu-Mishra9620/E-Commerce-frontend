@@ -74,7 +74,7 @@ const ExploreGrid = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
+          className="text-3xl md:text-4xl font-bold text-slate-900 mb-4"
         >
           Shop by Category
         </motion.h2>
@@ -82,7 +82,7 @@ const ExploreGrid = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
+          className="text-lg text-slate-600 max-w-2xl mx-auto"
         >
           Discover products across our carefully curated categories
         </motion.p>
@@ -108,9 +108,9 @@ const ExploreGrid = () => {
             />
 
             <div
-              className={`relative h-full rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-all duration-300 ${
+              className={`relative h-full rounded-2xl overflow-hidden border border-slate-200 shadow-md hover:shadow-lg transition-all duration-300 ${
                 hoveredIndex === index
-                  ? "ring-2 ring-primary-500 scale-[1.02]"
+                  ? "ring-2 ring-blue-500 scale-[1.02]"
                   : ""
               }`}
               onClick={(e) => handleCategory(category.title, e)}

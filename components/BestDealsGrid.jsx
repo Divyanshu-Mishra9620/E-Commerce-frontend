@@ -19,9 +19,7 @@ const BestDealsGrid = ({ deals, category, gradient }) => {
   return (
     <section className="relative">
       <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-          {category}
-        </h3>
+        <h3 className="text-2xl font-bold text-slate-900">{category}</h3>
         <Link
           href={`/search?q=${categorySlug}`}
           className={`hidden sm:inline-flex items-center text-sm font-medium bg-gradient-to-r ${gradient} text-white px-4 py-2 rounded-full hover:opacity-90 transition-opacity`}

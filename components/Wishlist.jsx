@@ -21,10 +21,10 @@ const WishlistSection = () => {
   if (status === "loading" || (!data && !error && status === "authenticated")) {
     return (
       <section className="mt-12 px-4 sm:px-6 lg:px-8">
-        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-          <h3 className="text-3xl font-semibold text-gray-900 dark:text-gray-100 mb-8">
+        <div className="bg-white rounded-xl shadow-lg p-6 border border-slate-200">
+          <h3 className="text-3xl font-semibold text-slate-900 mb-8">
             Saved Selections
-            <span className="ml-3 text-gray-400 dark:text-gray-500">❤</span>
+            <span className="ml-3 text-slate-400">❤</span>
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {Array.from({ length: 4 }).map((_, index) => (
@@ -61,17 +61,17 @@ const WishlistSection = () => {
       transition={{ duration: 0.4 }}
       className="mt-12 px-4 sm:px-6 lg:px-8"
     >
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-3xl font-semibold text-gray-900 dark:text-gray-100 mb-8">
+      <div className="bg-white rounded-xl shadow-lg p-6 border border-slate-200">
+        <h3 className="text-3xl font-semibold text-slate-900 mb-8">
           Saved Selections
-          <span className="ml-3 text-gray-400 dark:text-gray-500">❤</span>
+          <span className="ml-3 text-slate-400">❤</span>
         </h3>
 
         {wishlistItems.length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center py-12 text-gray-500 dark:text-gray-400"
+            className="text-center py-12 text-slate-500"
           >
             No items saved yet. Go on, find something you love!
           </motion.div>

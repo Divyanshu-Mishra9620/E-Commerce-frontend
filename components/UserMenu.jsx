@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 const MenuItem = ({ icon: Icon, text, onClick }) => (
   <li
     onClick={onClick}
-    className="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200 cursor-pointer"
+    className="flex items-center px-4 py-2 text-slate-900 hover:bg-blue-50 transition-colors duration-200 cursor-pointer"
   >
     <Icon className="w-4 h-4 mr-2" />
     <span>{text}</span>
@@ -37,7 +37,7 @@ export const UserMenu = () => {
     return (
       <button
         onClick={handleUserIconClick}
-        className="text-gray-200 hover:text-white"
+        className="text-slate-700 hover:text-blue-600"
       >
         <User className="w-6 h-6" />
       </button>
@@ -48,7 +48,7 @@ export const UserMenu = () => {
     <div className="relative">
       <button
         onClick={handleUserIconClick}
-        className="text-gray-200 hover:text-white"
+        className="text-slate-700 hover:text-blue-600"
       >
         <User className="w-6 h-6" />
       </button>
@@ -58,7 +58,7 @@ export const UserMenu = () => {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute right-0 mt-2 w-48 bg-black bg-opacity-90 backdrop-blur-lg rounded-lg shadow-lg border border-gray-700 py-2"
+            className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-50"
           >
             <MenuItem
               icon={User}

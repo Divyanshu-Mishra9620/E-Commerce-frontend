@@ -34,10 +34,10 @@ export function FilterPanel({ isOpen, onClose, initialFilters, onApply }) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-semibold text-gray-800">Filters</h3>
+              <h3 className="text-xl font-semibold text-slate-900">Filters</h3>
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="p-2 hover:bg-slate-100 rounded-lg text-slate-600"
               >
                 <X />
               </button>
@@ -45,7 +45,7 @@ export function FilterPanel({ isOpen, onClose, initialFilters, onApply }) {
 
             <div className="flex-grow space-y-6">
               <div>
-                <h4 className="font-medium mb-2 text-gray-700">Price Range</h4>
+                <h4 className="font-medium mb-2 text-slate-700">Price Range</h4>
                 <div className="flex items-center gap-4">
                   <input
                     type="number"
@@ -57,7 +57,7 @@ export function FilterPanel({ isOpen, onClose, initialFilters, onApply }) {
                         minPrice: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   <span>-</span>
                   <input
@@ -70,16 +70,16 @@ export function FilterPanel({ isOpen, onClose, initialFilters, onApply }) {
                         maxPrice: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-3 pt-6 border-t">
+            <div className="flex gap-3 pt-6 border-t border-slate-200">
               <button
                 onClick={() => setTempFilters({ minPrice: "", maxPrice: "" })}
-                className="w-full py-3 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium"
+                className="w-full py-3 bg-slate-100 hover:bg-slate-200 rounded-lg font-medium text-slate-900 transition-colors"
               >
                 Clear
               </button>

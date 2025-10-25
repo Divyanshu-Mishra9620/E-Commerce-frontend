@@ -1,38 +1,132 @@
 "use client";
-import useSWR from "swr";
-import { APIProvider, Map, Marker } from "@vis.gl/react-google-maps";
+import { useEffect, useRef } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
-const fetcher = (url) => fetch(url).then((res) => res.json());
-const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+  iconUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+});
 
-export function OrderMap({ orderId }) {
-  const { data: coordinates, isLoading } = useSWR(
-    orderId ? `${BACKEND_URI}/api/orders/${orderId}/geocode` : null,
-    fetcher
-  );
+export function OrderMap({ address }) {
+  const mapContainer = useRef(null);
+  const map = useRef(null);
 
-  if (isLoading) return <div>Loading map...</div>;
-  if (!coordinates) return <div>Could not load map for this address.</div>;
+  useEffect(() => {
+    if (!mapContainer.current || !address) return;
+
+    if (!map.current) {
+      map.current = L.map(mapContainer.current).setView([51.505, -0.09], 13);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19,
+      }).addTo(map.current);
+    }
+
+    const geocodeAddress = async () => {
+      try {
+        const addressString = `${address.street || ""}, ${
+          address.city || ""
+        }, ${address.state || ""}, ${address.postalCode || ""}, ${
+          address.country || ""
+        }`;
+
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+            addressString
+          )}`
+        );
+
+        const results = await response.json();
+
+        if (results && results.length > 0) {
+          const { lat, lon } = results[0];
+          const coordinates = [parseFloat(lat), parseFloat(lon)];
+
+          map.current.eachLayer((layer) => {
+            if (layer instanceof L.Marker) {
+              map.current.removeLayer(layer);
+            }
+          });
+
+          map.current.setView(coordinates, 14);
+
+          L.marker(coordinates, {
+            icon: L.icon({
+              iconUrl:
+                "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+              iconRetinaUrl:
+                "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+              shadowUrl:
+                "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+              iconSize: [25, 41],
+              iconAnchor: [12, 41],
+              popupAnchor: [1, -34],
+              shadowSize: [41, 41],
+            }),
+          })
+            .bindPopup(
+              `<div class="text-sm"><strong>${
+                address.fullName || "Delivery Location"
+              }</strong><br/>${addressString}</div>`
+            )
+            .addTo(map.current)
+            .openPopup();
+        } else {
+          const defaultCoords = [20.5937, 78.9629];
+          map.current.setView(defaultCoords, 13);
+
+          L.marker(defaultCoords, {
+            icon: L.icon({
+              iconUrl:
+                "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+              iconRetinaUrl:
+                "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+              shadowUrl:
+                "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+              iconSize: [25, 41],
+              iconAnchor: [12, 41],
+              popupAnchor: [1, -34],
+              shadowSize: [41, 41],
+            }),
+          })
+            .bindPopup(
+              `<div class="text-sm"><strong>${
+                address.fullName || "Delivery Location"
+              }</strong><br/>Address could not be located</div>`
+            )
+            .addTo(map.current)
+            .openPopup();
+        }
+      } catch (error) {
+        console.error("Geocoding error:", error);
+        const defaultCoords = [20.5937, 78.9629];
+        map.current.setView(defaultCoords, 13);
+      }
+    };
+
+    geocodeAddress();
+
+    return () => {};
+  }, [address]);
 
   return (
-    <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}>
-      <div
-        style={{
-          height: "300px",
-          width: "100%",
-          borderRadius: "12px",
-          overflow: "hidden",
-        }}
-      >
-        <Map
-          defaultCenter={coordinates}
-          defaultZoom={14}
-          gestureHandling={"greedy"}
-          disableDefaultUI={true}
-        >
-          <Marker position={coordinates} />
-        </Map>
-      </div>
-    </APIProvider>
+    <div
+      ref={mapContainer}
+      style={{
+        height: "300px",
+        width: "100%",
+        borderRadius: "12px",
+        overflow: "hidden",
+      }}
+      className="shadow-sm border border-slate-200"
+    />
   );
 }

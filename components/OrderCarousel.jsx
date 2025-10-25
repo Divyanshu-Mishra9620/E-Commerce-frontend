@@ -16,7 +16,6 @@ const OrderCard = ({ order }) => {
   const orderStatus = order.status || "Processing";
 
   return (
-    // Changed: Replaced CarouselItem with a div that has sizing and flex properties
     <div className="flex-shrink-0 w-[350px]">
       <motion.div
         whileHover={{ y: -5 }}
@@ -152,7 +151,6 @@ export default function OrderCarousel() {
         ) : orders?.length === 0 ? (
           <p className="text-gray-400 text-center">No orders found.</p>
         ) : (
-          // Changed: Replaced Carousel with a scrollable div
           <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide">
             {orders?.map((order) => (
               <OrderCard key={order._id} order={order} />

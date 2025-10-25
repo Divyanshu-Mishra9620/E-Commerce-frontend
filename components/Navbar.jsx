@@ -51,7 +51,9 @@ export default function Navbar() {
     <>
       <motion.nav
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          isScrolled ? "bg-black/80 backdrop-blur-lg" : "bg-black"
+          isScrolled
+            ? "bg-white/95 backdrop-blur-lg shadow-md border-b border-slate-200"
+            : "bg-white border-b border-slate-100"
         }`}
         animate={{ y: isVisible ? 0 : "-100%" }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
@@ -77,7 +79,7 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-sm font-medium text-gray-300 hover:text-white transition-colors"
+                  className="text-sm font-medium text-slate-700 hover:text-blue-600 transition-colors duration-200"
                 >
                   {link.label}
                 </Link>
@@ -95,11 +97,11 @@ export default function Navbar() {
 
               <Link
                 href="/profile/carts"
-                className="relative text-gray-200 hover:text-white"
+                className="relative text-slate-700 hover:text-blue-600 transition-colors"
               >
                 <ShoppingCart className="w-6 h-6" />
                 {isAuthenticated && cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-white text-black text-xs rounded-full px-1.5 py-0.5 font-semibold">
+                  <span className="absolute -top-2 -right-2 bg-emerald-500 text-white text-xs rounded-full px-1.5 py-0.5 font-semibold">
                     {cartCount}
                   </span>
                 )}
@@ -109,7 +111,7 @@ export default function Navbar() {
             <div className="lg:hidden">
               <button
                 onClick={() => setMobileMenuOpen(true)}
-                className="text-gray-200"
+                className="text-slate-700"
               >
                 <Menu className="w-6 h-6" />
               </button>
@@ -127,7 +129,10 @@ export default function Navbar() {
               className="fixed inset-0 bg-black/50 z-40 lg:hidden"
               onClick={() => setMobileMenuOpen(false)}
             />
-            <MobileMenu onClose={() => setMobileMenuOpen(false)} isAdmin={isAdmin} />
+            <MobileMenu
+              onClose={() => setMobileMenuOpen(false)}
+              isAdmin={isAdmin}
+            />
           </>
         )}
       </AnimatePresence>

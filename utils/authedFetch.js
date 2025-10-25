@@ -35,7 +35,6 @@ export const authedFetch = async (url, options = {}) => {
     },
     body: options.body ? JSON.stringify(options.body) : null,
   };
-  console.log(`${BACKEND_URI}${url}`);
 
   let response = await fetch(`${BACKEND_URI}${url}`, fetchOptions);
 

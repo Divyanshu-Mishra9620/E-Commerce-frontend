@@ -18,10 +18,10 @@ export function Modal({ isOpen, onClose, title, children }) {
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white rounded-xl w-full max-w-lg shadow-xl border border-gray-200"
+            className="bg-white rounded-xl w-full max-w-lg shadow-xl border border-gray-200 max-h-[90vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
               <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
               <button
                 onClick={onClose}
@@ -30,7 +30,7 @@ export function Modal({ isOpen, onClose, title, children }) {
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
-            <div className="p-6">{children}</div>
+            <div className="p-6 overflow-y-auto flex-1">{children}</div>
           </motion.div>
         </motion.div>
       )}

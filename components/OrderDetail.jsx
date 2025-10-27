@@ -17,6 +17,7 @@ import { InfoCard } from "./InfoCard";
 import { OrderMap } from "./OrderMap";
 import PageLoader from "./PageLoader";
 import { OrderStatusTracker } from "./OrderStatusTracker";
+import CancellationActionButtons from "./CancellationActionButtons";
 import { useOrderDetail } from "@/hooks/useOrderDetail";
 
 const DetailRow = ({ label, value }) => (
@@ -294,6 +295,8 @@ export default function OrderDetail({ order: initialOrder, isLoading, error }) {
                 Contact Support
               </button>
             </motion.div>
+
+            <CancellationActionButtons order={order} />
           </div>
         </main>
       </div>

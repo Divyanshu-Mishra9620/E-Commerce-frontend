@@ -70,15 +70,56 @@ export const CartProvider = ({ children }) => {
       }
 
       try {
+        const currentData = data;
+        let updatedItems = [
+          ...(currentData?.cart?.items || currentData?.items || []),
+        ];
+
+        if (action === "ADD") {
+          const existingItemIndex = updatedItems.findIndex(
+            (item) => item.product?._id === payload.product._id
+          );
+          if (existingItemIndex > -1) {
+            updatedItems[existingItemIndex].quantity += payload.quantity;
+          } else {
+            updatedItems.push({
+              product: payload.product,
+              quantity: payload.quantity,
+            });
+          }
+        } else if (action === "UPDATE") {
+          const itemIndex = updatedItems.findIndex(
+            (item) => item.product?._id === payload.productId
+          );
+          if (itemIndex > -1) {
+            updatedItems[itemIndex].quantity = payload.quantity;
+          }
+        } else if (action === "REMOVE") {
+          updatedItems = updatedItems.filter(
+            (item) => item.product?._id !== payload.productId
+          );
+        } else if (action === "CLEAR") {
+          updatedItems = [];
+        }
+
+        mutate(
+          {
+            cart: { items: updatedItems },
+            items: updatedItems,
+          },
+          false
+        );
+
         const res = await authedFetch(url, options);
         if (!res.ok) throw new Error((await res.json()).message);
 
         mutate();
       } catch (err) {
         toast.error(err.message);
+        mutate();
       }
     },
-    [userId, mutate]
+    [userId, mutate, data]
   );
 
   const { cartCount, cartTotal } = useMemo(() => {

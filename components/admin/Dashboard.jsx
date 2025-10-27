@@ -176,15 +176,19 @@ export default function Dashboard() {
   });
 
   const productCounts = {};
+  const productNames = {};
   orders?.forEach((order) => {
     order.products.forEach((prod) => {
-      productCounts[prod.product] =
-        (productCounts[prod.product] || 0) + prod.quantity;
+      const productId = prod.product?._id || prod.product;
+      const productName = prod.product?.name || productId;
+      productCounts[productId] =
+        (productCounts[productId] || 0) + prod.quantity;
+      productNames[productId] = productName;
     });
   });
-  const bestSellers = Object.entries(productCounts).sort(
-    ([, a], [, b]) => b - a
-  );
+  const bestSellers = Object.entries(productCounts)
+    .map(([productId, count]) => [productNames[productId] || productId, count])
+    .sort(([, a], [, b]) => b - a);
 
   if (loading) {
     return (

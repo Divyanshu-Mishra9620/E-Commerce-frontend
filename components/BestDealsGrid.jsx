@@ -2,9 +2,10 @@
 
 import { useRef } from "react";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+
 import { useDragScroll } from "@/hooks/useDragScroll";
 import ProductCard from "./ProductCard";
-import { ArrowRight } from "lucide-react";
 
 const BestDealsGrid = ({ deals, category, gradient }) => {
   const scrollRef = useRef(null);
@@ -17,24 +18,37 @@ const BestDealsGrid = ({ deals, category, gradient }) => {
   const categorySlug = category.toLowerCase();
 
   return (
-    <section className="relative">
-      <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-2xl font-bold text-slate-900">{category}</h3>
+    <section className="space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <span className="storefront-kicker">
+            Curated Drop
+          </span>
+          <h3 className="mt-4 text-2xl font-bold tracking-tight text-slate-950 md:text-3xl">
+            {category}
+          </h3>
+        </div>
+
         <Link
           href={`/search?q=${categorySlug}`}
-          className={`hidden sm:inline-flex items-center text-sm font-medium bg-gradient-to-r ${gradient} text-white px-4 py-2 rounded-full hover:opacity-90 transition-opacity`}
+          className={`inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${gradient} px-5 py-3 text-sm font-semibold text-white shadow-lg transition-transform duration-300 hover:-translate-y-0.5`}
         >
           View All
-          <ArrowRight className="ml-2 w-4 h-4" />
+          <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
 
       <div
         ref={scrollRef}
-        className="grid auto-cols-[minmax(280px,1fr)] grid-flow-col gap-6 overflow-x-auto pb-4 scrollbar-hide"
+        className="flex gap-6 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory"
       >
         {deals.map((deal) => (
-          <ProductCard key={deal._id || deal.uniq_id} product={deal} />
+          <div
+            key={deal._id || deal.uniq_id}
+            className="w-[280px] flex-shrink-0 snap-start sm:w-[300px]"
+          >
+            <ProductCard product={deal} />
+          </div>
         ))}
       </div>
     </section>

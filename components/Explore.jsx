@@ -1,163 +1,146 @@
 "use client";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { motion } from "framer-motion";
+
 import { useState, useTransition } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { ArrowRight, Compass } from "lucide-react";
+
 import Spinner from "./Spinner";
 
 const categories = [
   {
     title: "Fashion",
-    href: "/categories/fashion",
     image: "/clothes.jpg",
     description: "Trendy apparel for all occasions",
-    color: "bg-indigo-100 dark:bg-indigo-900/50",
+    accent: "from-rose-500/80 to-orange-400/80",
   },
   {
     title: "Home & Living",
-    href: "/categories/home-living",
     image: "/utensils.jpg",
     description: "Everything for your home",
-    color: "bg-amber-100 dark:bg-amber-900/50",
+    accent: "from-amber-500/80 to-yellow-400/80",
   },
   {
     title: "Beauty & Health",
-    href: "/categories/beauty-health",
     image: "/beauty.jpg",
     description: "Self-care essentials",
-    color: "bg-pink-100 dark:bg-pink-900/50",
+    accent: "from-pink-500/80 to-rose-400/80",
   },
   {
     title: "Sports & Outdoors",
-    href: "/categories/sports-outdoors",
     image: "/sports.jpg",
     description: "Gear for active lifestyles",
-    color: "bg-emerald-100 dark:bg-emerald-900/50",
+    accent: "from-emerald-500/80 to-lime-400/80",
   },
   {
     title: "Electronics",
-    href: "/categories/electronics",
     image: "/electronics.jpg",
     description: "Cutting-edge tech",
-    color: "bg-blue-100 dark:bg-blue-900/50",
+    accent: "from-blue-600/80 to-cyan-400/80",
   },
 ];
 
-const ExploreGrid = () => {
+export default function ExploreGrid() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
-  const handleCategory = (category, e) => {
-    e.preventDefault();
+  const handleCategory = (category, event) => {
+    event.preventDefault();
     startTransition(() => {
       router.push(`/search?q=${encodeURIComponent(category)}`);
     });
   };
 
-  if (isPending) {
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <Spinner size="lg" className="text-blue-500" />
-      </div>
-    );
-  }
-
   return (
-    <motion.section
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
-    >
-      <div className="text-center mb-12">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-3xl md:text-4xl font-bold text-slate-900 mb-4"
-        >
-          Shop by Category
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-lg text-slate-600 max-w-2xl mx-auto"
-        >
-          Discover products across our carefully curated categories
-        </motion.p>
-      </div>
+    <>
+      {isPending && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 backdrop-blur-sm">
+          <Spinner size="lg" className="text-white" />
+        </div>
+      )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-        {categories.map((category, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            className="relative group"
-            onMouseEnter={() => setHoveredIndex(index)}
-            onMouseLeave={() => setHoveredIndex(null)}
-          >
-            <div
-              className={`absolute inset-0 rounded-2xl ${
-                category.color
-              } transition-all duration-300 ${
-                hoveredIndex === index ? "opacity-100" : "opacity-50"
-              }`}
-            />
+      <motion.section
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="storefront-section py-12"
+      >
+        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <span className="storefront-kicker">
+              <Compass className="h-3.5 w-3.5 text-blue-500" />
+              Explore
+            </span>
+            <h2 className="mt-4 text-3xl font-black tracking-[-0.05em] text-slate-950 md:text-4xl">
+              Shop by Category
+            </h2>
+            <p className="mt-3 max-w-2xl text-base leading-8 text-slate-600">
+              Discover products across thoughtfully curated categories built for
+              faster browsing.
+            </p>
+          </div>
+          <span className="storefront-chip">Tap any card to jump in</span>
+        </div>
 
-            <div
-              className={`relative h-full rounded-2xl overflow-hidden border border-slate-200 shadow-md hover:shadow-lg transition-all duration-300 ${
-                hoveredIndex === index
-                  ? "ring-2 ring-blue-500 scale-[1.02]"
-                  : ""
-              }`}
-              onClick={(e) => handleCategory(category.title, e)}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-5">
+          {categories.map((category, index) => (
+            <motion.button
+              key={category.title}
+              type="button"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: index * 0.06 }}
+              className="relative overflow-hidden rounded-[1.75rem] border border-slate-200/80 text-left shadow-[0_30px_70px_-48px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-[0_34px_90px_-44px_rgba(37,99,235,0.32)]"
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
+              onClick={(event) => handleCategory(category.title, event)}
             >
-              <div className="aspect-square relative">
+              <div className="relative aspect-[4/4.8]">
                 <Image
                   src={category.image}
                   alt={category.title}
                   fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="object-cover transition-transform duration-500 hover:scale-105"
                   quality={90}
                   priority={index < 3}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div
+                  className={`absolute inset-0 bg-gradient-to-t ${category.accent} via-slate-950/25 to-slate-950/70`}
+                />
               </div>
 
-              <div className="absolute inset-0 flex flex-col justify-end p-6">
-                <motion.h3
-                  className="text-xl font-bold text-white mb-1"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {category.title}
-                </motion.h3>
-                <motion.p
-                  className="text-gray-200 text-sm"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 0.8 }}
-                  transition={{ duration: 0.3, delay: 0.1 }}
-                >
-                  {category.description}
-                </motion.p>
-                <motion.button
-                  className="mt-3 w-full py-2 bg-white/90 text-gray-900 font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Shop Now
-                </motion.button>
+              <div className="absolute inset-0 flex flex-col justify-between p-5">
+                <div className="flex justify-between">
+                  <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-sm">
+                    Featured
+                  </span>
+                  <span className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
+                    {index + 1}
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-2xl font-bold tracking-tight text-white">
+                    {category.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-7 text-white/80">
+                    {category.description}
+                  </p>
+                  <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-sm font-semibold text-slate-900 shadow-lg shadow-slate-900/10 transition-all duration-300">
+                    Shop Now
+                    <ArrowRight
+                      className={`h-4 w-4 transition-transform duration-300 ${
+                        hoveredIndex === index ? "translate-x-1 text-blue-500" : ""
+                      }`}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </motion.section>
+            </motion.button>
+          ))}
+        </div>
+      </motion.section>
+    </>
   );
-};
-
-export default ExploreGrid;
+}

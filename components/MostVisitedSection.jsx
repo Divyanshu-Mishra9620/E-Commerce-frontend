@@ -1,14 +1,24 @@
 "use client";
-import ProductCard from "./ProductCard";
+
 import { motion } from "framer-motion";
-import { FaFire } from "react-icons/fa";
+import { Flame, Radar } from "lucide-react";
+
+import ProductCard from "./ProductCard";
+import { getReviewSummary } from "@/lib/product-display";
 
 const MostVisitedSection = ({ products }) => {
-  const mostVisitedItems = products
-    ?.filter((product) => product.reviews && product.reviews > 0)
+  const productList = Array.isArray(products) ? products : [];
+
+  const mostVisitedItems = productList
+    .filter((product) => getReviewSummary(product).count > 0)
     .slice(0, 10);
-  const randomItems =
-    mostVisitedItems?.length === 0 ? products.slice(0, 10) : mostVisitedItems;
+
+  const featuredItems =
+    mostVisitedItems.length > 0 ? mostVisitedItems : productList.slice(0, 10);
+
+  if (featuredItems.length === 0) {
+    return null;
+  }
 
   return (
     <motion.section
@@ -16,42 +26,49 @@ const MostVisitedSection = ({ products }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.1 }}
       transition={{ duration: 0.6 }}
-      className="mt-16 px-4 sm:px-6 lg:px-8"
+      className="storefront-section py-12"
     >
-      <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between mb-8">
-          <h3 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            Trending Now
-            <span className="ml-3 text-red-500">
-              <FaFire className="inline-block w-8 h-8" />
+      <div className="storefront-panel px-6 py-8 md:px-8 md:py-10">
+        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <span className="storefront-kicker">
+              <Flame className="h-3.5 w-3.5 text-orange-500" />
+              Trending Picks
             </span>
-          </h3>
-          <div className="hidden md:block text-sm text-gray-500 dark:text-gray-400">
-            Based on user activity
+            <h3 className="mt-4 text-3xl font-black tracking-[-0.05em] text-slate-950">
+              Most Loved Right Now
+            </h3>
+            <p className="mt-3 max-w-2xl text-base leading-8 text-slate-600">
+              Products drawing the most attention across the storefront.
+            </p>
           </div>
+
+          <span className="storefront-chip">
+            <Radar className="h-4 w-4 text-blue-500" />
+            Based on recent user activity
+          </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          {randomItems?.map((item, index) => (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+          {featuredItems.map((item, index) => (
             <motion.div
-              key={item.uniq_id}
+              key={item._id || item.uniq_id || index}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ delay: index * 0.06 }}
             >
               <ProductCard
                 product={item}
-                showBadge
-                badgeText="Trending"
-                badgeColor="bg-gradient-to-r from-red-500 to-orange-400"
+                badgeText={mostVisitedItems.length > 0 ? "Trending" : "New"}
+                badgeColor={
+                  mostVisitedItems.length > 0
+                    ? "from-rose-500 to-orange-400"
+                    : "from-blue-600 to-cyan-500"
+                }
               />
             </motion.div>
           ))}
-        </div>
-
-        <div className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400 md:hidden">
-          Based on recent user activity
         </div>
       </div>
     </motion.section>

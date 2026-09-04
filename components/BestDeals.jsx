@@ -1,18 +1,29 @@
 "use client";
-import { useRouter } from "next/navigation";
-import React, { useRef, useState, useTransition } from "react";
-import { motion } from "framer-motion";
+
+import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
-import { useDragScroll } from "@/hooks/useDragScroll";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { ArrowRight, ShoppingCart, Sparkles, Star } from "lucide-react";
 import toast from "react-hot-toast";
+
 import { useCart } from "@/context/CartContext";
-import Spinner from "./Spinner";
 import { useAuth } from "@/hooks/useAuth";
-import PageLoader from "./PageLoader";
+import { useDragScroll } from "@/hooks/useDragScroll";
+import {
+  formatCurrency,
+  getDisplayPrices,
+  getReviewSummary,
+  RUPEE_SYMBOL,
+  sanitizeProductImage,
+} from "@/lib/product-display";
+import { cn } from "@/lib/utils";
+import { SkeletonCard } from "./SkeletonCard";
+import Spinner from "./Spinner";
 
 const BACKEND_URI = process.env.NEXT_PUBLIC_BACKEND_URI;
 
-const BestDealsGrid = ({ products }) => {
+export default function BestDeals({ products }) {
   const router = useRouter();
   const scrollRef = useRef(null);
   const productList = Array.isArray(products) ? products : [];
@@ -21,18 +32,13 @@ const BestDealsGrid = ({ products }) => {
   const [hoveredCard, setHoveredCard] = useState(null);
   const { user, isLoading: authLoading } = useAuth();
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <PageLoader />
-      </div>
-    );
-  }
-
   useDragScroll(scrollRef);
 
-  async function handleCartClick(deal, e) {
-    e.stopPropagation();
+  async function handleCartClick(deal, event) {
+    event.stopPropagation();
+
+    let loadingToastId;
+
     try {
       if (!user?._id) {
         router.push("/api/auth/signin");
@@ -40,12 +46,12 @@ const BestDealsGrid = ({ products }) => {
         return;
       }
 
-      const userCarts = JSON.parse(localStorage.getItem("cart") || "[]");
+      const userCarts = JSON.parse(localStorage.getItem("cart") || "{}");
       const existingItem = userCarts?.cart?.items?.find(
         (item) => item.product === deal._id
       );
 
-      const loadingToast = toast.loading("Adding to cart...");
+      loadingToastId = toast.loading("Adding to cart...");
 
       const response = await fetch(`${BACKEND_URI}/api/cart/${user?._id}`, {
         method: "PUT",
@@ -65,176 +71,185 @@ const BestDealsGrid = ({ products }) => {
       setCartItems(updatedCart.cart.items);
 
       toast.success("Item added to cart!", {
-        id: loadingToast,
-        icon: "🛒",
+        id: loadingToastId,
         position: "bottom-right",
       });
     } catch (error) {
       console.error("Error adding item to cart:", error);
       toast.error("Failed to add item to cart!", {
-        id: loadingToast,
+        id: loadingToastId,
         position: "bottom-right",
       });
     }
   }
 
-  const handleDeals = (uniq_id) => {
+  const handleDeals = (uniqId) => {
     startTransition(() => {
-      router.push(`/product/${uniq_id}`);
+      router.push(`/product/${uniqId}`);
     });
   };
 
-  if (isPending) {
+  if (authLoading) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-        <Spinner size="lg" className="text-blue-500" />
-      </div>
+      <section className="storefront-section py-12">
+        <div className="storefront-panel px-6 py-8 md:px-8">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <SkeletonCard key={index} />
+            ))}
+          </div>
+        </div>
+      </section>
     );
   }
 
   return (
-    <motion.section
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
-    >
-      <div className="text-center mb-12">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
-        >
-          Best Deals
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
-        >
-          Limited-time offers on our most popular products
-        </motion.p>
-      </div>
+    <>
+      {isPending && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 backdrop-blur-sm">
+          <Spinner size="lg" className="text-white" />
+        </div>
+      )}
 
-      <div
-        ref={scrollRef}
-        className="flex overflow-x-auto pb-8 gap-6 scrollbar-hide snap-x snap-mandatory"
+      <motion.section
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="storefront-section py-12"
       >
-        {productList.map((deal, index) => (
-          <motion.div
-            key={index}
-            className="snap-center flex-shrink-0 w-[300px] sm:w-[320px] relative"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.05 }}
-            onMouseEnter={() => setHoveredCard(index)}
-            onMouseLeave={() => setHoveredCard(null)}
+        <div className="storefront-panel overflow-hidden px-6 py-8 md:px-8 md:py-10">
+          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <span className="storefront-kicker">
+                <Sparkles className="h-3.5 w-3.5 text-blue-500" />
+                Limited-Time Prices
+              </span>
+              <h2 className="mt-4 text-3xl font-black tracking-[-0.05em] text-slate-950 md:text-4xl">
+                Best Deals Worth Grabbing Today
+              </h2>
+              <p className="mt-3 max-w-2xl text-base leading-8 text-slate-600">
+                A fast lane of standout offers from the latest catalog, styled
+                for quick browsing and even quicker checkout.
+              </p>
+            </div>
+
+            <span className="storefront-chip">Drag sideways to explore</span>
+          </div>
+
+          <div
+            ref={scrollRef}
+            className="flex gap-6 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory"
           >
-            <motion.div
-              className={`h-full bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-all duration-300 flex flex-col relative overflow-hidden ${
-                hoveredCard === index ? "ring-2 ring-primary-500" : ""
-              }`}
-              whileHover={{ y: -5 }}
-              onClick={() => handleDeals(deal.uniq_id)}
-            >
-              <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wider shadow-lg z-10">
-                {Math.round(
-                  (200 /
-                    ((isNaN(+deal.discounted_price)
-                      ? 599
-                      : +deal.discounted_price) +
-                      200)) *
-                    100
-                )}
-                % OFF
-              </div>
+            {productList.map((deal, index) => {
+              const { salePrice, originalPrice } = getDisplayPrices(deal);
+              const { rating, count } = getReviewSummary(deal);
 
-              <div className="relative h-64 w-full overflow-hidden">
-                <Image
-                  src={
-                    deal.image?.replace(/\s+/g, "").replace(/[\[\]]/g, "") ||
-                    "/product-placeholder.jpg"
-                  }
-                  alt={deal.product_name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="object-cover transition-transform duration-500"
-                  style={{
-                    transform:
-                      hoveredCard === index ? "scale(1.05)" : "scale(1)",
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              </div>
-
-              <div className="p-4 flex-1 flex flex-col">
-                <h4 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2 mb-2">
-                  {deal.product_name}
-                </h4>
-
-                <div className="flex items-baseline gap-3 mt-auto">
-                  <span className="text-xl font-bold text-primary-600 dark:text-primary-400">
-                    ₹{+deal.discounted_price?.toLocaleString() || "8,999"}
-                  </span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 line-through">
-                    ₹
-                    {(isNaN(+deal.discounted_price)
-                      ? 599
-                      : +deal.discounted_price + 200
-                    )?.toLocaleString()}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between mt-4">
-                  <div className="flex items-center gap-2">
-                    <div className="flex text-amber-400">
-                      {[...Array(5)].map((_, i) => (
-                        <svg
-                          key={i}
-                          className={`w-4 h-4 ${
-                            i < (deal.reviews?.rating || 0)
-                              ? "fill-current"
-                              : "fill-gray-300 dark:fill-gray-600"
-                          }`}
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                    </div>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      ({deal.reviews?.count || 0})
-                    </span>
-                  </div>
-
-                  <motion.button
-                    className="p-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors"
-                    whileTap={{ scale: 0.95 }}
-                    onClick={(e) => handleCartClick(deal, e)}
+              return (
+                <motion.article
+                  key={deal._id || deal.uniq_id || index}
+                  className="w-[300px] flex-shrink-0 snap-start sm:w-[320px]"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.04 }}
+                  onMouseEnter={() => setHoveredCard(index)}
+                  onMouseLeave={() => setHoveredCard(null)}
+                >
+                  <motion.div
+                    className={cn(
+                      "group h-full overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white shadow-[0_30px_70px_-48px_rgba(15,23,42,0.42)] transition-all duration-300",
+                      hoveredCard === index &&
+                        "border-blue-200 shadow-[0_34px_90px_-44px_rgba(37,99,235,0.32)]"
+                    )}
+                    whileHover={{ y: -6 }}
+                    onClick={() => handleDeals(deal.uniq_id)}
                   >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                    <div className="relative h-64 overflow-hidden bg-gradient-to-br from-slate-100 via-white to-slate-50">
+                      <Image
+                        src={sanitizeProductImage(deal.image)}
+                        alt={deal.product_name || "Product image"}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 320px"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
-                    </svg>
-                  </motion.button>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        ))}
-      </div>
-    </motion.section>
-  );
-};
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent" />
 
-export default BestDealsGrid;
+                      <div className="absolute left-4 top-4 rounded-full bg-rose-500 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white shadow-lg shadow-rose-500/20">
+                        Hot pick
+                      </div>
+
+                      <div className="absolute bottom-4 left-4 rounded-full border border-white/70 bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-lg shadow-slate-900/10 backdrop-blur-sm">
+                        {RUPEE_SYMBOL}
+                        {formatCurrency(salePrice)}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
+                      <div className="mb-3 flex items-center justify-between">
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                          {deal?.category || "Featured"}
+                        </span>
+                        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-600">
+                          Save {originalPrice > salePrice ? `${RUPEE_SYMBOL}${formatCurrency(originalPrice - salePrice)}` : "More"}
+                        </span>
+                      </div>
+
+                      <h4 className="line-clamp-2 min-h-[3.5rem] text-lg font-semibold leading-7 text-slate-950">
+                        {deal.product_name}
+                      </h4>
+
+                      <div className="mt-3 flex items-center gap-2 text-sm text-slate-500">
+                        <div className="flex items-center gap-0.5">
+                          {Array.from({ length: 5 }).map((_, starIndex) => (
+                            <Star
+                              key={starIndex}
+                              className={cn(
+                                "h-4 w-4",
+                                starIndex < Math.round(rating)
+                                  ? "fill-amber-400 text-amber-400"
+                                  : "text-slate-200"
+                              )}
+                            />
+                          ))}
+                        </div>
+                        <span>
+                          {count > 0 ? `${rating.toFixed(1)} from ${count} reviews` : "Fresh arrival"}
+                        </span>
+                      </div>
+
+                      <div className="mt-4 flex items-end justify-between gap-3">
+                        <div>
+                          <p className="text-2xl font-bold tracking-tight text-slate-950">
+                            {RUPEE_SYMBOL}
+                            {formatCurrency(salePrice)}
+                          </p>
+                          {originalPrice > salePrice && (
+                            <p className="mt-1 text-sm text-slate-400 line-through">
+                              {RUPEE_SYMBOL}
+                              {formatCurrency(originalPrice)}
+                            </p>
+                          )}
+                        </div>
+
+                        <button
+                          type="button"
+                          className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-slate-950 text-white shadow-lg shadow-slate-900/10 transition-all duration-200 hover:bg-blue-600"
+                          onClick={(event) => handleCartClick(deal, event)}
+                        >
+                          <ShoppingCart className="h-5 w-5" />
+                        </button>
+                      </div>
+
+                      <div className="mt-5 flex items-center justify-between rounded-[1.25rem] bg-slate-50 px-4 py-3 text-sm font-medium text-slate-600">
+                        View product details
+                        <ArrowRight className="h-4 w-4 text-blue-500" />
+                      </div>
+                    </div>
+                  </motion.div>
+                </motion.article>
+              );
+            })}
+          </div>
+        </div>
+      </motion.section>
+    </>
+  );
+}

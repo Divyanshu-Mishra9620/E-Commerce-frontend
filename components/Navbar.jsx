@@ -52,17 +52,17 @@ export default function Navbar() {
       <motion.nav
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
           isScrolled
-            ? "bg-white/95 backdrop-blur-lg shadow-md border-b border-slate-200"
-            : "bg-white border-b border-slate-100"
+            ? "border-b border-slate-200/80 bg-white/88 shadow-xl shadow-slate-200/50 backdrop-blur-xl"
+            : "border-b border-slate-100/80 bg-white/72 backdrop-blur-lg"
         }`}
         animate={{ y: isVisible ? 0 : "-100%" }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
       >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center py-4">
-          <div className="flex items-center gap-8">
+        <div className="storefront-section flex items-center justify-between py-4">
+          <div className="flex items-center gap-4 lg:gap-8">
             <Link
               href="/"
-              className="relative h-12 w-32 block"
+              className="relative block h-12 w-28 shrink-0 sm:w-32"
               aria-label="Go to Homepage"
             >
               <Image
@@ -74,12 +74,12 @@ export default function Navbar() {
               />
             </Link>
 
-            <div className="hidden lg:flex items-center gap-6">
+            <div className="hidden items-center gap-5 lg:flex">
               {visibleNavLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-sm font-medium text-slate-700 hover:text-blue-600 transition-colors duration-200"
+                  className="rounded-full px-3 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-950 dark:hover:bg-stone-800/80 dark:hover:text-amber-200"
                 >
                   {link.label}
                 </Link>
@@ -87,21 +87,21 @@ export default function Navbar() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-[min(42vw,18rem)] sm:w-[18rem] lg:w-[20rem]">
               <SearchBar />
             </div>
 
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden items-center space-x-3 md:flex">
               <UserMenu />
 
               <Link
                 href="/profile/carts"
-                className="relative text-slate-700 hover:text-blue-600 transition-colors"
+                className="relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 text-slate-700 shadow-lg shadow-slate-200/40 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:text-blue-600 dark:hover:border-amber-500/30 dark:hover:text-amber-200"
               >
                 <ShoppingCart className="w-6 h-6" />
                 {isAuthenticated && cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-emerald-500 text-white text-xs rounded-full px-1.5 py-0.5 font-semibold">
+                  <span className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-emerald-500 px-1.5 text-[10px] font-semibold text-white shadow-lg shadow-emerald-500/30">
                     {cartCount}
                   </span>
                 )}
@@ -111,7 +111,7 @@ export default function Navbar() {
             <div className="lg:hidden">
               <button
                 onClick={() => setMobileMenuOpen(true)}
-                className="text-slate-700"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 text-slate-700 shadow-lg shadow-slate-200/40 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:text-blue-600 dark:hover:border-amber-500/30 dark:hover:text-amber-200"
               >
                 <Menu className="w-6 h-6" />
               </button>
@@ -126,7 +126,7 @@ export default function Navbar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+              className="fixed inset-0 z-40 bg-slate-950/45 backdrop-blur-sm lg:hidden"
               onClick={() => setMobileMenuOpen(false)}
             />
             <MobileMenu

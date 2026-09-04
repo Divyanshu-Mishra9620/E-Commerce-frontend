@@ -14,11 +14,11 @@ export default function Spinner({ size = "md", className = "" }) {
   return (
     <div
       role="status"
-      className={cn("flex justify-center items-center", className)}
+      className="flex items-center justify-center"
       aria-label="Loading..."
     >
       <svg
-        className={cn("animate-spin text-blue-600", sizes[size])}
+        className={cn("animate-spin text-blue-600", sizes[size], className)}
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"

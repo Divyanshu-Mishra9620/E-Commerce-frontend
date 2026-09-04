@@ -44,22 +44,22 @@ export default function Page() {
 
   if (error) {
     return (
-      <div className="flex justify-center items-center min-h-screen text-red-500">
+      <div className="flex min-h-screen items-center justify-center text-rose-500">
         Failed to load products.
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="relative pb-24 md:pb-0">
       <motion.div
-        className="fixed top-0 left-0 right-0 h-1 bg-blue-500 origin-left z-50"
+        className="fixed left-0 right-0 top-0 z-[60] h-1 origin-left bg-gradient-to-r from-blue-600 via-cyan-500 to-emerald-400"
         style={{ scaleX }}
       />
 
-      <main>
-        <SectionWrapper>
-          <TabNavigation handleTabChange={handleTabChange} />
+      <main className="relative">
+        <SectionWrapper delay={0.05}>
+          <TabNavigation activeTab={activeTab} handleTabChange={handleTabChange} />
         </SectionWrapper>
 
         {activeTab === "Home" && (
@@ -109,7 +109,7 @@ const SectionWrapper = ({ children, delay = 0 }) => (
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true, amount: 0.1 }}
     transition={{ duration: 0.6, ease: "easeOut", delay }}
-    className="overflow-hidden"
+    className="relative overflow-visible"
   >
     {children}
   </motion.div>

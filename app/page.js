@@ -19,7 +19,7 @@ import { useHomepageData } from "@/hooks/useHomepageData";
 import { useRouter } from "next/navigation";
 
 export default function Page() {
-  const { products, isLoading, error } = useHomepageData();
+  const { products, isLoading, error, retry } = useHomepageData();
   const router = useRouter();
   const { status } = useSession({
     required: true,
@@ -41,14 +41,19 @@ export default function Page() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  if (status === "loading" || isLoading) {
+  // Products are public, so render as soon as they arrive instead of also
+  // waiting on the session check (which can be slow while a token refreshes).
+  if (status === "unauthenticated" || isLoading) {
     return <PageLoader />;
   }
 
-  if (error) {
+  if (error && products.length === 0) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-rose-500">
-        Failed to load products.
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
+        <p className="text-rose-500">Failed to load products.</p>
+        <button type="button" onClick={retry} className="btn-primary">
+          <span>Try again</span>
+        </button>
       </div>
     );
   }

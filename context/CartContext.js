@@ -163,8 +163,8 @@ export const CartProvider = ({ children }) => {
     ]
   );
 
-  if (isAuthLoading) return null;
-
+  // Always render children: gating on auth here blanked the entire app while
+  // the session was being fetched or refreshed. Consumers read `isLoading`.
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -20,9 +20,11 @@ import { EASE_OUT_EXPO } from "@/lib/motion";
 import {
   formatCurrency,
   getCategoryLabel,
+  getCleanDescription,
   getDiscountPercent,
   getDisplayPrices,
   getReviewSummary,
+  pluralize,
   RUPEE_SYMBOL,
   sanitizeProductImage,
 } from "@/lib/product-display";
@@ -166,6 +168,7 @@ export default function Hero({ products }) {
   const { rating, count } = getReviewSummary(product);
   const words = titleWords(product?.product_name);
   const category = getCategoryLabel(product, "");
+  const description = getCleanDescription(product);
 
   const autoplay = total > 1 && !reduceMotion;
   const isPaused = isHovered || isDragging || !isInView;
@@ -223,30 +226,31 @@ export default function Hero({ products }) {
 
                 <h1 className="mt-6 font-display text-[2.4rem] font-extrabold leading-[1] tracking-[-0.045em] sm:text-6xl lg:text-[4.1rem]">
                   {words.map((word, wordIndex) => (
-                    <span
-                      key={`${word}-${wordIndex}`}
-                      className="mr-[0.24em] inline-block overflow-hidden pb-[0.1em] align-bottom"
-                    >
-                      <motion.span
-                        variants={wordRise}
-                        className={cn(
-                          "inline-block",
-                          wordIndex === words.length - 1 &&
-                            "bg-gradient-to-r from-brand-300 via-fuchsia-300 to-coral-300 bg-clip-text text-transparent"
-                        )}
-                      >
-                        {word}
-                      </motion.span>
-                    </span>
+                    <Fragment key={`${word}-${wordIndex}`}>
+                      {/* Real spaces between words keep the title readable for screen readers and copy-paste */}
+                      {wordIndex > 0 && " "}
+                      <span className="inline-block overflow-hidden pb-[0.1em] align-bottom">
+                        <motion.span
+                          variants={wordRise}
+                          className={cn(
+                            "inline-block",
+                            wordIndex === words.length - 1 &&
+                              "bg-gradient-to-r from-brand-300 via-fuchsia-300 to-coral-300 bg-clip-text text-transparent"
+                          )}
+                        >
+                          {word}
+                        </motion.span>
+                      </span>
+                    </Fragment>
                   ))}
                 </h1>
 
-                {product?.description && (
+                {description && (
                   <motion.p
                     variants={fadeUp}
                     className="mt-5 line-clamp-2 max-w-xl text-base leading-7 text-white/60 md:text-lg"
                   >
-                    {product.description}
+                    {description}
                   </motion.p>
                 )}
 
@@ -361,7 +365,7 @@ export default function Hero({ products }) {
                   <span>
                     {rating.toFixed(1)}
                     <span className="ml-1 font-normal text-white/60">
-                      &middot; {count} reviews
+                      &middot; {pluralize(count, "review")}
                     </span>
                   </span>
                 ) : (

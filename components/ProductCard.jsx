@@ -16,6 +16,7 @@ import {
   getDiscountPercent,
   getDisplayPrices,
   getReviewSummary,
+  pluralize,
   RUPEE_SYMBOL,
   sanitizeProductImage,
 } from "@/lib/product-display";
@@ -140,7 +141,7 @@ const ProductCard = ({
         <div className="flex items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
           <span className="truncate">{getCategoryLabel(product)}</span>
           <span className="shrink-0 normal-case tracking-normal">
-            {count > 0 ? `${count} reviews` : "Fresh pick"}
+            {count > 0 ? pluralize(count, "review") : "Fresh pick"}
           </span>
         </div>
 

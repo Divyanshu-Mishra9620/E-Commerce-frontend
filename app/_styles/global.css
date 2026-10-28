@@ -444,11 +444,11 @@
   }
 
   .dark .skeleton-shimmer {
-    background-color: rgb(28 26 44);
+    background-color: rgb(38 34 62);
   }
 
   .dark .skeleton-shimmer::after {
-    background: linear-gradient(90deg, transparent, rgba(149, 123, 255, 0.08), transparent);
+    background: linear-gradient(90deg, transparent, rgba(149, 123, 255, 0.16), transparent);
   }
 
   .btn-primary {

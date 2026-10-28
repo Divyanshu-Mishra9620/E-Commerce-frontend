@@ -1,12 +1,15 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Flame, Radar } from "lucide-react";
 
-import ProductCard from "./ProductCard";
+import SectionHeading from "@/components/fx/SectionHeading";
+import { EASE_OUT_EXPO } from "@/lib/motion";
 import { getReviewSummary } from "@/lib/product-display";
+import ProductCard from "./ProductCard";
 
 const MostVisitedSection = ({ products }) => {
+  const reduceMotion = useReducedMotion();
   const productList = Array.isArray(products) ? products : [];
 
   const mostVisitedItems = productList
@@ -21,57 +24,43 @@ const MostVisitedSection = ({ products }) => {
   }
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.1 }}
-      transition={{ duration: 0.6 }}
-      className="storefront-section py-12"
-    >
-      <div className="storefront-panel px-6 py-8 md:px-8 md:py-10">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <span className="storefront-kicker">
-              <Flame className="h-3.5 w-3.5 text-orange-500" />
-              Trending Picks
-            </span>
-            <h3 className="mt-4 text-3xl font-black tracking-[-0.05em] text-slate-950">
-              Most Loved Right Now
-            </h3>
-            <p className="mt-3 max-w-2xl text-base leading-8 text-slate-600">
-              Products drawing the most attention across the storefront.
-            </p>
-          </div>
-
+    <section className="storefront-section py-12 md:py-16">
+      <SectionHeading
+        kicker="Trending picks"
+        icon={Flame}
+        title="Most loved"
+        highlight="right now"
+        description="Products drawing the most attention across the storefront."
+        action={
           <span className="storefront-chip">
-            <Radar className="h-4 w-4 text-blue-500" />
-            Based on recent user activity
+            <Radar className="h-4 w-4 text-brand-500 motion-safe:animate-spin-slow" />
+            Based on recent activity
           </span>
-        </div>
+        }
+      />
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
-          {featuredItems.map((item, index) => (
-            <motion.div
-              key={item._id || item.uniq_id || index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.06 }}
-            >
-              <ProductCard
-                product={item}
-                badgeText={mostVisitedItems.length > 0 ? "Trending" : "New"}
-                badgeColor={
-                  mostVisitedItems.length > 0
-                    ? "from-rose-500 to-orange-400"
-                    : "from-blue-600 to-cyan-500"
-                }
-              />
-            </motion.div>
-          ))}
-        </div>
+      <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4 xl:grid-cols-5">
+        {featuredItems.map((item, index) => (
+          <motion.div
+            key={item._id || item.uniq_id || index}
+            initial={reduceMotion ? false : { opacity: 0, y: 32, scale: 0.97 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.8, ease: EASE_OUT_EXPO, delay: (index % 5) * 0.07 }}
+          >
+            <ProductCard
+              product={item}
+              badgeText={mostVisitedItems.length > 0 ? "Trending" : "New"}
+              badgeColor={
+                mostVisitedItems.length > 0
+                  ? "from-coral-500 to-rose-500"
+                  : "from-brand-600 to-fuchsia-500"
+              }
+            />
+          </motion.div>
+        ))}
       </div>
-    </motion.section>
+    </section>
   );
 };
 

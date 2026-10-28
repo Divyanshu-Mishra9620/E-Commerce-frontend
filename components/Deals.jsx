@@ -1,41 +1,60 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
-import { Layers3, Sparkles } from "lucide-react";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "framer-motion";
+import { Sparkles } from "lucide-react";
 
+import { EASE_OUT_EXPO } from "@/lib/motion";
+import { cn } from "@/lib/utils";
 import BestDealsGrid from "./BestDealsGrid";
 
 const dealCategories = {
   summerDeals: {
     title: "Summer Collection",
     keywords: ["summer", "beach", "vacation", "sun"],
-    gradient: "from-sky-500 to-cyan-500",
+    gradient: "from-sky-500 to-brand-500",
   },
   sportsDeals: {
     title: "Sports Gear",
     keywords: ["sports", "fitness", "gym", "athletic"],
-    gradient: "from-emerald-500 to-lime-500",
+    gradient: "from-emerald-500 to-teal-500",
   },
   clothesDeals: {
     title: "Fashion Hub",
     keywords: ["clothing", "fashion", "apparel", "shirt", "jeans"],
-    gradient: "from-rose-500 to-orange-400",
+    gradient: "from-fuchsia-500 to-coral-500",
   },
   smartphoneDeals: {
     title: "Mobile Zone",
     keywords: ["smartphone", "mobile", "android", "iphone"],
-    gradient: "from-blue-600 to-cyan-500",
+    gradient: "from-brand-600 to-fuchsia-500",
   },
   kitchenDeals: {
     title: "Kitchen Essentials",
     keywords: ["kitchen", "cooking", "appliance", "cookware"],
-    gradient: "from-amber-500 to-orange-500",
+    gradient: "from-amber-500 to-coral-500",
   },
 };
 
 export default function Deals({ products }) {
+  const reduceMotion = useReducedMotion();
+  const bannerRef = useRef(null);
+  const [selectedKey, setSelectedKey] = useState(null);
+
+  const { scrollYProgress } = useScroll({
+    target: bannerRef,
+    offset: ["start end", "end start"],
+  });
+  const imageY = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
+  const copyY = useTransform(scrollYProgress, [0, 1], [40, -40]);
+
   const deals = useMemo(() => {
     if (!Array.isArray(products)) return {};
 
@@ -69,85 +88,131 @@ export default function Deals({ products }) {
     ([, collection]) => collection.length > 0
   );
 
+  const activeKey = availableCollections.some(([key]) => key === selectedKey)
+    ? selectedKey
+    : availableCollections[0]?.[0];
+  const activeDeals = deals[activeKey] || [];
+
   return (
-    <motion.section
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="storefront-section py-12"
+    <section
+      id="collections"
+      className="storefront-section scroll-mt-32 py-12 md:py-16"
     >
-      <div className="storefront-panel overflow-hidden">
-        <div className="relative aspect-[16/8] md:aspect-[16/6] overflow-hidden">
+      {/* Parallax banner */}
+      <div
+        ref={bannerRef}
+        className="relative isolate flex min-h-[24rem] items-end overflow-hidden rounded-[2rem] ring-1 ring-black/5 sm:rounded-[2.5rem] md:min-h-[28rem] dark:ring-white/10"
+      >
+        <motion.div
+          style={reduceMotion ? undefined : { y: imageY }}
+          className="absolute inset-x-0 -inset-y-[12%] -z-10"
+        >
           <Image
             src="/summer-banner.jpg"
-            alt="New Season Arrivals"
+            alt=""
             fill
+            sizes="(max-width: 1280px) 100vw, 80rem"
             className="object-cover"
-            priority
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-blue-900/65 to-cyan-600/45" />
+        </motion.div>
+        <div className="absolute inset-0 -z-10 bg-gradient-to-tr from-[#0b0a14]/95 via-brand-900/65 to-coral-600/25" />
+        <div className="bg-grid mask-radial absolute inset-0 -z-10 opacity-30" />
 
-          <div className="absolute inset-0 flex items-center p-6 md:p-10 lg:p-14">
-            <div className="max-w-2xl">
-              <span className="storefront-kicker border-white/20 bg-white/10 text-blue-50">
-                <Sparkles className="h-3.5 w-3.5 text-cyan-200" />
-                Seasonal Edit
-              </span>
-
-              <h2 className="mt-6 text-4xl font-black tracking-[-0.05em] text-white md:text-5xl">
-                Shop Curated Collections for Every Mood
-              </h2>
-              <p className="mt-4 max-w-xl text-base leading-8 text-blue-50/85">
-                Fresh arrivals, crowd favorites, and category-based picks laid
-                out in easy-to-browse rows.
-              </p>
-
-              <div className="mt-6 flex flex-wrap gap-3">
-                <span className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/85 backdrop-blur-sm">
-                  {availableCollections.length} curated lanes
-                </span>
-                <span className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/85 backdrop-blur-sm">
-                  New season spotlight
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-12 px-6 py-8 md:px-8 md:py-10">
-          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <span className="storefront-kicker">
-                <Layers3 className="h-3.5 w-3.5 text-blue-500" />
-                Browse By Theme
-              </span>
-              <h3 className="mt-4 text-2xl font-bold tracking-tight text-slate-950 md:text-3xl">
-                Collections worth exploring next
-              </h3>
-            </div>
-            <p className="max-w-xl text-sm leading-7 text-slate-600">
-              Each row is tailored from the catalog so you can jump straight
-              into the categories that match what you are shopping for.
-            </p>
-          </div>
-
-          {availableCollections.length === 0 ? (
-            <div className="storefront-empty px-6 py-12 text-center text-slate-500">
-              Collections will appear here as products are added.
-            </div>
-          ) : (
-            <div className="space-y-12">
-              {availableCollections.map(([key, dealList]) => (
-                <BestDealsGrid
-                  key={key}
-                  deals={dealList}
-                  category={dealCategories[key].title}
-                  gradient={dealCategories[key].gradient}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        <motion.div
+          style={reduceMotion ? undefined : { y: copyY }}
+          className="max-w-2xl p-7 sm:p-10 lg:p-14"
+        >
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#fff]/85 backdrop-blur">
+            <Sparkles className="h-3.5 w-3.5 text-coral-300" />
+            Seasonal edit
+          </span>
+          <h2 className="mt-5 font-display text-4xl font-extrabold leading-[1.02] tracking-[-0.045em] text-[#fff] md:text-6xl">
+            Curated collections for{" "}
+            <span className="bg-gradient-to-r from-brand-200 via-fuchsia-200 to-coral-300 bg-clip-text text-transparent">
+              every mood
+            </span>
+          </h2>
+          <p className="mt-4 max-w-xl text-base leading-7 text-[#fff]/70">
+            Fresh arrivals, crowd favourites and category picks, sorted into
+            lanes you can flick through in seconds.
+          </p>
+        </motion.div>
       </div>
-    </motion.section>
+
+      {availableCollections.length === 0 ? (
+        <div className="storefront-empty mt-10 px-6 py-12 text-center text-slate-500">
+          Collections will appear here as products are added.
+        </div>
+      ) : (
+        <div className="mt-10">
+          <div
+            role="tablist"
+            aria-label="Collections"
+            className="storefront-panel-soft scrollbar-hide mb-8 flex w-fit max-w-full gap-1 overflow-x-auto rounded-full p-1.5"
+          >
+            {availableCollections.map(([key, collection]) => {
+              const isActive = key === activeKey;
+
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-controls="collection-panel"
+                  onClick={() => setSelectedKey(key)}
+                  className="relative shrink-0 rounded-full px-4 py-2.5 text-sm font-semibold sm:px-5"
+                >
+                  {isActive && (
+                    <motion.span
+                      layoutId="collection-tab-indicator"
+                      className="absolute inset-0 rounded-full bg-[#0f0d1f] shadow-lg shadow-brand-900/20 dark:bg-[#f0eeff]"
+                      transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                    />
+                  )}
+                  <span
+                    className={cn(
+                      "relative z-10 flex items-center gap-2 whitespace-nowrap transition-colors duration-300",
+                      isActive
+                        ? "text-[#fff] dark:text-[#0f0d1f]"
+                        : "text-slate-500 hover:text-slate-950"
+                    )}
+                  >
+                    {dealCategories[key].title}
+                    <span
+                      className={cn(
+                        "rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums",
+                        isActive
+                          ? "bg-white/15 dark:bg-black/10"
+                          : "bg-slate-900/5 dark:bg-white/10"
+                      )}
+                    >
+                      {collection.length}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={activeKey}
+              id="collection-panel"
+              role="tabpanel"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE_OUT_EXPO } }}
+              exit={{ opacity: 0, y: -12, transition: { duration: 0.2 } }}
+            >
+              <BestDealsGrid
+                deals={activeDeals}
+                category={dealCategories[activeKey].title}
+                gradient={dealCategories[activeKey].gradient}
+              />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      )}
+    </section>
   );
 }

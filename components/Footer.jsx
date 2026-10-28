@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   FaInstagram,
   FaLinkedinIn,
@@ -15,41 +15,59 @@ import {
   SiPaypal,
   SiVisa,
 } from "react-icons/si";
-import {
-  Clock,
-  Mail,
-  Package,
-  Phone,
-  Send,
-  Shield,
-  Truck,
-} from "lucide-react";
+import { ArrowUp, CheckCircle2, Mail, Phone, Send } from "lucide-react";
 
-import { RUPEE_SYMBOL } from "@/lib/product-display";
+import Magnetic from "@/components/fx/Magnetic";
 
-const SocialIcon = ({ href, icon: Icon, brandColor }) => (
-  <a
-    href={href}
-    target="_blank"
-    rel="noopener noreferrer"
-    className={`inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-400 transition-all duration-300 hover:-translate-y-0.5 hover:text-white ${brandColor}`}
-  >
-    <Icon size={18} />
-  </a>
-);
+const AUTHOR_URL = "https://www.linkedin.com/in/divyanshu-mishra-12039b309/";
 
-const FeatureCard = ({ icon: Icon, title, description }) => (
-  <motion.div
-    whileHover={{ y: -4 }}
-    className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5 text-center backdrop-blur-sm"
-  >
-    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-amber-500 shadow-lg shadow-amber-500/20">
-      <Icon className="h-5 w-5 text-white" />
-    </div>
-    <h4 className="text-sm font-semibold text-white">{title}</h4>
-    <p className="mt-1 text-xs leading-6 text-slate-400">{description}</p>
-  </motion.div>
-);
+const socialLinks = [
+  {
+    href: "https://www.instagram.com/elys_oria?igsh=cWZ2d2E4azdtMWVn",
+    icon: FaInstagram,
+    label: "Instagram",
+  },
+  { href: "https://x.com/Elysoria543215", icon: FaTwitter, label: "X (Twitter)" },
+  { href: AUTHOR_URL, icon: FaLinkedinIn, label: "LinkedIn" },
+  {
+    href: "https://www.youtube.com/@ElysoriaYourStore",
+    icon: FaYoutube,
+    label: "YouTube",
+  },
+];
+
+const footerLinks = [
+  {
+    title: "Shop",
+    links: [
+      { label: "Categories", href: "/categories" },
+      { label: "Best Deals", href: "/" },
+      { label: "Coupons", href: "/coupons" },
+      { label: "Sell on Elysoria", href: "/sell" },
+    ],
+  },
+  {
+    title: "Support",
+    links: [
+      { label: "Contact Us", href: "/contact" },
+      { label: "FAQs", href: "/FAQS" },
+      { label: "Shipping Info", href: "/shipping" },
+      { label: "Returns & Refunds", href: "/returns" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { label: "Privacy Policy", href: "/privacy-policy" },
+      { label: "Terms of Service", href: "/terms" },
+      { label: "Refund Policy", href: "/refund" },
+      { label: "Help Centre", href: "/help" },
+    ],
+  },
+];
+
+const underline =
+  "relative after:absolute after:-bottom-0.5 after:left-0 after:h-px after:w-full after:origin-right after:scale-x-0 after:bg-current after:transition-transform after:duration-500 after:ease-out-expo hover:after:origin-left hover:after:scale-x-100";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -65,146 +83,124 @@ export default function Footer() {
     setTimeout(() => setSubscribed(false), 3000);
   };
 
-  const footerLinks = [
-    {
-      title: "Shop",
-      links: [
-        { label: "Categories", href: "/categories" },
-        { label: "Best Deals", href: "/" },
-        { label: "New Arrivals", href: "/" },
-        { label: "Sell on Elysoria", href: "/sell" },
-      ],
-    },
-    {
-      title: "Support",
-      links: [
-        { label: "Contact Us", href: "/contact" },
-        { label: "FAQs", href: "/FAQS" },
-        { label: "Shipping Info", href: "/shipping" },
-        { label: "Returns & Refunds", href: "/returns" },
-      ],
-    },
-    {
-      title: "Company",
-      links: [
-        { label: "About Us", href: "#" },
-        { label: "Blog", href: "#" },
-        { label: "Careers", href: "#" },
-        { label: "Press", href: "#" },
-      ],
-    },
-  ];
-
   return (
-    <motion.footer
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6 }}
-      className="mt-16 bg-zinc-950 text-white"
-    >
-      <div className="storefront-section py-14">
-        <div className="grid grid-cols-2 gap-4 border-b border-white/10 pb-12 md:grid-cols-4">
-          <FeatureCard
-            icon={Truck}
-            title="Free Shipping"
-            description={`On orders above ${RUPEE_SYMBOL}500`}
-          />
-          <FeatureCard
-            icon={Shield}
-            title="Secure"
-            description="100% secure payments"
-          />
-          <FeatureCard
-            icon={Clock}
-            title="Quick Delivery"
-            description="Fast and reliable shipping"
-          />
-          <FeatureCard
-            icon={Package}
-            title="Easy Returns"
-            description="Hassle-free returns"
-          />
+    <footer className="relative isolate mt-20 overflow-hidden rounded-t-[2.5rem] bg-[#0b0a14] text-[#fff] ring-1 ring-white/5">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -top-56 left-1/4 h-[30rem] w-[30rem] rounded-full bg-brand-600/30 blur-[130px]" />
+        <div className="absolute -top-40 right-0 h-80 w-80 rounded-full bg-coral-500/15 blur-[120px]" />
+        <div className="bg-grid absolute inset-0 opacity-[0.15] [mask-image:linear-gradient(to_bottom,#000,transparent_60%)]" />
+      </div>
+
+      <div className="storefront-section pt-16 md:pt-20">
+        {/* Newsletter CTA */}
+        <div className="grid gap-10 border-b border-white/10 pb-14 lg:grid-cols-[1.2fr_1fr] lg:items-end">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#fff]/70">
+              Newsletter
+            </span>
+            <h2 className="mt-5 font-display text-4xl font-extrabold leading-[1.02] tracking-[-0.045em] md:text-6xl">
+              Let&apos;s keep you{" "}
+              <span className="bg-gradient-to-r from-brand-300 via-fuchsia-300 to-coral-300 bg-clip-text text-transparent">
+                in the loop.
+              </span>
+            </h2>
+            <p className="mt-4 max-w-md text-base leading-7 text-[#fff]/60">
+              Special offers, restock alerts and curated product updates, straight
+              to your inbox.
+            </p>
+          </div>
+
+          <div>
+            <form
+              onSubmit={handleSubscribe}
+              className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 p-1.5 backdrop-blur transition-[border-color,box-shadow] duration-300 focus-within:border-brand-400/60 focus-within:shadow-[0_0_0_6px_rgba(118,85,250,0.15)]"
+            >
+              <label htmlFor="footer-email" className="sr-only">
+                Email address
+              </label>
+              <input
+                id="footer-email"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@example.com"
+                className="min-w-0 flex-1 bg-transparent px-4 text-sm text-[#fff] outline-none placeholder:text-[#fff]/35"
+                required
+              />
+              <button
+                type="submit"
+                className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-[#fff] px-5 py-3 text-sm font-semibold text-[#0b0a14] transition-colors duration-300 hover:bg-brand-200"
+              >
+                Subscribe
+                <Send className="h-4 w-4 transition-transform duration-500 ease-out-expo group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </button>
+            </form>
+
+            <AnimatePresence>
+              {subscribed && (
+                <motion.p
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  className="mt-3 flex items-center gap-2 pl-4 text-sm text-emerald-300"
+                  role="status"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  Thanks for subscribing!
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-10 py-14 lg:grid-cols-5">
-          <div className="lg:col-span-2">
-            <span className="storefront-kicker border-white/10 bg-white/5 text-amber-100">
-              Premium Storefront
-            </span>
-            <h2 className="mt-5 text-4xl font-black tracking-[-0.05em] text-white">
-              Elysoria
-            </h2>
-            <p className="mt-4 max-w-xl text-sm leading-8 text-slate-300">
-              Discover a curated collection of premium products designed to
-              elevate everyday shopping with cleaner browsing, better deals, and
-              a more refined storefront experience.
+        {/* Brand + link columns */}
+        <div className="grid grid-cols-2 gap-10 py-14 md:grid-cols-3 lg:grid-cols-[1.5fr_repeat(3,1fr)]">
+          <div className="col-span-2 md:col-span-3 lg:col-span-1">
+            <p className="font-display text-3xl font-extrabold tracking-[-0.04em]">
+              Elysoria<span className="text-coral-400">.</span>
+            </p>
+            <p className="mt-3 max-w-sm text-sm leading-7 text-[#fff]/55">
+              A curated collection of products designed to make everyday shopping
+              calmer, faster and a little more delightful.
             </p>
 
-            <div className="mt-6 space-y-4">
-              <div className="flex items-start gap-3">
-                <Phone className="mt-1 h-4 w-4 text-amber-300" />
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                    Support
-                  </p>
-                  <a
-                    href="tel:+919876543210"
-                    className="text-sm text-slate-300 transition-colors hover:text-white"
-                  >
-                    +91 987-654-3210
-                  </a>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Mail className="mt-1 h-4 w-4 text-amber-300" />
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                    Email
-                  </p>
-                  <a
-                    href="mailto:support@elysoria.com"
-                    className="text-sm text-slate-300 transition-colors hover:text-white"
-                  >
-                    support@elysoria.com
-                  </a>
-                </div>
-              </div>
+            <div className="mt-6 space-y-3 text-sm">
+              <a
+                href="tel:+919876543210"
+                className="flex w-fit items-center gap-3 text-[#fff]/70 transition-colors hover:text-[#fff]"
+              >
+                <Phone className="h-4 w-4 text-brand-300" />
+                <span className={underline}>+91 987-654-3210</span>
+              </a>
+              <a
+                href="mailto:support@elysoria.com"
+                className="flex w-fit items-center gap-3 text-[#fff]/70 transition-colors hover:text-[#fff]"
+              >
+                <Mail className="h-4 w-4 text-brand-300" />
+                <span className={underline}>support@elysoria.com</span>
+              </a>
             </div>
 
-            <div className="mt-6 flex items-center gap-3">
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                Follow us
-              </span>
-              <div className="flex gap-2">
-                <SocialIcon
-                  href="https://www.instagram.com/elys_oria?igsh=cWZ2d2E4azdtMWVn"
-                  icon={FaInstagram}
-                  brandColor="hover:border-pink-400/40 hover:bg-pink-500/15"
-                />
-                <SocialIcon
-                  href="https://x.com/Elysoria543215"
-                  icon={FaTwitter}
-                  brandColor="hover:border-stone-300/40 hover:bg-stone-100/10"
-                />
-                <SocialIcon
-                  href="https://www.linkedin.com/in/divyanshu-mishra-12039b309/"
-                  icon={FaLinkedinIn}
-                  brandColor="hover:border-amber-400/35 hover:bg-amber-500/10"
-                />
-                <SocialIcon
-                  href="https://www.youtube.com/@ElysoriaYourStore"
-                  icon={FaYoutube}
-                  brandColor="hover:border-red-400/40 hover:bg-red-500/15"
-                />
-              </div>
+            <div className="mt-6 flex gap-2">
+              {socialLinks.map(({ href, icon: Icon, label }) => (
+                <Magnetic key={label} strength={0.4}>
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#fff]/70 transition-colors duration-300 hover:border-transparent hover:bg-[#fff] hover:text-[#0b0a14]"
+                  >
+                    <Icon size={16} />
+                  </a>
+                </Magnetic>
+              ))}
             </div>
           </div>
 
           {footerLinks.map((section) => (
             <div key={section.title}>
-              <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-white">
+              <h4 className="font-sans text-[11px] font-semibold uppercase tracking-[0.22em] text-[#fff]/40">
                 {section.title}
               </h4>
               <ul className="mt-5 space-y-3">
@@ -212,83 +208,64 @@ export default function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-slate-400 transition-colors hover:text-white"
+                      className="text-sm text-[#fff]/70 transition-colors duration-300 hover:text-[#fff]"
                     >
-                      {link.label}
+                      <span className={underline}>{link.label}</span>
                     </Link>
                   </li>
                 ))}
               </ul>
             </div>
           ))}
-
-          <div>
-            <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-white">
-              Newsletter
-            </h4>
-            <p className="mt-5 text-sm leading-8 text-slate-400">
-              Subscribe for special offers, restock alerts, and curated product
-              updates.
-            </p>
-
-            <form onSubmit={handleSubscribe} className="mt-5 space-y-3">
-              <input
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="Enter your email"
-                className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition-all duration-200 placeholder:text-slate-500 focus:border-amber-300/35 focus:ring-4 focus:ring-amber-500/10"
-                required
-              />
-              <button
-                type="submit"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:bg-amber-200"
-              >
-                <Send className="h-4 w-4" />
-                Subscribe
-              </button>
-            </form>
-
-            {subscribed && (
-              <p className="mt-3 text-sm text-emerald-300">
-                {"\u2713"} Thanks for subscribing!
-              </p>
-            )}
-          </div>
         </div>
 
-        <div className="flex flex-col gap-6 border-t border-white/10 pt-8 text-sm text-slate-400 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-wrap items-center gap-4">
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-              Secure Payment
-            </span>
-            <div className="flex items-center gap-3">
-              <SiVisa size={28} />
-              <SiMastercard size={28} />
-              <SiAmericanexpress size={28} />
-              <SiPaypal size={28} />
-            </div>
+        {/* Bottom bar */}
+        <div className="flex flex-col gap-6 border-t border-white/10 py-8 text-sm text-[#fff]/50 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3 text-[#fff]/40">
+            <SiVisa size={26} />
+            <SiMastercard size={22} />
+            <SiAmericanexpress size={20} />
+            <SiPaypal size={18} />
           </div>
 
           <p>
-            {"\u00A9"} {currentYear} <span className="font-semibold text-white">Elysoria</span>. All rights reserved.
+            &copy; {currentYear} <span className="font-semibold text-[#fff]">Elysoria</span>.
+            All rights reserved.
           </p>
 
-          <div className="flex flex-wrap gap-3">
-            <Link href="/privacy-policy" className="transition-colors hover:text-white">
-              Privacy
-            </Link>
-            <span>{"\u2022"}</span>
-            <Link href="/terms" className="transition-colors hover:text-white">
-              Terms
-            </Link>
-            <span>{"\u2022"}</span>
-            <Link href="/returns" className="transition-colors hover:text-white">
-              Returns
-            </Link>
+          <div className="flex items-center justify-between gap-6">
+            <p>
+              Designed &amp; developed by{" "}
+              <a
+                href={AUTHOR_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[#fff] transition-colors hover:text-brand-300"
+              >
+                <span className={underline}>Divyanshu Mishra</span>
+              </a>
+            </p>
+
+            <Magnetic strength={0.5}>
+              <button
+                type="button"
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                className="group inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/15 text-[#fff] transition-colors duration-300 hover:border-transparent hover:bg-brand-gradient"
+                aria-label="Back to top"
+              >
+                <ArrowUp className="h-4 w-4 transition-transform duration-500 ease-out-expo group-hover:-translate-y-0.5" />
+              </button>
+            </Magnetic>
           </div>
         </div>
       </div>
-    </motion.footer>
+
+      {/* Oversized wordmark */}
+      <div aria-hidden className="pointer-events-none select-none overflow-hidden pb-24 md:pb-0">
+        <p className="translate-y-[22%] bg-gradient-to-b from-white/[0.16] to-white/0 bg-clip-text text-center font-display text-[22vw] font-extrabold leading-[0.8] tracking-[-0.06em] text-transparent xl:text-[17.5rem]">
+          Elysoria
+        </p>
+      </div>
+    </footer>
   );
 }

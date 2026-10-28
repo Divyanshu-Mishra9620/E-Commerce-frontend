@@ -1,12 +1,15 @@
 "use client";
 import { motion, useScroll, useSpring } from "framer-motion";
 import Hero from "@/components/Hero";
+import MarqueeBand from "@/components/MarqueeBand";
 import Explore from "@/components/Explore";
 import BestDeals from "@/components/BestDeals";
+import PerksBento from "@/components/PerksBento";
 import Deals from "@/components/Deals";
 import WishlistSection from "@/components/Wishlist";
 import MostVisitedSection from "@/components/MostVisitedSection";
 import Footer from "@/components/Footer";
+import Reveal from "@/components/fx/Reveal";
 import { useState } from "react";
 import PageLoader from "@/components/PageLoader";
 import TabNavigation from "@/components/TabNavigation";
@@ -51,66 +54,51 @@ export default function Page() {
   }
 
   return (
-    <div className="relative pb-24 md:pb-0">
+    <div className="relative">
       <motion.div
-        className="fixed left-0 right-0 top-0 z-[60] h-1 origin-left bg-gradient-to-r from-blue-600 via-cyan-500 to-emerald-400"
+        className="fixed left-0 right-0 top-0 z-[60] h-[3px] origin-left bg-brand-gradient"
         style={{ scaleX }}
       />
 
-      <main className="relative">
-        <SectionWrapper delay={0.05}>
-          <TabNavigation activeTab={activeTab} handleTabChange={handleTabChange} />
-        </SectionWrapper>
+      {/* overflow-x-clip (not hidden) keeps the sticky tab bar working */}
+      <main className="relative overflow-x-clip pt-[72px]">
+        <TabNavigation activeTab={activeTab} handleTabChange={handleTabChange} />
 
         {activeTab === "Home" && (
           <>
-            <SectionWrapper>
-              <Hero products={products} />
-            </SectionWrapper>
+            <Hero products={products} />
 
-            <SectionWrapper delay={0.2}>
+            <MarqueeBand />
+
+            <Reveal>
               <Explore />
-            </SectionWrapper>
+            </Reveal>
 
-            <SectionWrapper delay={0.3}>
+            <Reveal>
               <BestDeals products={products} />
-            </SectionWrapper>
+            </Reveal>
 
-            <SectionWrapper delay={0.4}>
+            <Reveal>
+              <PerksBento products={products} />
+            </Reveal>
+
+            <Reveal>
               <Deals products={products} />
-            </SectionWrapper>
+            </Reveal>
 
-            <SectionWrapper delay={0.5}>
+            <Reveal>
               <WishlistSection />
-            </SectionWrapper>
+            </Reveal>
 
-            <SectionWrapper delay={0.6}>
+            <Reveal>
               <MostVisitedSection products={products} />
-            </SectionWrapper>
+            </Reveal>
           </>
         )}
         {activeTab === "ProductSeller" && <ProductSeller />}
       </main>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-      >
-        <Footer />
-      </motion.div>
+      <Footer />
     </div>
   );
 }
-
-const SectionWrapper = ({ children, delay = 0 }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 50 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, amount: 0.1 }}
-    transition={{ duration: 0.6, ease: "easeOut", delay }}
-    className="relative overflow-visible"
-  >
-    {children}
-  </motion.div>
-);

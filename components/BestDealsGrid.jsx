@@ -1,16 +1,12 @@
 "use client";
 
-import { useRef } from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
-import { useDragScroll } from "@/hooks/useDragScroll";
+import SliderRail from "@/components/fx/SliderRail";
 import ProductCard from "./ProductCard";
 
 const BestDealsGrid = ({ deals, category, gradient }) => {
-  const scrollRef = useRef(null);
-  useDragScroll(scrollRef);
-
   if (!deals || deals.length === 0) {
     return null;
   }
@@ -18,40 +14,32 @@ const BestDealsGrid = ({ deals, category, gradient }) => {
   const categorySlug = category.toLowerCase();
 
   return (
-    <section className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <span className="storefront-kicker">
-            Curated Drop
-          </span>
-          <h3 className="mt-4 text-2xl font-bold tracking-tight text-slate-950 md:text-3xl">
-            {category}
-          </h3>
-        </div>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <p className="text-sm text-slate-500">
+          <span className="font-display text-lg font-bold text-slate-950">
+            {deals.length}
+          </span>{" "}
+          picks in {category}
+        </p>
 
         <Link
           href={`/search?q=${categorySlug}`}
-          className={`inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${gradient} px-5 py-3 text-sm font-semibold text-white shadow-lg transition-transform duration-300 hover:-translate-y-0.5`}
+          className={`group inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${gradient} py-1.5 pl-5 pr-1.5 text-sm font-semibold text-[#fff] shadow-lg transition-transform duration-500 ease-out-expo hover:-translate-y-0.5`}
         >
-          View All
-          <ArrowRight className="h-4 w-4" />
+          View all
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 transition-transform duration-500 ease-out-expo group-hover:rotate-45">
+            <ArrowUpRight className="h-4 w-4" />
+          </span>
         </Link>
       </div>
 
-      <div
-        ref={scrollRef}
-        className="flex gap-6 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory"
-      >
+      <SliderRail label={category}>
         {deals.map((deal) => (
-          <div
-            key={deal._id || deal.uniq_id}
-            className="w-[280px] flex-shrink-0 snap-start sm:w-[300px]"
-          >
-            <ProductCard product={deal} />
-          </div>
+          <ProductCard key={deal._id || deal.uniq_id} product={deal} />
         ))}
-      </div>
-    </section>
+      </SliderRail>
+    </div>
   );
 };
 

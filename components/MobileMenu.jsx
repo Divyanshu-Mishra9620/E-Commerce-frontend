@@ -110,14 +110,14 @@ export const MobileMenu = ({ onClose, isAdmin }) => {
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="absolute inset-y-0 right-0 flex w-full max-w-sm flex-col border-l border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] shadow-2xl dark:border-slate-800 dark:bg-zinc-950"
+        className="absolute inset-y-0 right-0 flex w-full max-w-sm flex-col border-l border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#faf9ff_100%)] shadow-2xl dark:border-white/10 dark:bg-[linear-gradient(180deg,#110f1d_0%,#0b0a14_100%)]"
         onClick={(e) => e.stopPropagation()}
       >
         <header className="border-b border-slate-200 px-5 py-5 dark:border-slate-800">
           <div className="flex items-start justify-between gap-3">
             {isAuthenticated && user ? (
               <div className="flex items-center gap-3">
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-900 via-blue-700 to-cyan-500 text-base font-semibold text-white dark:bg-stone-200 dark:text-stone-950">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-gradient text-base font-semibold text-[#fff]">
                   {user?.name?.charAt(0)?.toUpperCase() || "U"}
                 </span>
                 <div>

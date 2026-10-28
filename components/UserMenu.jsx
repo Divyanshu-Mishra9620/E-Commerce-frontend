@@ -22,7 +22,7 @@ const MenuItem = ({ icon: Icon, text, onClick, tone = "default" }) => (
       "flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-medium transition-all duration-200",
       tone === "danger"
         ? "text-rose-600 hover:bg-rose-50"
-        : "text-slate-700 hover:bg-slate-100 hover:text-slate-950 dark:hover:bg-stone-800/70 dark:hover:text-amber-100"
+        : "text-slate-700 hover:bg-slate-100 hover:text-slate-950"
     )}
   >
     <span
@@ -30,7 +30,7 @@ const MenuItem = ({ icon: Icon, text, onClick, tone = "default" }) => (
         "flex h-9 w-9 items-center justify-center rounded-2xl border",
         tone === "danger"
           ? "border-rose-100 bg-rose-50"
-          : "border-slate-200 bg-white dark:border-stone-700 dark:bg-zinc-900"
+          : "border-slate-200 bg-white"
       )}
     >
       <Icon className="h-4 w-4" />
@@ -88,7 +88,8 @@ export const UserMenu = () => {
     return (
       <button
         onClick={handleUserIconClick}
-        className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 text-slate-700 shadow-lg shadow-slate-200/40 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:text-blue-600 dark:hover:border-amber-500/30 dark:hover:text-amber-200"
+        className="icon-btn"
+        aria-label="Sign in"
       >
         <User className="w-6 h-6" />
       </button>
@@ -99,11 +100,11 @@ export const UserMenu = () => {
     <div ref={menuRef} className="relative">
       <button
         onClick={handleUserIconClick}
-        className="inline-flex h-11 items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 px-1.5 pr-3 text-slate-700 shadow-lg shadow-slate-200/40 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:text-blue-600 dark:hover:border-amber-500/30 dark:hover:text-amber-200"
+        className="icon-btn w-auto gap-2 px-1.5 pr-3"
         aria-expanded={isOpen}
         aria-haspopup="menu"
       >
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-slate-900 via-blue-700 to-cyan-500 text-sm font-semibold text-white dark:bg-stone-200 dark:text-stone-950">
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-gradient text-sm font-semibold text-[#fff]">
           {user?.name?.charAt(0)?.toUpperCase() || "U"}
         </span>
         <span className="hidden text-left xl:block">
@@ -130,14 +131,14 @@ export const UserMenu = () => {
             transition={{ duration: 0.18 }}
             className="storefront-panel absolute right-0 mt-3 w-72 overflow-hidden p-3 z-50"
           >
-            <div className="rounded-[1.25rem] bg-gradient-to-r from-slate-950 via-blue-900 to-cyan-600 px-4 py-4 text-white dark:bg-zinc-950">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-100/80 dark:text-amber-100/80">
+            <div className="rounded-[1.25rem] relative overflow-hidden bg-[#0b0a14] bg-[radial-gradient(circle_at_top_right,rgba(118,85,250,0.55),transparent_60%),radial-gradient(circle_at_bottom_left,rgba(255,106,61,0.3),transparent_55%)] px-4 py-4 text-[#fff]">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#fff]/60">
                 Signed In
               </p>
               <p className="mt-2 text-base font-semibold">
                 {user?.name || "Your account"}
               </p>
-              <p className="truncate text-sm text-blue-100/80 dark:text-amber-50/80">{user?.email}</p>
+              <p className="truncate text-sm text-[#fff]/60">{user?.email}</p>
             </div>
 
             <div className="mt-3 space-y-1.5">

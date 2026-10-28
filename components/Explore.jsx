@@ -3,9 +3,11 @@
 import { useState, useTransition } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { ArrowRight, Compass } from "lucide-react";
+import { ArrowUpRight, Compass } from "lucide-react";
 
+import SectionHeading from "@/components/fx/SectionHeading";
+import SliderRail from "@/components/fx/SliderRail";
+import { cn } from "@/lib/utils";
 import Spinner from "./Spinner";
 
 const categories = [
@@ -13,38 +15,40 @@ const categories = [
     title: "Fashion",
     image: "/clothes.jpg",
     description: "Trendy apparel for all occasions",
-    accent: "from-rose-500/80 to-orange-400/80",
+    accent: "from-rose-500/70",
   },
   {
     title: "Home & Living",
     image: "/utensils.jpg",
     description: "Everything for your home",
-    accent: "from-amber-500/80 to-yellow-400/80",
+    accent: "from-amber-500/70",
   },
   {
     title: "Beauty & Health",
     image: "/beauty.jpg",
     description: "Self-care essentials",
-    accent: "from-pink-500/80 to-rose-400/80",
+    accent: "from-fuchsia-500/70",
   },
   {
     title: "Sports & Outdoors",
     image: "/sports.jpg",
     description: "Gear for active lifestyles",
-    accent: "from-emerald-500/80 to-lime-400/80",
+    accent: "from-emerald-500/70",
   },
   {
     title: "Electronics",
     image: "/electronics.jpg",
     description: "Cutting-edge tech",
-    accent: "from-blue-600/80 to-cyan-400/80",
+    accent: "from-brand-500/70",
   },
 ];
+
+const pad = (value) => String(value).padStart(2, "0");
 
 export default function ExploreGrid() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const handleCategory = (category, event) => {
     event.preventDefault();
@@ -61,86 +65,148 @@ export default function ExploreGrid() {
         </div>
       )}
 
-      <motion.section
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="storefront-section py-12"
-      >
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <span className="storefront-kicker">
-              <Compass className="h-3.5 w-3.5 text-blue-500" />
-              Explore
+      <section className="storefront-section py-12 md:py-16">
+        <SectionHeading
+          kicker="Explore"
+          icon={Compass}
+          title="Shop by"
+          highlight="category"
+          description="Pick a lane and jump straight into a curated edit, from wardrobe staples to the latest tech."
+          action={
+            <span className="storefront-chip">
+              <span className="font-display text-base font-bold text-slate-950">
+                {pad(categories.length)}
+              </span>
+              curated categories
             </span>
-            <h2 className="mt-4 text-3xl font-black tracking-[-0.05em] text-slate-950 md:text-4xl">
-              Shop by Category
-            </h2>
-            <p className="mt-3 max-w-2xl text-base leading-8 text-slate-600">
-              Discover products across thoughtfully curated categories built for
-              faster browsing.
-            </p>
-          </div>
-          <span className="storefront-chip">Tap any card to jump in</span>
-        </div>
+          }
+        />
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-5">
-          {categories.map((category, index) => (
-            <motion.button
-              key={category.title}
-              type="button"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: index * 0.06 }}
-              className="relative overflow-hidden rounded-[1.75rem] border border-slate-200/80 text-left shadow-[0_30px_70px_-48px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-[0_34px_90px_-44px_rgba(37,99,235,0.32)]"
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-              onClick={(event) => handleCategory(category.title, event)}
-            >
-              <div className="relative aspect-[4/4.8]">
+        {/* Desktop: expanding accordion panels */}
+        <div className="hidden h-[32rem] gap-3 lg:flex">
+          {categories.map((category, index) => {
+            const isActive = activeIndex === index;
+
+            return (
+              <button
+                key={category.title}
+                type="button"
+                onMouseEnter={() => setActiveIndex(index)}
+                onFocus={() => setActiveIndex(index)}
+                onClick={(event) => handleCategory(category.title, event)}
+                aria-label={`Shop ${category.title}`}
+                className={cn(
+                  "group relative min-w-0 overflow-hidden rounded-[1.75rem] text-left ring-1 ring-black/5 transition-[flex-grow] duration-700 ease-out-expo dark:ring-white/10",
+                  isActive ? "flex-[4.5]" : "flex-[1]"
+                )}
+              >
                 <Image
                   src={category.image}
-                  alt={category.title}
+                  alt=""
                   fill
-                  className="object-cover transition-transform duration-500 hover:scale-105"
-                  quality={90}
-                  priority={index < 3}
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                  priority={index < 2}
+                  className={cn(
+                    "object-cover transition-all duration-1000 ease-out-expo",
+                    isActive ? "scale-100 grayscale-0" : "scale-125 grayscale-[0.5]"
+                  )}
                 />
                 <div
-                  className={`absolute inset-0 bg-gradient-to-t ${category.accent} via-slate-950/25 to-slate-950/70`}
+                  className={cn(
+                    "absolute inset-0 bg-gradient-to-t to-transparent transition-opacity duration-700",
+                    category.accent,
+                    isActive ? "opacity-70" : "opacity-0"
+                  )}
                 />
-              </div>
+                <div
+                  className={cn(
+                    "absolute inset-0 bg-gradient-to-t from-[#0b0a14]/90 via-[#0b0a14]/35 to-[#0b0a14]/10 transition-opacity duration-700",
+                    isActive ? "opacity-80" : "opacity-100"
+                  )}
+                />
 
-              <div className="absolute inset-0 flex flex-col justify-between p-5">
-                <div className="flex justify-between">
-                  <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-sm">
-                    Featured
-                  </span>
-                  <span className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
-                    {index + 1}
-                  </span>
-                </div>
+                <span className="absolute left-5 top-5 font-display text-sm font-bold text-[#fff]/70">
+                  {pad(index + 1)}
+                </span>
 
-                <div>
-                  <h3 className="text-2xl font-bold tracking-tight text-white">
+                {/* Collapsed label */}
+                <span
+                  className={cn(
+                    "absolute bottom-6 left-1/2 -translate-x-1/2 rotate-180 whitespace-nowrap font-display text-xl font-bold text-[#fff] transition-opacity duration-300 [writing-mode:vertical-rl]",
+                    isActive ? "opacity-0" : "opacity-100"
+                  )}
+                >
+                  {category.title}
+                </span>
+
+                {/* Expanded content */}
+                <div
+                  className={cn(
+                    "absolute inset-x-0 bottom-0 w-[24rem] p-7 transition-all ease-out-expo",
+                    isActive
+                      ? "translate-y-0 opacity-100 delay-200 duration-700"
+                      : "pointer-events-none translate-y-6 opacity-0 duration-200"
+                  )}
+                >
+                  <h3 className="font-display text-4xl font-extrabold tracking-[-0.04em] text-[#fff]">
                     {category.title}
                   </h3>
-                  <p className="mt-2 text-sm leading-7 text-white/80">
+                  <p className="mt-2 text-sm leading-6 text-[#fff]/75">
                     {category.description}
                   </p>
-                  <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-sm font-semibold text-slate-900 shadow-lg shadow-slate-900/10 transition-all duration-300">
-                    Shop Now
-                    <ArrowRight
-                      className={`h-4 w-4 transition-transform duration-300 ${
-                        hoveredIndex === index ? "translate-x-1 text-blue-500" : ""
-                      }`}
-                    />
-                  </div>
+                  <span className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#fff] py-1.5 pl-4 pr-1.5 text-sm font-semibold text-[#0b0a14]">
+                    Shop now
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#0b0a14] text-[#fff] transition-transform duration-500 group-hover:rotate-45">
+                      <ArrowUpRight className="h-4 w-4" />
+                    </span>
+                  </span>
                 </div>
-              </div>
-            </motion.button>
-          ))}
+              </button>
+            );
+          })}
         </div>
-      </motion.section>
+
+        {/* Touch: swipeable cards */}
+        <div className="lg:hidden">
+          <SliderRail
+            label="Shop by category"
+            slideClassName="basis-[72%] sm:basis-[42%]"
+          >
+            {categories.map((category, index) => (
+              <button
+                key={category.title}
+                type="button"
+                onClick={(event) => handleCategory(category.title, event)}
+                className="group relative block aspect-[4/5] w-full overflow-hidden rounded-[1.75rem] text-left"
+              >
+                <Image
+                  src={category.image}
+                  alt=""
+                  fill
+                  sizes="(max-width: 640px) 72vw, 42vw"
+                  className="object-cover transition-transform duration-700 group-active:scale-105"
+                />
+                <div
+                  className={cn(
+                    "absolute inset-0 bg-gradient-to-t via-[#0b0a14]/30 to-transparent",
+                    category.accent
+                  )}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0b0a14]/85 via-transparent to-transparent" />
+                <span className="absolute left-4 top-4 font-display text-sm font-bold text-[#fff]/75">
+                  {pad(index + 1)}
+                </span>
+                <div className="absolute inset-x-0 bottom-0 p-5">
+                  <h3 className="font-display text-2xl font-extrabold tracking-tight text-[#fff]">
+                    {category.title}
+                  </h3>
+                  <p className="mt-1 text-sm text-[#fff]/75">{category.description}</p>
+                </div>
+              </button>
+            ))}
+          </SliderRail>
+        </div>
+      </section>
     </>
   );
 }

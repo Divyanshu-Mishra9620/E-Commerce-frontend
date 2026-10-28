@@ -1,71 +1,73 @@
 "use client";
 import { motion } from "framer-motion";
-import { Home, Sparkles } from "lucide-react";
+import { Flame, Home } from "lucide-react";
 import Spinner from "./Spinner";
+import { useScrollHandler } from "@/hooks/useScrollHandler";
 import { cn } from "@/lib/utils";
 
 const tabs = [
-  { id: "Home", label: "Home", icon: Home, activeIconColor: "text-blue-500" },
-  {
-    id: "ProductSeller",
-    label: "Popular",
-    icon: Sparkles,
-    activeIconColor: "text-emerald-500",
-  },
+  { id: "Home", label: "Home", icon: Home },
+  { id: "ProductSeller", label: "Popular", icon: Flame },
 ];
 
+// Sticky segmented control. It must be a direct child of a tall container
+// (the page <main>) for `position: sticky` to hold while scrolling.
 const TabNavigation = ({ activeTab = "Home", handleTabChange, isTabLoading }) => {
-  const handleTabClick = (tab) => {
-    handleTabChange(tab);
-  };
+  const { isVisible } = useScrollHandler();
 
   return (
-    <div className="storefront-section pt-20 sm:pt-24">
-      <div className="sticky top-[76px] z-40 sm:top-[88px]">
-        <div className="storefront-panel relative p-2">
-          {isTabLoading && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center rounded-[1.75rem] bg-white/75 backdrop-blur-sm">
-              <Spinner size="sm" className="text-blue-600" />
-            </div>
-          )}
-          <div className="grid grid-cols-2 gap-2">
-            {tabs.map(({ id, label, icon: Icon, activeIconColor }) => {
-              const isActive = activeTab === id;
-
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => handleTabClick(id)}
-                  className={cn(
-                    "relative overflow-hidden rounded-[1.35rem] px-4 py-3 text-sm font-semibold transition-all duration-200",
-                    isActive
-                      ? "text-slate-950"
-                      : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
-                  )}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeTab"
-                      className="absolute inset-0 rounded-[1.35rem] bg-white shadow-lg shadow-slate-200/70"
-                      initial={false}
-                      transition={{ type: "spring", stiffness: 320, damping: 30 }}
-                    />
-                  )}
-                  <span className="relative z-10 flex items-center justify-center gap-2">
-                    <Icon
-                      className={cn(
-                        "h-4 w-4 transition-colors",
-                        isActive ? activeIconColor : "text-slate-400"
-                      )}
-                    />
-                    {label}
-                  </span>
-                </button>
-              );
-            })}
+    <div
+      className={cn(
+        "pointer-events-none sticky top-[72px] z-40 flex justify-center px-4 py-3 transition-all duration-500 ease-out-expo",
+        isVisible ? "translate-y-0 opacity-100" : "-translate-y-28 opacity-0"
+      )}
+    >
+      <div
+        role="tablist"
+        aria-label="Storefront views"
+        className={cn(
+          "storefront-panel-soft relative flex gap-1 rounded-full p-1.5",
+          isVisible && "pointer-events-auto"
+        )}
+      >
+        {isTabLoading && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center rounded-full bg-white/75 backdrop-blur-sm">
+            <Spinner size="sm" />
           </div>
-        </div>
+        )}
+        {tabs.map(({ id, label, icon: Icon }) => {
+          const isActive = activeTab === id;
+
+          return (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => handleTabChange(id)}
+              className="relative rounded-full px-5 py-2 text-sm font-semibold sm:px-6"
+            >
+              {isActive && (
+                <motion.span
+                  layoutId="storefront-tab-indicator"
+                  className="absolute inset-0 rounded-full bg-[#0f0d1f] shadow-lg shadow-brand-900/25 dark:bg-[#f0eeff]"
+                  transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                />
+              )}
+              <span
+                className={cn(
+                  "relative z-10 flex items-center gap-2 transition-colors duration-300",
+                  isActive
+                    ? "text-[#fff] dark:text-[#0f0d1f]"
+                    : "text-slate-500 hover:text-slate-950"
+                )}
+              >
+                <Icon className={cn("h-4 w-4", isActive && "text-coral-400 dark:text-coral-500")} />
+                {label}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

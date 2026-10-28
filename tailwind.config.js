@@ -1,3 +1,32 @@
+// Brand palette: an indigo-violet primary and a warm coral counterpoint.
+const brand = {
+  50: "#f3f1ff",
+  100: "#e9e5ff",
+  200: "#d6cfff",
+  300: "#b8a9ff",
+  400: "#957bff",
+  500: "#7655fa",
+  600: "#6338ee",
+  700: "#5329d4",
+  800: "#4523ab",
+  900: "#3a2188",
+  950: "#22124f",
+};
+
+const coral = {
+  50: "#fff4f0",
+  100: "#ffe6dd",
+  200: "#ffcab8",
+  300: "#ffa68a",
+  400: "#ff8661",
+  500: "#ff6a3d",
+  600: "#f04f22",
+  700: "#c93c16",
+  800: "#a03218",
+  900: "#822e19",
+  950: "#461409",
+};
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
@@ -10,6 +39,10 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "var(--font-sans)", "ui-sans-serif", "sans-serif"],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -72,6 +105,15 @@ module.exports = {
           500: "#B8860B",
           600: "#A67C00",
         },
+        brand,
+        coral,
+        // Legacy pages use blue/cyan throughout; aliasing them keeps every
+        // page on the brand palette without touching hundreds of class names.
+        blue: brand,
+        cyan: coral,
+      },
+      transitionTimingFunction: {
+        "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",
       },
       keyframes: {
         marquee: {
@@ -90,10 +132,31 @@ module.exports = {
             transform: "translateY(calc(-100% - var(--gap)))",
           },
         },
+        shimmer: {
+          "100%": { transform: "translateX(100%)" },
+        },
+        aurora: {
+          "0%, 100%": { transform: "translate3d(0, 0, 0) scale(1)" },
+          "33%": { transform: "translate3d(6%, -8%, 0) scale(1.08)" },
+          "66%": { transform: "translate3d(-5%, 6%, 0) scale(0.96)" },
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+        "gradient-x": {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
       },
       animation: {
         marquee: "marquee var(--duration) infinite linear",
         "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
+        shimmer: "shimmer 1.8s infinite",
+        aurora: "aurora 18s ease-in-out infinite",
+        float: "float 6s ease-in-out infinite",
+        "spin-slow": "spin 14s linear infinite",
+        "gradient-x": "gradient-x 6s ease infinite",
       },
     },
   },

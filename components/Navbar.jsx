@@ -1,9 +1,10 @@
 "use client";
 import * as React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Menu,
-  ShoppingCart,
+  ShoppingBag,
   LayoutGrid,
   Tag,
   IndianRupee,
@@ -13,11 +14,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/context/CartContext";
 import { useScrollHandler } from "@/hooks/useScrollHandler";
 import { useAuth } from "@/hooks/useAuth";
+import { EASE_OUT_EXPO } from "@/lib/motion";
+import { cn } from "@/lib/utils";
 
 import { SearchBar } from "./SearchBar";
 import { UserMenu } from "./UserMenu";
 import { MobileMenu } from "./MobileMenu";
-import Image from "next/image";
 
 const navLinks = [
   { href: "/categories", label: "Categories", icon: LayoutGrid },
@@ -26,10 +28,30 @@ const navLinks = [
   { href: "/admin", label: "Admin", icon: Settings, adminOnly: true },
 ];
 
+export function BrandMark({ className }) {
+  return (
+    <Link
+      href="/"
+      className={cn("group flex shrink-0 items-center gap-2.5", className)}
+      aria-label="Elysoria home"
+    >
+      <span className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-brand-gradient text-[#fff] shadow-lg shadow-brand-600/30">
+        <span className="font-display text-lg font-extrabold leading-none">E</span>
+        <span className="absolute inset-0 -translate-x-full bg-[linear-gradient(115deg,transparent_30%,rgba(255,255,255,0.5)_50%,transparent_70%)] transition-transform duration-700 ease-out-expo group-hover:translate-x-full" />
+      </span>
+      <span className="hidden font-display text-xl font-extrabold tracking-[-0.04em] text-slate-950 sm:block">
+        Elysoria<span className="text-coral-500">.</span>
+      </span>
+    </Link>
+  );
+}
+
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [isAdmin, setIsAdmin] = React.useState(false);
+  const [hoveredLink, setHoveredLink] = React.useState(null);
 
+  const pathname = usePathname();
   const { isScrolled, isVisible } = useScrollHandler();
   const { isAuthenticated, user } = useAuth();
   const { cartCount } = useCart();
@@ -47,93 +69,109 @@ export default function Navbar() {
     }
   }, [user]);
 
+  const showCartCount = isAuthenticated && cartCount > 0;
+
   return (
     <>
-      <motion.nav
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          isScrolled
-            ? "border-b border-slate-200/80 bg-white/88 shadow-xl shadow-slate-200/50 backdrop-blur-xl"
-            : "border-b border-slate-100/80 bg-white/72 backdrop-blur-lg"
-        }`}
-        animate={{ y: isVisible ? 0 : "-100%" }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
+      <motion.header
+        className="fixed inset-x-0 top-0 z-50 pt-3"
+        animate={{ y: isVisible ? 0 : "-130%" }}
+        transition={{ duration: 0.5, ease: EASE_OUT_EXPO }}
       >
-        <div className="storefront-section flex items-center justify-between py-4">
-          <div className="flex items-center gap-4 lg:gap-8">
-            <Link
-              href="/"
-              className="relative block h-12 w-28 shrink-0 sm:w-32"
-              aria-label="Go to Homepage"
-            >
-              <Image
-                src="/images/Elysoria-logo.png"
-                alt="Elysoria Logo"
-                fill
-                className="object-contain"
-                priority
-              />
-            </Link>
+        <div className="storefront-section">
+          <nav
+            className={cn(
+              "flex items-center justify-between gap-3 rounded-full border py-2 pl-3 pr-2 transition-all duration-500 ease-out-expo sm:pl-4",
+              isScrolled
+                ? "border-slate-200 bg-white/85 shadow-[0_20px_50px_-30px_rgba(35,18,79,0.5)] backdrop-blur-xl"
+                : "border-transparent bg-white/70 backdrop-blur-md"
+            )}
+          >
+            <div className="flex items-center gap-4 lg:gap-6">
+              <BrandMark />
 
-            <div className="hidden items-center gap-5 lg:flex">
-              {visibleNavLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="rounded-full px-3 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-950 dark:hover:bg-stone-800/80 dark:hover:text-amber-200"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-[min(42vw,18rem)] sm:w-[18rem] lg:w-[20rem]">
-              <SearchBar />
-            </div>
-
-            <div className="hidden items-center space-x-3 md:flex">
-              <UserMenu />
-
-              <Link
-                href="/profile/carts"
-                className="relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 text-slate-700 shadow-lg shadow-slate-200/40 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:text-blue-600 dark:hover:border-amber-500/30 dark:hover:text-amber-200"
+              <div
+                className="hidden items-center lg:flex"
+                onMouseLeave={() => setHoveredLink(null)}
               >
-                <ShoppingCart className="w-6 h-6" />
-                {isAuthenticated && cartCount > 0 && (
-                  <span className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-emerald-500 px-1.5 text-[10px] font-semibold text-white shadow-lg shadow-emerald-500/30">
-                    {cartCount}
-                  </span>
-                )}
-              </Link>
+                {visibleNavLinks.map((link) => {
+                  const isActive = pathname.startsWith(link.href);
+
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onMouseEnter={() => setHoveredLink(link.href)}
+                      className={cn(
+                        "relative rounded-full px-4 py-2 text-sm font-medium transition-colors duration-300",
+                        isActive ? "text-slate-950" : "text-slate-500 hover:text-slate-950"
+                      )}
+                    >
+                      {hoveredLink === link.href && (
+                        <motion.span
+                          layoutId="nav-hover-pill"
+                          className="absolute inset-0 rounded-full bg-slate-900/[0.06] dark:bg-white/[0.08]"
+                          transition={{ type: "spring", stiffness: 400, damping: 34 }}
+                        />
+                      )}
+                      <span className="relative">{link.label}</span>
+                      {isActive && (
+                        <span className="absolute bottom-0.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-coral-500" />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
 
-            <div className="lg:hidden">
+            <div className="flex items-center gap-2">
+              <div className="w-[min(46vw,18rem)] sm:w-[18rem] lg:w-[20rem]">
+                <SearchBar />
+              </div>
+
+              <div className="hidden items-center gap-2 md:flex">
+                <UserMenu />
+
+                <Link
+                  href="/profile/carts"
+                  className="icon-btn relative"
+                  aria-label={showCartCount ? `Cart, ${cartCount} items` : "Cart"}
+                >
+                  <ShoppingBag className="h-5 w-5" />
+                  <AnimatePresence>
+                    {showCartCount && (
+                      <motion.span
+                        key={cartCount}
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 18 }}
+                        className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-coral-500 px-1.5 text-[10px] font-bold text-[#fff] shadow-lg shadow-coral-500/40"
+                      >
+                        {cartCount}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </Link>
+              </div>
+
               <button
                 onClick={() => setMobileMenuOpen(true)}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 text-slate-700 shadow-lg shadow-slate-200/40 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:text-blue-600 dark:hover:border-amber-500/30 dark:hover:text-amber-200"
+                className="icon-btn lg:hidden"
+                aria-label="Open menu"
               >
-                <Menu className="w-6 h-6" />
+                <Menu className="h-5 w-5" />
               </button>
             </div>
-          </div>
+          </nav>
         </div>
-      </motion.nav>
+      </motion.header>
       <AnimatePresence>
         {mobileMenuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-slate-950/45 backdrop-blur-sm lg:hidden"
-              onClick={() => setMobileMenuOpen(false)}
-            />
-            <MobileMenu
-              onClose={() => setMobileMenuOpen(false)}
-              isAdmin={isAdmin}
-            />
-          </>
+          <MobileMenu
+            onClose={() => setMobileMenuOpen(false)}
+            isAdmin={isAdmin}
+          />
         )}
       </AnimatePresence>
     </>
